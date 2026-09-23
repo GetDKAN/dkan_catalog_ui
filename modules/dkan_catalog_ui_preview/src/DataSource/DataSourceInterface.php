@@ -53,7 +53,9 @@ interface DataSourceInterface {
    *   Machine names of columns to return, in order (empty = all).
    *
    * @return \Drupal\dkan_catalog_ui_preview\DataSource\DataSourceResult
-   *   The rows and total count.
+   *   The rows and matching count. Sources SHOULD also set
+   *   unfilteredTotalCount (rows ignoring the conditions) when they can do
+   *   so cheaply; without it the summary omits the denominator.
    */
   public function fetchData(
     string $resource_id,

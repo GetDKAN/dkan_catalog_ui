@@ -82,7 +82,7 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertStringContainsString('Data preview is not yet available.', $html);
     $this->assertStringNotContainsString('dcu-table__table', $html);
     // The download link renders without a table; the panels do not.
-    $this->assertStringContainsString('dcu-table__download" href="http://example.com/data.csv"', $html);
+    $this->assertStringContainsString('dcu-table__download-original" href="http://example.com/data.csv"', $html);
     $this->assertStringNotContainsString('dcu-table__panel', $html);
     // The toolbar closes before the message: nothing nests inside it.
     $xpath = new \DOMXPath(Html::load($html));
@@ -90,13 +90,16 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertCount(1, $xpath->query('//div[@class="dcu-table__toolbar"]'));
     // The file row names the file and links the download; without a table
     // there are no tools and no status.
+    // Only the original exists, so it is a direct link, not a disclosure.
     $file = $xpath->query('//div[@class="dcu-table__file"]/*');
     $this->assertCount(2, $file);
-    $this->assertSame('dcu-table__caption', $file->item(0)->getAttribute('class'));
+    $this->assertSame('dcu-table__identity', $file->item(0)->getAttribute('class'));
     $this->assertStringContainsString('data.csv', $file->item(0)->textContent);
-    $this->assertSame('dcu-button dcu-table__download', $file->item(1)->getAttribute('class'));
+    $this->assertSame('dcu-button dcu-table__download dcu-table__download-original', $file->item(1)->getAttribute('class'));
+    $this->assertStringContainsString('Download (CSV)', $file->item(1)->textContent);
     $this->assertCount(0, $xpath->query('//div[@class="dcu-table__tools"]'));
     $this->assertCount(0, $xpath->query('//div[@class="dcu-table__status"]'));
+    $this->assertCount(0, $xpath->query('//form[@class="dcu-table__page-size"]'));
     $this->assertStringContainsString('href="#data-table"', $html);
   }
 
@@ -122,7 +125,7 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $xpath = new \DOMXPath(Html::load($html));
     $this->assertCount(1, $xpath->query('//div[@class="dcu-table__toolbar"]'));
     // The file row still names the file; nothing else renders.
-    $this->assertCount(1, $xpath->query('//div[@class="dcu-table__file"]/p[@class="dcu-table__caption"]'));
+    $this->assertCount(1, $xpath->query('//div[@class="dcu-table__file"]/div[@class="dcu-table__identity"]/p[@class="dcu-table__caption"]'));
     $this->assertCount(1, $xpath->query('//div[@class="dcu-table__file"]/*'));
     $this->assertCount(0, $xpath->query('//div[@class="dcu-table__tools"]'));
   }
@@ -142,7 +145,7 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertStringContainsString('<p class="dcu-table__caption" id="dcu-table-caption"><span class="dcu-table__file-label">Data file</span> data.csv</p>', $html);
     $this->assertStringContainsString('aria-labelledby="dcu-table-caption"', $html);
     $this->assertStringNotContainsString('<caption>', $html);
-    $this->assertStringContainsString('Displaying 1 - 25 of 30 rows', $html);
+    $this->assertStringContainsString('Rows 1–25 of 30', $html);
     $this->assertStringContainsString('aria-sort="descending"', $html);
     // Links and the form target the dataset alias and the apply route.
     $this->assertStringContainsString('href="/dataset/preview-imported?sort=name"', $html);
@@ -150,11 +153,12 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertStringContainsString('action="/dataset/preview-imported/table/apply"', $html);
     $this->assertStringContainsString('name="sort" value="age"', $html);
     $this->assertStringContainsString('name="direction" value="desc"', $html);
-    $this->assertStringContainsString('class="dcu-button dcu-table__download" href="http://example.com/data.csv"', $html);
+    $this->assertStringContainsString('class="dcu-table__download-option dcu-table__download-original" href="http://example.com/data.csv"', $html);
+    $this->assertStringContainsString('class="dcu-table__download-option dcu-table__download-results" href="/api/1/datastore/query/', $html);
     $this->assertStringNotContainsString('dcu-table__chooser', $html);
     $this->assertMatchesRegularExpression('/<tbody[^>]*>.*?<td>69<\/td>/s', $html);
-    // Toolbar rows in order: file (caption then download), tools (panels
-    // then full screen), status (the summary).
+    // Toolbar rows in order: file (identity then download), tools (the
+    // panels), status (the summary); footer: page size then pager.
     $xpath = new \DOMXPath(Html::load($html));
     $rows = $xpath->query('//div[@class="dcu-table__toolbar"]/*');
     $this->assertCount(3, $rows);
@@ -163,10 +167,17 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertSame('dcu-table__status', $rows->item(2)->getAttribute('class'));
     $file = $xpath->query('//div[@class="dcu-table__file"]/*');
     $this->assertCount(2, $file);
-    $this->assertSame('dcu-table__caption', $file->item(0)->getAttribute('class'));
-    $this->assertSame('dcu-button dcu-table__download', $file->item(1)->getAttribute('class'));
-    $this->assertSame('dcu-table__fullscreen', $xpath->query('//div[@class="dcu-table__tools"]/*[last()]')->item(0)->getAttribute('class'));
+    $this->assertSame('dcu-table__identity', $file->item(0)->getAttribute('class'));
+    $this->assertSame('CSV · 3 columns', $xpath->query('//p[@class="dcu-table__meta"]')->item(0)->textContent);
+    $this->assertSame('dcu-table-download', $file->item(1)->getAttribute('id'));
+    $tools = $xpath->query('//div[@class="dcu-table__tools"]/details');
+    $this->assertSame(['dcu-table-filters', 'dcu-table-columns', 'dcu-table-display', 'dcu-table-share'], array_map(fn ($d) => $d->getAttribute('id'), iterator_to_array($tools)));
+    // View is JS-only.
+    $this->assertTrue($tools->item(2)->hasAttribute('hidden'));
     $this->assertCount(1, $xpath->query('//div[@class="dcu-table__status"]/p[@class="dcu-table__summary"]'));
+    $footer = $xpath->query('//div[@class="dcu-table__footer"]/*');
+    $this->assertSame('dcu-table__page-size', $footer->item(0)->getAttribute('class'));
+    $this->assertCount(0, $xpath->query('//form[@class="dcu-table__page-size"]//input[@name="panel" or @name="page" or @name="page_size"]'));
   }
 
   /**

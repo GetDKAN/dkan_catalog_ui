@@ -23,10 +23,11 @@ use Drupal\dkan_catalog_ui_preview\TableState;
  * request's query string (see TableState). Only one table per page is
  * supported; the dataset page uses DataPreviewBuilder::lazyBuild() instead.
  *
- * The toolbar panels (filters, columns, display settings) submit to an apply
- * route that normalizes their input; pass one as #apply_url (a Url) when the
- * placement provides it. Without it the toolbar shows the summary only and
- * the table is driven by links and hand-written URLs.
+ * The toolbar panels (filters, columns) submit to an apply route that
+ * normalizes their input; pass one as #apply_url (a Url) when the placement
+ * provides it. Without it the toolbar shows the summary only and the table
+ * is driven by links, the footer rows-per-page form (a plain GET to the
+ * current path) and hand-written URLs.
  */
 #[RenderElement('dkan_catalog_ui_preview')]
 class DataPreview extends RenderElementBase {

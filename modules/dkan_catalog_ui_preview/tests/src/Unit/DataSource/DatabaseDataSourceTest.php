@@ -160,9 +160,11 @@ class DatabaseDataSourceTest extends UnitTestCase {
       ['name', 'age'],
     );
 
-    $this->assertCount(2, $queries);
+    // Data, matching count, unfiltered count.
+    $this->assertCount(3, $queries);
     $this->assertSame($rows, $result->rows);
     $this->assertSame(42, $result->totalCount);
+    $this->assertSame(42, $result->unfilteredTotalCount);
 
     // Data query.
     $dataQuery = $queries[0];
@@ -185,6 +187,49 @@ class DatabaseDataSourceTest extends UnitTestCase {
     );
     $this->assertSame([], $countQuery->sorts);
     $this->assertSame([], $countQuery->properties);
+
+    // Unfiltered count: no conditions, sort, limit or properties.
+    $unfilteredQuery = $queries[2];
+    $this->assertTrue($unfilteredQuery->count);
+    $this->assertSame([], $unfilteredQuery->conditions);
+    $this->assertSame([], $unfilteredQuery->sorts);
+    $this->assertSame([], $unfilteredQuery->properties);
+    $this->assertFalse(isset($unfilteredQuery->limit));
+  }
+
+  /**
+   * Without conditions the matching count doubles as the unfiltered total.
+   */
+  public function testFetchDataUnfilteredSkipsSecondCount(): void {
+    $queries = [];
+    $storage = $this->createMock(DatabaseTableInterface::class);
+    $storage->method('query')->willReturnCallback(function ($query) use (&$queries) {
+      $queries[] = $query;
+      return $query->count ? [(object) ['expression' => '7']] : [];
+    });
+
+    $result = $this->getDataSource($storage)->fetchData('abc__1', 10, 0, NULL, 'asc');
+
+    $this->assertCount(2, $queries);
+    $this->assertSame(7, $result->totalCount);
+    $this->assertSame(7, $result->unfilteredTotalCount);
+  }
+
+  /**
+   * Filtered: matching and unfiltered counts come from separate queries.
+   */
+  public function testFetchDataFilteredTotals(): void {
+    $storage = $this->createMock(DatabaseTableInterface::class);
+    $storage->method('query')->willReturnCallback(
+      fn ($query) => $query->count ? [(object) ['expression' => $query->conditions ? '3' : '10']] : []
+    );
+
+    $result = $this->getDataSource($storage)->fetchData('abc__1', 10, 0, NULL, 'asc', [
+      ['property' => 'state', 'value' => 'Texas'],
+    ]);
+
+    $this->assertSame(3, $result->totalCount);
+    $this->assertSame(10, $result->unfilteredTotalCount);
   }
 
   /**

@@ -1,0 +1,11 @@
+.dcu-table__page-size {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dcu-space-xs, 0.25rem) var(--dcu-space-sm, 0.5rem);
+  margin: 0;
+}
+
+.dcu-table__page-size [hidden] {
+  display: none !important;
+}

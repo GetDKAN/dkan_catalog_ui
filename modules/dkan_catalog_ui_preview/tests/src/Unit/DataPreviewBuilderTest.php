@@ -6,6 +6,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
+use Drupal\Core\Url;
 use Drupal\Core\Utility\UnroutedUrlAssemblerInterface;
 use Drupal\dkan_catalog_ui_preview\DataPreviewBuilder;
 use Drupal\dkan_catalog_ui_preview\DataSource\DataSourceInterface;
@@ -17,6 +18,7 @@ use Drupal\dkan_catalog_ui_preview\TabularDistributionsInterface;
 use Drupal\dkan_catalog_ui_preview\Toolbar\ToolbarBuilder;
 use Drupal\Tests\dkan_catalog_ui_preview\Traits\LikeEscaperTrait;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -203,7 +205,7 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $toolbar = $build['#slots']['toolbar'];
     $this->assertSame('dkan_catalog_ui_preview:data-table-toolbar', $toolbar['#component']);
     $summary = $toolbar['#slots']['summary'];
-    $this->assertSame('Displaying 1 - 25 of 30 rows', (string) $summary['#value']);
+    $this->assertSame('Rows 1–25 of 30', (string) $summary['#value']);
     $this->assertSame('polite', $summary['#attributes']['aria-live']);
     $this->assertSame('base:node/1', $toolbar['#props']['apply_url']);
     $this->assertSame('', $toolbar['#props']['fragment_url']);
@@ -211,7 +213,8 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $this->assertTrue($toolbar['#props']['show_panels']);
     $this->assertTrue($toolbar['#props']['has_summary']);
     $this->assertSame(['id' => 'dcu-table-caption', 'text' => 'a.csv'], $toolbar['#props']['caption']);
-    $this->assertNull($toolbar['#props']['download']);
+    // A resource without an original URL still offers current results.
+    $this->assertNull($toolbar['#props']['download']['original']);
     $this->assertNull($toolbar['#props']['chooser']);
     $this->assertSame([], $toolbar['#props']['chips']['items']);
     $expectedCall = [
@@ -348,7 +351,7 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $this->assertSame(200, $this->fetchCalls[0]['offset']);
     $this->assertSame(0, $this->fetchCalls[1]['offset']);
     $this->assertCount(5, $build['#slots']['table']['#rows']);
-    $this->assertSame('Displaying 1 - 5 of 5 rows', (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
+    $this->assertSame('5 rows', (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
     $this->assertSame(['#markup' => ''], $build['#slots']['pager']);
   }
 
@@ -370,7 +373,7 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $this->assertSame('base:node/1?page=3&page_size=10&sort=age', $pager['#items']['pages'][3]['href']);
     $this->assertSame('base:node/1?page=3&page_size=10&sort=age', $pager['#items']['next']['href']);
     $this->assertSame('base:node/1?page=3&page_size=10&sort=age', $pager['#items']['last']['href']);
-    $this->assertSame('Displaying 11 - 20 of 30 rows', (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
+    $this->assertSame('Rows 11–20 of 30', (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
 
     // First page: no first/previous; a wide range gets an ellipsis.
     $build = $this->getBuilder()->build($this->getDataSource(200), 'abc__1', $this->state(['page_size' => '10']));
@@ -413,8 +416,17 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $props = $build['#slots']['toolbar']['#props'];
 
     $this->assertSame('filters', $props['open_panel']);
-    $this->assertSame('https://example.com/a.csv', $props['download']['url']);
-    $this->assertSame('Download full dataset (CSV)', $props['download']['label']);
+    $this->assertSame('https://example.com/a.csv', $props['download']['original']['url']);
+    $this->assertSame('Original file (CSV)', $props['download']['original']['label']);
+    $this->assertSame('Download (CSV)', $props['download']['original']['button_label']);
+    $this->assertSame(['CSV', '2 columns'], $props['file_meta']);
+    $this->assertSame([
+      'filters' => 'Filters',
+      'columns' => 'Columns',
+      'display' => 'View',
+      'share' => 'Share view',
+      'download' => 'Download',
+    ], $props['labels']);
     $this->assertSame([
       ['value' => '0', 'label' => 'A', 'selected' => TRUE],
       ['value' => '1', 'label' => 'B', 'selected' => FALSE],
@@ -445,10 +457,21 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $this->assertSame(1, $columns['hidden_count']);
     $this->assertSame('base:node/1?conditions[0][property]=name&conditions[0][operator]=in&conditions[0][value]=a,b&page=3&page_size=10&sort=age&columns=age', $columns['cancel_url']);
 
-    // Display: page sizes capped by the row limit; page not carried.
-    $this->assertSame([10, 25], $props['display']['page_sizes']);
-    $this->assertSame(10, $props['display']['current']);
-    $this->assertArrayNotHasKey('page', $props['display']['hidden']);
+    // Footer page size: sizes capped by the row limit; page, page size
+    // and panel not carried.
+    $this->assertArrayNotHasKey('display', $props);
+    $pageSize = $build['#slots']['page_size'];
+    $this->assertSame('dkan_catalog_ui_preview:data-table-page-size', $pageSize['#component']);
+    $this->assertSame('base:node/1', $pageSize['#props']['apply_url']);
+    $this->assertSame([10, 25], $pageSize['#props']['sizes']);
+    $this->assertSame(10, $pageSize['#props']['current']);
+    $this->assertSame([
+      'conditions[0][property]' => 'name',
+      'conditions[0][operator]' => 'in',
+      'conditions[0][value]' => 'a,b',
+      'sort' => 'age',
+      'columns' => 'age',
+    ], $pageSize['#props']['hidden']);
 
     // Chips: one per condition plus the hidden-columns chip, then clear all.
     $chips = $props['chips']['items'];
@@ -458,13 +481,56 @@ class DataPreviewBuilderTest extends UnitTestCase {
     $this->assertSame('1 column hidden', $chips[1]['label']);
     $this->assertSame('base:node/1?conditions[0][property]=name&conditions[0][operator]=in&conditions[0][value]=a,b&page=3&page_size=10&sort=age', $chips[1]['url']);
     $this->assertSame('base:node/1?page_size=10&sort=age', $props['chips']['clear_all_url']);
+    $this->assertSame('Active view settings', $props['chips']['label']);
+    $this->assertSame('Clear all filters and show all columns', $props['chips']['clear_all_label']);
 
-    // Share: filtered download on the datastore route, copy link canonical.
+    // Current results on the datastore route; copy link canonical.
     $expectedDownload = 'route:dkan_datastore.1.query.id.download/abc__1'
       . '?conditions[0][property]=name&conditions[0][operator]=in&conditions[0][value][0]=a&conditions[0][value][1]=b'
       . '&sorts[0][property]=age&sorts[0][order]=asc&properties[0]=age&format=csv';
-    $this->assertSame($expectedDownload, $props['share']['download_url']);
-    $this->assertSame('base:node/1?conditions[0][property]=name&conditions[0][operator]=in&conditions[0][value]=a,b&page=3&page_size=10&sort=age&columns=age', $props['share']['copy_url']);
+    $this->assertSame($expectedDownload, $props['download']['results']['url']);
+    $this->assertSame('Current results (CSV)', $props['download']['results']['label']);
+    $this->assertSame(['copy_url' => 'base:node/1?conditions[0][property]=name&conditions[0][operator]=in&conditions[0][value]=a,b&page=3&page_size=10&sort=age&columns=age'], $props['share']);
+  }
+
+  /**
+   * Zero matches disable current results; the original stays.
+   */
+  public function testDownloadZeroMatches(): void {
+    $build = $this->getBuilder()->build($this->getDataSource(0), 'abc__1', $this->state(), [
+      'tables' => [
+        [
+          'resource_id' => 'abc__1',
+          'label' => 'a.csv',
+          'title' => 'A',
+          'download_url' => 'https://example.com/a.csv',
+          'distribution_uuid' => 'd1',
+        ],
+      ],
+    ]);
+    $download = $build['#slots']['toolbar']['#props']['download'];
+    $this->assertSame('https://example.com/a.csv', $download['original']['url']);
+    $this->assertSame('', $download['results']['url']);
+  }
+
+  /**
+   * Without an original URL only current results remain; else no download.
+   */
+  public function testDownloadWithoutOriginal(): void {
+    $props = $this->getBuilder()->build($this->getDataSource(), 'abc__1', $this->state())['#slots']['toolbar']['#props'];
+    $this->assertNull($props['download']['original']);
+    $this->assertNotSame('', $props['download']['results']['url']);
+    // Unknown format: column count only.
+    $this->assertSame(['2 columns'], $props['file_meta']);
+
+    $toolbar = new ToolbarBuilder($this->likeEscaper());
+    $toolbar->setStringTranslation($this->getStringTranslationStub());
+    $props = $toolbar->build($this->state(), [], [
+      'base_url' => Url::fromUri('base:node/1'),
+      'panels' => FALSE,
+    ])['#props'];
+    $this->assertNull($props['download']);
+    $this->assertSame([], $props['file_meta']);
   }
 
   /**
@@ -493,9 +559,61 @@ class DataPreviewBuilderTest extends UnitTestCase {
    */
   public function testEmptyResult(): void {
     $build = $this->getBuilder()->build($this->getDataSource(0), 'abc__1', $this->state());
-    $this->assertSame('No rows match.', (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
+    $this->assertSame('No rows available', (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
     $this->assertSame([], $build['#slots']['table']['#rows']);
     $this->assertSame(['#markup' => ''], $build['#slots']['pager']);
+  }
+
+  /**
+   * Summary text for each count state.
+   *
+   * @param array $query
+   *   Table state query.
+   * @param int $rows
+   *   Rows returned for the page.
+   * @param int $matching
+   *   Rows matching the conditions.
+   * @param int|null $unfiltered
+   *   Unfiltered total the source reports, or NULL.
+   * @param string $expected
+   *   Expected summary.
+   */
+  #[DataProvider('providerSummary')]
+  public function testSummary(array $query, int $rows, int $matching, ?int $unfiltered, string $expected): void {
+    $source = $this->createMock(DataSourceInterface::class);
+    $source->method('getSchema')->willReturn(['fields' => $this->fields]);
+    $source->method('fetchData')->willReturn(new DataSourceResult(
+      array_fill(0, $rows, (object) ['name' => 'x', 'age' => 1]),
+      $matching,
+      $unfiltered,
+    ));
+    $build = $this->getBuilder()->build($source, 'abc__1', $this->state($query));
+    $this->assertSame($expected, (string) $build['#slots']['toolbar']['#slots']['summary']['#value']);
+  }
+
+  /**
+   * Data provider for ::testSummary().
+   */
+  public static function providerSummary(): array {
+    $filter = ['conditions' => [['property' => 'name', 'operator' => '=', 'value' => 'x']]];
+    return [
+      'unfiltered, one page' => [[], 10, 10, 10, '10 rows'],
+      'unfiltered, one row' => [[], 1, 1, 1, '1 row'],
+      'filtered, one page' => [$filter, 3, 3, 10, '3 of 10 rows'],
+      'unfiltered, many pages' => [['page' => '2'], 25, 1000, 1000, 'Rows 26–50 of 1,000'],
+      'filtered, many pages' => [
+        $filter + ['page' => '2'], 25, 120, 1000,
+        'Rows 26–50 of 120 matching rows · 1,000 total',
+      ],
+      'zero matches' => [$filter, 0, 0, 10, 'No matching rows · 10 total'],
+      'empty file' => [[], 0, 0, 0, 'No rows available'],
+      'empty file, filtered' => [$filter, 0, 0, 0, 'No rows available'],
+      // A source that does not report the unfiltered total.
+      'unknown total, unfiltered' => [[], 10, 10, NULL, '10 rows'],
+      'unknown total, one page' => [$filter, 3, 3, NULL, '3 matching rows'],
+      'unknown total, many pages' => [$filter + ['page' => '2'], 25, 120, NULL, 'Rows 26–50 of 120 matching rows'],
+      'unknown total, zero matches' => [$filter, 0, 0, NULL, 'No matching rows'],
+    ];
   }
 
 }

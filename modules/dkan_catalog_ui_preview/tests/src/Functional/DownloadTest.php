@@ -74,9 +74,14 @@ class DownloadTest extends BrowserTestBase {
     ];
     $this->drupalGet('/dataset/dl-test', ['query' => $query]);
     $assert = $this->assertSession();
-    $assert->pageTextContains('Displaying 1 - 10 of 10 rows');
+    $assert->pageTextContains('10 of 30 rows');
 
-    $link = $this->getSession()->getPage()->find('css', 'a.dcu-table__filtered-download');
+    // Both choices sit in the Download disclosure; the original ignores the
+    // view state.
+    $page = $this->getSession()->getPage();
+    $this->assertNotNull($page->find('css', 'details#dcu-table-download a.dcu-table__download-original'));
+    $this->assertStringNotContainsString('?', $page->find('css', 'a.dcu-table__download-original')->getAttribute('href'));
+    $link = $page->find('css', 'details#dcu-table-download a.dcu-table__download-results');
     $this->assertNotNull($link);
     $href = $link->getAttribute('href');
     $this->assertStringContainsString('/api/1/datastore/query/', $href);
@@ -86,6 +91,8 @@ class DownloadTest extends BrowserTestBase {
     $copy = $this->getSession()->getPage()->find('css', '[data-dcu-copy]')->getAttribute('data-dcu-copy');
     $this->assertStringStartsWith($this->baseUrl . '/dataset/dl-test?', $copy);
     $this->assertStringNotContainsString('panel', $copy);
+    // Without JavaScript the same link is a selectable field.
+    $this->assertSame($copy, $this->getSession()->getPage()->find('css', 'input#dcu-table-share-url')->getAttribute('value'));
 
     // An absolute URL keeps the query string; a path would be encoded.
     $this->drupalGet($this->getAbsoluteUrl($href));
@@ -103,6 +110,44 @@ class DownloadTest extends BrowserTestBase {
     rsort($descending);
     $this->assertSame($descending, $names);
     $this->assertSame('person_19', $names[0]);
+  }
+
+  /**
+   * Current results export every matching row, whatever the page.
+   */
+  public function testResultsIgnorePaging(): void {
+    $this->createImportedDataset('dl-pages');
+    $this->drupalGet('/dataset/dl-pages', [
+      'query' => [
+        'conditions' => [['property' => 'name', 'operator' => 'contains', 'value' => 'person']],
+        'page' => '2',
+        'page_size' => '10',
+      ],
+    ]);
+    $href = $this->getSession()->getPage()->find('css', 'a.dcu-table__download-results')->getAttribute('href');
+    $this->assertStringNotContainsString('limit', $href);
+    $this->assertStringNotContainsString('offset', $href);
+    $this->drupalGet($this->getAbsoluteUrl($href));
+    $lines = array_values(array_filter(array_map('trim', explode("\n", $this->getSession()->getPage()->getContent()))));
+    // Header plus all 30 rows.
+    $this->assertCount(31, $lines);
+  }
+
+  /**
+   * Zero matches: current results are disabled, the original stays a link.
+   */
+  public function testZeroMatchesDisablesResults(): void {
+    $this->createImportedDataset('dl-none');
+    $this->drupalGet('/dataset/dl-none', [
+      'query' => [
+        'conditions' => [['property' => 'name', 'operator' => '=', 'value' => 'nobody']],
+      ],
+    ]);
+    $assert = $this->assertSession();
+    $assert->pageTextContains('No matching rows · 30 total');
+    $assert->elementNotExists('css', 'a.dcu-table__download-results');
+    $assert->elementExists('css', '.dcu-table__download-results[aria-disabled="true"]');
+    $assert->elementExists('css', 'a.dcu-table__download-original');
   }
 
 }

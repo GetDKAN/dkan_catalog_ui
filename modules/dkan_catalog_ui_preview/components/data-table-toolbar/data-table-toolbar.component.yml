@@ -1,14 +1,13 @@
 $schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
 name: Data table toolbar
 status: experimental
-description: File row (distribution chooser or file caption, then the download link); tools row (the filter / manage columns / display settings / share panels, details elements with a heading and GET forms to the apply route, then full screen); status row (result summary and active-filter chips). Works without JavaScript.
+description: File header (distribution chooser or file caption, format and column count, then the Download disclosure); tools row (Filters / Columns / View / Share view panels, details elements with a heading; Filters and Columns hold GET forms to the apply route, View is JS-only); status row (result summary and chips). Works without JavaScript.
 props:
   type: object
   required:
     - apply_url
     - filters
     - columns
-    - display
     - chips
     - share
     - labels
@@ -37,6 +36,12 @@ props:
           type: string
         text:
           type: string
+    file_meta:
+      type: array
+      title: File header metadata
+      description: Known parts only (format, exposed column count), joined with a middle dot.
+      items:
+        type: string
     open_panel:
       type: string
       title: Panel rendered open
@@ -50,12 +55,34 @@ props:
       type:
         - object
         - 'null'
-      title: Full dataset download
+      title: Download choices
+      description: NULL when neither choice exists. With only the original file the template renders a direct link.
       properties:
-        url:
-          type: string
-        label:
-          type: string
+        original:
+          type:
+            - object
+            - 'null'
+          title: Original file (validated downloadURL)
+          properties:
+            url:
+              type: string
+            label:
+              type: string
+              description: Label inside the disclosure.
+            button_label:
+              type: string
+              description: Label of the direct link when it is the only choice.
+        results:
+          type:
+            - object
+            - 'null'
+          title: Current results export (all matching rows, selected columns, sort)
+          properties:
+            url:
+              type: string
+              description: Datastore download route; empty when nothing matches (rendered disabled).
+            label:
+              type: string
     chooser:
       type:
         - object
@@ -120,7 +147,7 @@ props:
           type: integer
     columns:
       type: object
-      title: Manage columns panel
+      title: Columns panel
       properties:
         items:
           type: array
@@ -144,21 +171,9 @@ props:
         cancel_url:
           type: string
           description: Canonical URL of the current state (discards unsaved changes).
-    display:
-      type: object
-      title: Display settings panel
-      properties:
-        page_sizes:
-          type: array
-          items:
-            type: integer
-        current:
-          type: integer
-        hidden:
-          type: object
     chips:
       type: object
-      title: Active filter chips
+      title: Active filter and hidden-column chips
       properties:
         items:
           type: array
@@ -171,15 +186,18 @@ props:
                 type: string
               remove_label:
                 type: string
+        label:
+          type: string
+          description: Accessible name of the chip list.
         clear_all_url:
           type: string
+        clear_all_label:
+          type: string
+          description: Accessible name of Clear all (filters and column visibility).
     share:
       type: object
       title: Share panel
       properties:
-        download_url:
-          type: string
-          description: Filtered CSV on the datastore download route; empty without a resource.
         copy_url:
           type: string
           description: Absolute canonical URL of the current state.
@@ -194,6 +212,8 @@ props:
         display:
           type: string
         share:
+          type: string
+        download:
           type: string
 slots:
   summary:
