@@ -72,12 +72,26 @@ class DatabaseDataSource implements DataSourceInterface {
     $query = $this->buildQuery($limit, $offset, $sort_field, $sort_direction, $conditions, $properties);
     $rows = $storage->query($query);
 
-    $countQuery = $this->buildQuery(0, 0, NULL, 'asc', $conditions, []);
-    $countQuery->count();
-    $countResult = $storage->query($countQuery);
-    $totalCount = (int) ($countResult[0]->expression ?? 0);
+    $totalCount = $this->count($storage, $conditions);
+    // Only filtered requests pay for the second count.
+    $unfilteredTotalCount = $conditions ? $this->count($storage, []) : $totalCount;
 
-    return new DataSourceResult($rows, $totalCount);
+    return new DataSourceResult($rows, $totalCount, $unfilteredTotalCount);
+  }
+
+  /**
+   * Count-only query: conditions, no sort, limit or properties.
+   *
+   * @param \Drupal\dkan_datastore\Storage\DatabaseTable $storage
+   *   The resource storage.
+   * @param array $conditions
+   *   Conditions in datastore query shape.
+   */
+  protected function count($storage, array $conditions): int {
+    $query = $this->buildQuery(0, 0, NULL, 'asc', $conditions, []);
+    $query->count();
+    $result = $storage->query($query);
+    return (int) ($result[0]->expression ?? 0);
   }
 
   /**

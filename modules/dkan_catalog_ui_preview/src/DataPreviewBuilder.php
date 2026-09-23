@@ -180,13 +180,13 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
       'apply_url' => $applyUrl,
       'tables' => $options['tables'],
       'panel' => $panel,
-      'page_sizes' => TableState::pageSizes($options['max_page_size']),
-      'summary' => $this->buildResultSummary($state->offset(), count($result->rows), $result->totalCount),
+      'summary' => $this->buildResultSummary($state, $result),
       'caption' => $options['caption'],
       'panels' => (bool) $options['panels'],
       'fragment_url' => $options['fragment_url'],
       'resource_id' => $resource_id,
       'labels' => $labels,
+      'matching_count' => $result->totalCount,
     ]);
 
     return [
@@ -210,6 +210,7 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
           '#attributes' => ['class' => ['dcu-table__table']]
           + ((string) ($options['caption'] ?? '') !== '' ? ['aria-labelledby' => self::CAPTION_ID] : []),
         ],
+        'page_size' => $this->buildPageSize($state, $applyUrl, TableState::pageSizes($options['max_page_size'])),
         // Slots must be render arrays; an empty pager still needs one.
         'pager' => $this->buildPager($state, $result, $baseUrl) ?: ['#markup' => ''],
       ],
@@ -244,6 +245,7 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
       '#slots' => [
         'toolbar' => $toolbar,
         'table' => $this->statusMessage->build($resource_id),
+        'page_size' => ['#markup' => ''],
         'pager' => ['#markup' => ''],
       ],
     ];
@@ -336,6 +338,26 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
   }
 
   /**
+   * Footer rows-per-page form; changing the size returns to page 1.
+   *
+   * No `panel` parameter: changing the page size reopens nothing.
+   */
+  protected function buildPageSize(TableState $state, Url $applyUrl, array $pageSizes): array {
+    $hidden = $state->toQuery();
+    unset($hidden['page_size'], $hidden['page']);
+    return [
+      '#type' => 'component',
+      '#component' => 'dkan_catalog_ui_preview:data-table-page-size',
+      '#props' => [
+        'apply_url' => $applyUrl->toString(),
+        'sizes' => array_values($pageSizes),
+        'current' => $state->pageSize,
+        'hidden' => self::flattenQuery($hidden),
+      ],
+    ];
+  }
+
+  /**
    * Build the pager (1-based `page`), reusing core pager class names.
    */
   protected function buildPager(TableState $state, DataSourceResult $result, Url $baseUrl): array {
@@ -373,23 +395,60 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
 
   /**
    * Build the result summary markup.
+   *
+   * Filtered results name the unfiltered total when the source reports it;
+   * the matching count never stands in for it.
    */
-  protected function buildResultSummary(int $offset, int $rowCount, int $totalCount): array {
+  protected function buildResultSummary(TableState $state, DataSourceResult $result): array {
     $summary = [
       '#type' => 'html_tag',
       '#tag' => 'p',
       '#attributes' => ['class' => ['dcu-table__summary'], 'aria-live' => 'polite'],
+      '#value' => $this->summaryText($state, $result),
     ];
-    if ($totalCount === 0) {
-      $summary['#value'] = $this->t('No rows match.');
-      return $summary;
-    }
-    $summary['#value'] = $this->t('Displaying @start - @end of @total rows', [
-      '@start' => number_format($offset + 1),
-      '@end' => number_format($offset + $rowCount),
-      '@total' => number_format($totalCount),
-    ]);
     return $summary;
+  }
+
+  /**
+   * The summary sentence for a result.
+   */
+  protected function summaryText(TableState $state, DataSourceResult $result): string {
+    $matching = $result->totalCount;
+    $filtered = (bool) $state->conditions;
+    $total = $filtered ? $result->unfilteredTotalCount : $matching;
+    $args = [
+      '@matching' => number_format($matching),
+      '@total' => number_format((int) $total),
+      '@start' => number_format($state->offset() + 1),
+      '@end' => number_format($state->offset() + count($result->rows)),
+    ];
+
+    if ($matching === 0) {
+      if (!$filtered || $total === 0) {
+        return (string) $this->t('No rows available');
+      }
+      return (string) ($total === NULL
+        ? $this->t('No matching rows')
+        : $this->t('No matching rows · @total total', $args));
+    }
+
+    // PluralTranslatableMarkup overwrites @count with the raw number, so the
+    // formatted counts travel as @matching / @total.
+    if ($matching <= $state->pageSize && $state->offset() === 0) {
+      if (!$filtered) {
+        return (string) $this->formatPlural($matching, '1 row', '@total rows', $args);
+      }
+      return (string) ($total === NULL
+        ? $this->formatPlural($matching, '1 matching row', '@matching matching rows', $args)
+        : $this->formatPlural($total, '@matching of 1 row', '@matching of @total rows', $args));
+    }
+
+    if (!$filtered) {
+      return (string) $this->t('Rows @start–@end of @total', $args);
+    }
+    return (string) ($total === NULL
+      ? $this->t('Rows @start–@end of @matching matching rows', $args)
+      : $this->t('Rows @start–@end of @matching matching rows · @total total', $args));
   }
 
   /**

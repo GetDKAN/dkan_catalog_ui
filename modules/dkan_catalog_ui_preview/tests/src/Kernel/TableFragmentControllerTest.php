@@ -66,7 +66,7 @@ class TableFragmentControllerTest extends CatalogUiKernelTestBase {
 
     $html = $response->getContent();
     $this->assertStringContainsString('<div id="dcu-table"', $html);
-    $this->assertStringContainsString('Displaying 1 - 10 of 30 rows', $html);
+    $this->assertStringContainsString('Rows 1–10 of 30', $html);
     $this->assertStringContainsString('aria-sort="descending"', $html);
     $this->assertStringContainsString('data-dcu-fragment="/dataset/frag-test/table"', $html);
     $this->assertStringContainsString('data-dcu-apply="/dataset/frag-test/table/apply"', $html);
@@ -96,10 +96,10 @@ class TableFragmentControllerTest extends CatalogUiKernelTestBase {
 
     $html = $this->fragment('frag-chooser', ['table' => '1'])->getContent();
     $this->assertStringContainsString('<option value="1" selected>Second</option>', $html);
-    $this->assertStringContainsString('dcu-table__download" href="http://example.com/second.csv"', $html);
+    $this->assertStringContainsString('dcu-table__download-original" href="http://example.com/second.csv"', $html);
     // The chooser lists titles, so the caption still names the file.
     $xpath = new \DOMXPath(Html::load($html));
-    $caption = $xpath->query('//div[@class="dcu-table__file"]/p[@id="dcu-table-caption"]');
+    $caption = $xpath->query('//div[@class="dcu-table__identity"]/p[@id="dcu-table-caption"]');
     $this->assertCount(1, $caption);
     $this->assertSame('dcu-table__caption', $caption->item(0)->getAttribute('class'));
     $this->assertSame('second.csv', trim($caption->item(0)->textContent));

@@ -1,5 +1,9 @@
+/* One workspace: toolbar, table and footer inside a single border. No
+   overflow clipping here; panels are positioned against it. */
 .dcu-table {
   margin-block: var(--dcu-space-md, 1rem) 0;
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
 }
 
 .dcu-table__table th.dcu-table__cell--number,
@@ -7,10 +11,10 @@
   text-align: end;
 }
 
+/* Only the table scrolls sideways; separators, not a nested box. */
 .dcu-table__wrapper {
   overflow-x: auto;
-  border: 1px solid var(--dcu-color-border, #dfe1e2);
-  border-radius: var(--dcu-radius, 0.25rem);
+  border-block: 1px solid var(--dcu-color-border, #dfe1e2);
 }
 
 .dcu-table__table {
@@ -34,10 +38,27 @@
 }
 
 .dcu-table__message {
+  margin: 0;
   padding: var(--dcu-space-md, 1rem);
-  border: 1px solid var(--dcu-color-border, #dfe1e2);
-  border-radius: var(--dcu-radius, 0.25rem);
   background: var(--dcu-color-surface-alt, #f0f0f0);
+}
+
+/* Rows per page at the start, pager at the end. */
+.dcu-table__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
+  padding: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
+}
+
+.dcu-table__footer:not(:has(*)) {
+  display: none;
+}
+
+.dcu-table__footer .pager {
+  margin-inline-start: auto;
 }
 
 .dcu-table__footer .pager__items {
@@ -45,7 +66,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--dcu-space-xs, 0.25rem);
-  margin-block: var(--dcu-space-md, 1rem) 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -60,14 +81,37 @@
   padding-block: 1rem;
 }
 
+/* Expanded view: toolbar and footer keep their natural height and the
+   table takes the rest, scrolling both ways. When wrapped controls leave
+   too little room, the root itself scrolls. */
 .dcu-table--fullscreen {
   position: fixed;
   inset: 0;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
   margin: 0;
   padding: var(--dcu-space-md, 1rem) 3.5rem var(--dcu-space-md, 1rem) var(--dcu-space-md, 1rem);
+  border: 0;
+  border-radius: 0;
   background: var(--dcu-color-surface, #fff);
+}
+
+.dcu-table--fullscreen > * {
+  flex: none;
+}
+
+.dcu-table--fullscreen > .dcu-table__wrapper {
+  flex: 1 1 auto;
+  min-height: 12rem;
+  overflow: auto;
+}
+
+.dcu-table--fullscreen .dcu-table__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .dcu-table [hidden] {

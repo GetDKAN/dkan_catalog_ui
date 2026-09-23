@@ -55,13 +55,13 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
       'apply_url' => NULL,
       'tables' => [],
       'panel' => NULL,
-      'page_sizes' => TableState::PAGE_SIZES,
       'summary' => [],
       'caption' => NULL,
       'panels' => TRUE,
       'fragment_url' => NULL,
       'resource_id' => NULL,
       'labels' => [],
+      'matching_count' => NULL,
     ];
     $this->labels = $options['labels'];
     $baseUrl = $options['base_url'];
@@ -78,13 +78,13 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
         'has_summary' => !empty($options['summary']),
         'open_panel' => (string) $options['panel'],
         'caption' => $this->caption($options['caption']),
-        'download' => $this->download($current),
+        'file_meta' => $this->fileMeta($current, $fields),
+        'download' => $this->download($current, $state, $options['resource_id'], $options['matching_count']),
         'chooser' => $this->chooser($options['tables'], $state),
         'filters' => $this->filters($state, $fields),
         'columns' => $this->columns($state, $fields, $baseUrl),
-        'display' => $this->display($state, $options['page_sizes']),
         'chips' => $this->chips($state, $fields, $baseUrl),
-        'share' => $this->share($state, $baseUrl, $options['resource_id']),
+        'share' => $this->share($state, $baseUrl),
         'labels' => $this->labels(),
       ],
       '#slots' => [
@@ -108,20 +108,69 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
   }
 
   /**
-   * The validated full-dataset download link, or NULL.
+   * File format and exposed column count, for the file header.
+   *
+   * @return string[]
+   *   Known parts only; empty when nothing reliable is known.
    */
-  protected function download(?array $table): ?array {
+  protected function fileMeta(?array $table, array $fields): array {
+    $meta = [];
+    if ($format = $this->format($table)) {
+      $meta[] = $format;
+    }
+    if ($fields) {
+      $meta[] = (string) $this->formatPlural(count($fields), '1 column', '@count columns');
+    }
+    return $meta;
+  }
+
+  /**
+   * Upper-case file extension of the table's file label, or ''.
+   */
+  protected function format(?array $table): string {
+    return strtoupper((string) pathinfo($table['label'] ?? '', PATHINFO_EXTENSION));
+  }
+
+  /**
+   * Download choices: the original file and the current-results export.
+   *
+   * The export goes to DKAN's streaming download route with the state
+   * translated to the datastore query shape (no limit: every matching row).
+   * With zero matching rows its url is '' and the template renders it
+   * disabled.
+   *
+   * @return array|null
+   *   Keys `original` ({url, label, button_label}) and `results` ({url,
+   *   label}), each NULL when unavailable; NULL when neither is.
+   */
+  protected function download(?array $table, TableState $state, ?string $resourceId, ?int $matchingCount): ?array {
+    $format = $this->format($table);
+    $original = NULL;
     $url = $table ? DownloadUrl::fromString($table['download_url'] ?? '') : NULL;
-    if (!$url) {
+    if ($url) {
+      $original = [
+        'url' => $url->toString(),
+        'label' => (string) ($format
+          ? $this->t('Original file (@format)', ['@format' => $format])
+          : $this->t('Original file')),
+        'button_label' => (string) ($format
+          ? $this->t('Download (@format)', ['@format' => $format])
+          : $this->t('Download')),
+      ];
+    }
+    $results = NULL;
+    if ($resourceId) {
+      $results = [
+        'url' => $matchingCount === 0 ? '' : Url::fromRoute(self::DOWNLOAD_ROUTE, ['identifier' => $resourceId], [
+          'query' => $state->toDatastoreQuery($this->likeEscaper),
+        ])->toString(),
+        'label' => (string) $this->t('Current results (CSV)'),
+      ];
+    }
+    if (!$original && !$results) {
       return NULL;
     }
-    $extension = strtoupper((string) pathinfo($table['label'] ?? '', PATHINFO_EXTENSION));
-    return [
-      'url' => $url->toString(),
-      'label' => (string) ($extension
-        ? $this->t('Download full dataset (@format)', ['@format' => $extension])
-        : $this->t('Download full dataset')),
-    ];
+    return ['original' => $original, 'results' => $results];
   }
 
   /**
@@ -218,19 +267,6 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
   }
 
   /**
-   * Display settings panel: rows per page.
-   */
-  protected function display(TableState $state, array $pageSizes): array {
-    $hidden = $state->toQuery();
-    unset($hidden['page_size'], $hidden['page']);
-    return [
-      'page_sizes' => array_values($pageSizes),
-      'current' => $state->pageSize,
-      'hidden' => DataPreviewBuilder::flattenQuery($hidden),
-    ];
-  }
-
-  /**
    * Chips for active conditions and hidden columns, with a clear-all link.
    */
   protected function chips(TableState $state, array $fields, ?Url $baseUrl): array {
@@ -254,32 +290,22 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
     }
     return [
       'items' => $items,
+      'label' => (string) ($hiddenCount > 0 ? $this->t('Active view settings') : $this->t('Active filters')),
       'clear_all_url' => $items ? $this->stateUrl($baseUrl, $state->withConditions([])->withColumns([])) : '',
+      'clear_all_label' => (string) $this->t('Clear all filters and show all columns'),
     ];
   }
 
   /**
-   * Share panel: filtered CSV download and the canonical link to copy.
-   *
-   * The download goes to DKAN's streaming download route with the state
-   * translated to the datastore query shape (no limit: every matching row).
+   * Share panel: the absolute canonical link of the current state.
    */
-  protected function share(TableState $state, ?Url $baseUrl, ?string $resourceId): array {
-    $download = '';
-    if ($resourceId) {
-      $download = Url::fromRoute(self::DOWNLOAD_ROUTE, ['identifier' => $resourceId], [
-        'query' => $state->toDatastoreQuery($this->likeEscaper),
-      ])->toString();
-    }
+  protected function share(TableState $state, ?Url $baseUrl): array {
     $copy = '';
     if ($baseUrl) {
       $url = clone $baseUrl;
       $copy = $url->setOption('query', $state->toQuery())->setAbsolute()->toString();
     }
-    return [
-      'download_url' => $download,
-      'copy_url' => $copy,
-    ];
+    return ['copy_url' => $copy];
   }
 
   /**
@@ -287,10 +313,11 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
    */
   protected function labels(): array {
     return [
-      'filters' => (string) $this->t('Filter Dataset'),
-      'columns' => (string) $this->t('Manage Columns'),
-      'display' => (string) $this->t('Display Settings'),
-      'share' => (string) $this->t('Share'),
+      'filters' => (string) $this->t('Filters'),
+      'columns' => (string) $this->t('Columns'),
+      'display' => (string) $this->t('View'),
+      'share' => (string) $this->t('Share view'),
+      'download' => (string) $this->t('Download'),
     ];
   }
 

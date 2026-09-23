@@ -1,0 +1,26 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Data table page size
+status: experimental
+description: Rows per page GET form for the data table footer. Carries the rest of the state as hidden inputs and returns to page 1. The Apply button is for no-JS; the script hides it and submits on change when the table updates in place.
+props:
+  type: object
+  required:
+    - apply_url
+    - sizes
+    - current
+  properties:
+    apply_url:
+      type: string
+      title: Apply route URL
+    sizes:
+      type: array
+      title: Allowed page sizes
+      items:
+        type: integer
+    current:
+      type: integer
+      title: Selected page size
+    hidden:
+      type: object
+      title: Hidden state inputs
+      description: Flattened canonical state without page_size and page.

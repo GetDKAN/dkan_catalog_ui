@@ -161,7 +161,7 @@ class PreviewIntegrationTest extends KernelTestBase {
     $this->assertStringContainsString('<p class="dcu-table__caption" id="dcu-table-caption"><span class="dcu-table__file-label">Data file</span> preview_sample.csv</p>', $html);
     $this->assertStringNotContainsString('<caption>', $html);
     $this->assertStringContainsString('aria-labelledby="dcu-table-caption"', $html);
-    $this->assertStringContainsString('Displaying 1 - 10 of 30 rows', $html);
+    $this->assertStringContainsString('Rows 1–10 of 30', $html);
     $this->assertStringContainsString('aria-sort="descending"', $html);
     $this->assertStringContainsString('href="/preview-test?page_size=10&amp;sort=name"', $html);
     $this->assertStringContainsString('aria-label="Sort by name, ascending"', $html);

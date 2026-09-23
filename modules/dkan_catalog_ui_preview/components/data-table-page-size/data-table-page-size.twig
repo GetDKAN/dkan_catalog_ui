@@ -1,0 +1,12 @@
+<form method="get" action="{{ apply_url }}" class="dcu-table__page-size" data-dcu-state-form>
+  {% for name, value in hidden %}
+    <input type="hidden" name="{{ name }}" value="{{ value }}" />
+  {% endfor %}
+  <label for="dcu-table-page-size">{{ 'Rows per page'|t }}</label>
+  <select id="dcu-table-page-size" name="page_size" data-dcu-autosubmit>
+    {% for size in sizes %}
+      <option value="{{ size }}"{{ size == current ? ' selected' }}>{{ size }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="dcu-table__page-size-apply" data-dcu-autosubmit-apply>{{ 'Apply'|t }}</button>
+</form>

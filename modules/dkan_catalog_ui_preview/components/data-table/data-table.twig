@@ -1,10 +1,11 @@
 <div{{ attributes.addClass('dcu-table') }}>
-  <button type="button" class="dcu-table__close" hidden data-dcu-fullscreen-close aria-label="{{ 'Exit full screen'|t }}">{{ include('dkan_catalog_ui:icon', {name: 'close'}, with_context = false) }}</button>
+  <button type="button" class="dcu-table__close" hidden data-dcu-fullscreen-close aria-label="{{ 'Exit expanded view'|t }}">{{ include('dkan_catalog_ui:icon', {name: 'close'}, with_context = false) }}</button>
   {% block toolbar %}{% endblock %}
   <div class="dcu-table__wrapper">
     {% block table %}{% endblock %}
   </div>
   <div class="dcu-table__footer">
+    {% block page_size %}{% endblock %}
     {% block pager %}{% endblock %}
   </div>
 </div>

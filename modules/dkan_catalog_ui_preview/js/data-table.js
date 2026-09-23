@@ -4,16 +4,24 @@
  *
  * Without this script every control is a link or a GET form to the apply
  * route. With it: links and forms inside the table update the table in place
- * through the fragment route and push history; panels get keyboard and
- * click-outside behaviour; JS-only controls appear (add filter, full screen,
- * row height, operator narrowing). Any failure falls back to navigation.
+ * through the fragment route and push history; the footer page size applies
+ * on change; panels get keyboard and click-outside behaviour; JS-only
+ * controls appear (add filter, the View panel with row height and expanded
+ * view, copy link, operator narrowing). Any failure falls back to
+ * navigation.
  */
 (function (Drupal, once) {
   'use strict';
 
   const ROOT = '#dcu-table';
+  // Table-state GET forms outside the toolbar (the footer page size).
+  const STATE_FORM = 'form[data-dcu-state-form]';
   const DENSITY_KEY = 'dcuTableDensity';
   const DENSITIES = ['compact', 'normal', 'expanded'];
+
+  // Bumped by every table request; a response older than the latest is
+  // dropped so overlapping changes cannot apply out of order.
+  let latestRequest = 0;
 
   /**
    * Read the stored row height, or 'normal'.
@@ -67,6 +75,10 @@
    *   Selectors to try in order; empty leaves focus on the table root.
    */
   function focusHints(form, submitter) {
+    if (form.matches(STATE_FORM)) {
+      // The footer form re-renders in place: stay on its select.
+      return ['#dcu-table-page-size'];
+    }
     const panel = form.closest('details.dcu-table__panel');
     if (!panel || !panel.id) {
       return [];
@@ -129,6 +141,7 @@
     }
     const fragmentUrl = new URL(toolbar.dataset.dcuFragment, window.location.href);
     fragmentUrl.search = fullUrl.search;
+    const request = ++latestRequest;
 
     root.classList.add('is-loading');
     root.setAttribute('aria-busy', 'true');
@@ -139,16 +152,22 @@
         credentials: 'same-origin',
       });
       if (!response.ok) {
-        return false;
+        return request !== latestRequest;
       }
       html = await response.text();
     }
     catch (e) {
-      return false;
+      return request !== latestRequest;
     }
     finally {
-      root.classList.remove('is-loading');
-      root.removeAttribute('aria-busy');
+      if (request === latestRequest) {
+        root.classList.remove('is-loading');
+        root.removeAttribute('aria-busy');
+      }
+    }
+    if (request !== latestRequest) {
+      // Superseded: the newer request owns the table.
+      return true;
     }
 
     const template = document.createElement('template');
@@ -161,7 +180,7 @@
     // then re-enter on the new one.
     const wasFullscreen = root.classList.contains('dcu-table--fullscreen');
     if (wasFullscreen) {
-      exitFullscreen(root);
+      exitFullscreen(root, true);
     }
     root.replaceWith(next);
     if (push) {
@@ -169,7 +188,7 @@
     }
     Drupal.attachBehaviors(next.parentNode);
     if (wasFullscreen) {
-      enterFullscreen(next);
+      enterFullscreen(next, true);
     }
     focusAfter(next, hints);
     const summary = next.querySelector('.dcu-table__summary');
@@ -216,6 +235,7 @@
     }
     const applyUrl = new URL(form.action, window.location.href);
     applyUrl.search = params.toString();
+    const request = ++latestRequest;
     try {
       const response = await fetch(applyUrl.toString(), {
         headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -225,14 +245,20 @@
         throw new Error(response.status);
       }
       const data = await response.json();
+      if (request !== latestRequest) {
+        return;
+      }
       if (!data || !data.url) {
         throw new Error('no url');
       }
       go(data.url, (pageUrl) => { window.location.assign(pageUrl.toString()); }, focusHints(form, submitter));
     }
     catch (e) {
-      // Full navigation through the apply route, submitter included.
-      window.location.assign(applyUrl.toString());
+      // Full navigation through the apply route, submitter included, unless
+      // a newer request has taken over.
+      if (request === latestRequest) {
+        window.location.assign(applyUrl.toString());
+      }
     }
   }
 
@@ -352,9 +378,30 @@
   let inertElements = [];
 
   /**
-   * Expand the table over the viewport; everything else becomes inert.
+   * Close the View panel holding the expand button and focus its toggle.
+   *
+   * Leaving it open would make the first Escape close the panel instead of
+   * the expanded view, and would strand focus when an outside click closes
+   * it.
    */
-  function enterFullscreen(root) {
+  function focusViewToggle(root) {
+    const button = root.querySelector('[data-dcu-fullscreen]');
+    const panel = button && button.closest('details');
+    if (panel) {
+      panel.removeAttribute('open');
+      panel.querySelector('summary').focus();
+    }
+  }
+
+  /**
+   * Expand the table over the viewport; everything else becomes inert.
+   *
+   * @param {Element} root
+   *   The table root.
+   * @param {boolean} [quiet]
+   *   Skip the announcement (a fragment swap re-entering).
+   */
+  function enterFullscreen(root, quiet) {
     root.classList.add('dcu-table--fullscreen');
     document.body.classList.add('dcu-table-scroll-lock');
     inertElements = [];
@@ -371,19 +418,27 @@
     const button = root.querySelector('[data-dcu-fullscreen]');
     if (button) {
       button.setAttribute('aria-pressed', 'true');
-      setLabel(button, Drupal.t('Exit Full Screen'));
+      setLabel(button, Drupal.t('Exit expanded view'));
     }
     const close = root.querySelector('[data-dcu-fullscreen-close]');
     if (close) {
       close.removeAttribute('hidden');
     }
-    Drupal.announce(Drupal.t('Full screen on. Press Escape to exit.'));
+    focusViewToggle(root);
+    if (!quiet) {
+      Drupal.announce(Drupal.t('Expanded view on. Press Escape to exit.'));
+    }
   }
 
   /**
    * Leave full screen.
+   *
+   * @param {Element} root
+   *   The table root.
+   * @param {boolean} [quiet]
+   *   Skip the announcement (a fragment swap about to re-enter).
    */
-  function exitFullscreen(root) {
+  function exitFullscreen(root, quiet) {
     root.classList.remove('dcu-table--fullscreen');
     document.body.classList.remove('dcu-table-scroll-lock');
     const close = root.querySelector('[data-dcu-fullscreen-close]');
@@ -395,10 +450,12 @@
     const button = root.querySelector('[data-dcu-fullscreen]');
     if (button) {
       button.setAttribute('aria-pressed', 'false');
-      setLabel(button, Drupal.t('Full Screen'));
-      button.focus();
+      setLabel(button, Drupal.t('Expand table'));
     }
-    Drupal.announce(Drupal.t('Full screen off.'));
+    focusViewToggle(root);
+    if (!quiet) {
+      Drupal.announce(Drupal.t('Expanded view off.'));
+    }
   }
 
   Drupal.behaviors.dcuDataTable = {
@@ -410,8 +467,15 @@
         applyDensity(root, storedDensity(), false);
 
         // JS-only controls.
-        root.querySelectorAll('[data-dcu-add-filter], [data-dcu-fullscreen], [data-dcu-density], [data-dcu-copy], [data-dcu-panel-close]')
+        root.querySelectorAll('[data-dcu-add-filter], [data-dcu-view], [data-dcu-copy], [data-dcu-panel-close]')
           .forEach((el) => el.removeAttribute('hidden'));
+        // In place, the page size applies on change; Apply is for no-JS.
+        if (inPlace) {
+          root.querySelectorAll(`${STATE_FORM} [data-dcu-autosubmit-apply]`).forEach((el) => el.setAttribute('hidden', ''));
+          root.querySelectorAll(`${STATE_FORM} [data-dcu-autosubmit]`).forEach((select) => {
+            select.addEventListener('change', () => select.form.requestSubmit());
+          });
+        }
         root.querySelectorAll('[data-dcu-density] input').forEach((radio) => {
           radio.checked = radio.value === storedDensity();
           radio.addEventListener('change', () => applyDensity(root, radio.value, true));
@@ -479,7 +543,7 @@
         if (inPlace) {
           root.addEventListener('submit', (event) => {
             const form = event.target;
-            if (form.matches('form') && form.method.toLowerCase() === 'get' && toolbar.contains(form)) {
+            if (form.matches('form') && form.method.toLowerCase() === 'get' && (toolbar.contains(form) || form.matches(STATE_FORM))) {
               event.preventDefault();
               submitForm(form, event.submitter);
             }

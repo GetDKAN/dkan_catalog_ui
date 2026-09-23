@@ -2,7 +2,8 @@
   display: none !important;
 }
 
-/* Three rows: the file and its download, the view tools, the status. */
+/* Three rows inside the workspace: the file header, the tools, the
+   status. Items shrink (min-width: 0) and wrap rather than overflow. */
 .dcu-table__file,
 .dcu-table__tools,
 .dcu-table__status {
@@ -10,26 +11,51 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
-  margin-block-end: var(--dcu-space-sm, 0.5rem);
+  padding: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
+}
+
+.dcu-table__file > *,
+.dcu-table__tools > *,
+.dcu-table__status > * {
+  min-width: 0;
+}
+
+.dcu-table__file,
+.dcu-table__tools {
+  border-block-end: 1px solid var(--dcu-color-border, #dfe1e2);
+}
+
+.dcu-table__file {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.dcu-table__identity {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-direction: column;
+  gap: var(--dcu-space-xs, 0.25rem);
+  overflow-wrap: anywhere;
 }
 
 .dcu-table__status {
   align-items: baseline;
 }
 
-/* End of their row, after the file identity and the view tools. The
-   two-class selectors outrank a theme's own margin reset on buttons. */
-.dcu-table__file .dcu-table__download,
-.dcu-table__tools .dcu-table__fullscreen {
+/* Share view sits at the end of the tools row when there is room. The
+   two-class selector outranks a theme's own margin reset. */
+.dcu-table__tools .dcu-table__panel--share {
   margin-inline-start: auto;
 }
 
-.dcu-table__caption {
+.dcu-table__caption,
+.dcu-table__meta {
   margin: 0;
   font-size: var(--dcu-font-size-sm, 0.875rem);
 }
 
-.dcu-table__file-label {
+.dcu-table__file-label,
+.dcu-table__meta {
   color: var(--dcu-color-text-muted, #565c65);
 }
 
@@ -92,7 +118,6 @@
 
 /* Icon and label controls. */
 .dcu-table__download,
-.dcu-table__filtered-download,
 .dcu-table__fullscreen,
 .dcu-table__share button,
 .dcu-table__chip a {
@@ -123,6 +148,7 @@
   z-index: 10;
   inset-inline-end: 0;
   min-width: 20rem;
+  max-width: calc(100vw - 2rem);
   margin-block-start: var(--dcu-space-xs, 0.25rem);
   padding: var(--dcu-space-md, 1rem);
   border: 1px solid var(--dcu-color-border, #dfe1e2);
@@ -145,6 +171,54 @@
   align-items: center;
   gap: var(--dcu-space-xs, 0.25rem);
   margin-block-end: var(--dcu-space-xs, 0.25rem);
+}
+
+/* Filter editor fields: visible label above each control. */
+.dcu-table__filter-row {
+  align-items: flex-end;
+}
+
+.dcu-table__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.dcu-table__field label {
+  font-size: var(--dcu-font-size-sm, 0.875rem);
+}
+
+/* Download choices: a title and what it contains. */
+.dcu-table__download-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dcu-table__download-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--dcu-space-sm, 0.5rem);
+}
+
+.dcu-table__download-title {
+  font-weight: 600;
+}
+
+.dcu-table__download-note {
+  color: var(--dcu-color-text-muted, #565c65);
+  font-size: var(--dcu-font-size-sm, 0.875rem);
+}
+
+.dcu-table__download-option.is-disabled {
+  color: var(--dcu-color-text-muted, #565c65);
+  cursor: not-allowed;
+}
+
+.dcu-table__share-url {
+  width: 100%;
 }
 
 .dcu-table__panel-actions {
@@ -172,6 +246,7 @@
   .dcu-table__panel-body {
     position: static;
     min-width: 0;
+    max-width: none;
   }
 }
 

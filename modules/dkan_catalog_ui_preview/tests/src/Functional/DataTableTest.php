@@ -89,7 +89,7 @@ class DataTableTest extends BrowserTestBase {
     $this->drupalGet('/dataset/ft-filters');
     $assert = $this->assertSession();
     $assert->statusCodeEquals(200);
-    $assert->pageTextContains('Displaying 1 - 25 of 30 rows');
+    $assert->pageTextContains('Rows 1–25 of 30');
     $assert->elementExists('css', 'details#dcu-table-filters:not([open])');
 
     // Fill the blank row and apply: redirected to the canonical URL, the
@@ -104,7 +104,7 @@ class DataTableTest extends BrowserTestBase {
     $this->assertSame([
       'conditions' => [['property' => 'name', 'operator' => 'starts with', 'value' => 'person_1']],
     ], $this->currentQuery());
-    $assert->pageTextContains('Displaying 1 - 10 of 10 rows');
+    $assert->pageTextContains('10 of 30 rows');
     $assert->elementExists('css', 'details#dcu-table-filters:not([open])');
     $assert->elementTextContains('css', '.dcu-table__chips', 'name Starts With person_1');
     $assert->pageTextContains('person_10');
@@ -115,7 +115,7 @@ class DataTableTest extends BrowserTestBase {
     $page->selectFieldOption('conditions[1][property]', 'city');
     $page->fillField('conditions[1][value]', 'nowhere');
     $page->pressButton('Apply filters');
-    $assert->pageTextContains('No rows match.');
+    $assert->pageTextContains('No matching rows · 30 total');
     $this->assertCount(2, $this->currentQuery()['conditions']);
 
     // The Remove button drops one row and leaves the panel open.
@@ -123,21 +123,21 @@ class DataTableTest extends BrowserTestBase {
     $this->assertSame([['property' => 'name', 'operator' => 'starts with', 'value' => 'person_1']], $this->currentQuery()['conditions']);
     $this->assertSame('filters', $this->currentQuery()['panel']);
     $assert->elementExists('css', 'details#dcu-table-filters[open]');
-    $assert->pageTextContains('Displaying 1 - 10 of 10 rows');
+    $assert->pageTextContains('10 of 30 rows');
 
     // The chip link removes the filter without the apply route.
     $this->getSession()->getPage()->find('css', '.dcu-table__chip a[aria-label^="Remove filter"]')->click();
     $this->assertSame([], $this->currentQuery());
-    $assert->pageTextContains('Displaying 1 - 25 of 30 rows');
+    $assert->pageTextContains('Rows 1–25 of 30');
 
     // Reset ignores the submitted rows.
     // Ages are text in the datastore, so ">" is not offered; use contains.
     $contains = ['property' => 'name', 'operator' => 'contains', 'value' => '_1'];
     $this->drupalGet('/dataset/ft-filters', ['query' => ['conditions' => [$contains]]]);
-    $assert->pageTextContains('Displaying 1 - 10 of 10 rows');
+    $assert->pageTextContains('10 of 30 rows');
     $this->getSession()->getPage()->find('css', 'button[name="reset_filters"]')->press();
     $this->assertSame(['panel' => 'filters'], $this->currentQuery());
-    $assert->pageTextContains('Displaying 1 - 25 of 30 rows');
+    $assert->pageTextContains('Rows 1–25 of 30');
   }
 
   /**
@@ -185,7 +185,7 @@ class DataTableTest extends BrowserTestBase {
   }
 
   /**
-   * Display settings, sort links and the pager.
+   * Footer rows per page, sort links and the pager.
    */
   public function testDisplaySortAndPager(): void {
     $this->createImportedDataset('ft-display');
@@ -194,10 +194,9 @@ class DataTableTest extends BrowserTestBase {
 
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('page_size', '10');
-    $page->find('css', 'form.dcu-table__display')->findButton('Apply')->press();
+    $page->find('css', 'form.dcu-table__page-size')->findButton('Apply')->press();
     $this->assertSame(['page_size' => '10'], $this->currentQuery());
-    $assert->elementExists('css', 'details#dcu-table-display:not([open])');
-    $assert->pageTextContains('Displaying 1 - 10 of 30 rows');
+    $assert->pageTextContains('Rows 1–10 of 30');
 
     $this->getSession()->getPage()->find('css', 'th a[aria-label="Sort by age, ascending"]')->click();
     $this->assertSame(['page_size' => '10', 'sort' => 'age'], $this->currentQuery());
@@ -208,14 +207,37 @@ class DataTableTest extends BrowserTestBase {
 
     $this->clickLink('Next page');
     $this->assertSame(['page' => '2', 'page_size' => '10', 'sort' => 'age', 'direction' => 'desc'], $this->currentQuery());
-    $assert->pageTextContains('Displaying 11 - 20 of 30 rows');
+    $assert->pageTextContains('Rows 11–20 of 30');
     $this->clickLink('Last page');
-    $assert->pageTextContains('Displaying 21 - 30 of 30 rows');
+    $assert->pageTextContains('Rows 21–30 of 30');
     $assert->elementExists('css', '.pager__item.is-active a[aria-current="page"]');
 
     // Out-of-range pages clamp; junk is ignored.
     $this->drupalGet('/dataset/ft-display', ['query' => ['page' => '99', 'page_size' => '10', 'junk' => 'x']]);
-    $assert->pageTextContains('Displaying 21 - 30 of 30 rows');
+    $assert->pageTextContains('Rows 21–30 of 30');
+
+    // The footer form keeps filters, sort and columns and returns to page 1.
+    $condition = ['property' => 'name', 'operator' => 'contains', 'value' => 'person'];
+    $this->drupalGet('/dataset/ft-display', [
+      'query' => [
+        'conditions' => [$condition],
+        'page' => '2',
+        'page_size' => '10',
+        'sort' => 'age',
+        'columns' => 'age,name',
+      ],
+    ]);
+    $assert->pageTextContains('Rows 11–20 of 30 matching rows · 30 total');
+    $page = $this->getSession()->getPage();
+    $page->selectFieldOption('page_size', '25');
+    $page->find('css', 'form.dcu-table__page-size')->findButton('Apply')->press();
+    $this->assertEquals([
+      'conditions' => [$condition],
+      'sort' => 'age',
+      'columns' => 'age,name',
+    ], $this->currentQuery());
+    $assert->pageTextContains('Rows 1–25 of 30 matching rows · 30 total');
+    $assert->elementNotExists('css', 'details[open]');
   }
 
   /**
@@ -232,10 +254,11 @@ class DataTableTest extends BrowserTestBase {
     $this->drupalGet('/dataset/ft-chooser', ['query' => ['sort' => 'age']]);
     $assert = $this->assertSession();
     $assert->elementTextContains('css', '#dcu-table-caption', 'first.csv');
-    $assert->elementExists('css', 'a.dcu-table__download[href="http://example.com/first.csv"]');
+    $assert->elementExists('css', 'a.dcu-table__download-original[href="http://example.com/first.csv"]');
     // File row: chooser (titles), caption (the file name and the table's
-    // accessible name), download.
-    $assert->elementExists('css', '.dcu-table__file > form.dcu-table__chooser + p.dcu-table__caption + a.dcu-table__download');
+    // accessible name), then the Download disclosure.
+    $assert->elementExists('css', '.dcu-table__identity > form.dcu-table__chooser + p.dcu-table__caption');
+    $assert->elementExists('css', '.dcu-table__file > .dcu-table__identity + details#dcu-table-download');
     $assert->elementNotExists('css', 'p.dcu-table__caption.visually-hidden');
     $assert->elementTextContains('css', 'p#dcu-table-caption', 'first.csv');
     $assert->elementExists('css', 'table.dcu-table__table[aria-labelledby="dcu-table-caption"]');
@@ -248,7 +271,7 @@ class DataTableTest extends BrowserTestBase {
     $assert->pageTextContains('Data preview is not yet available.');
     $assert->elementNotExists('css', 'table.dcu-table__table');
     $assert->elementNotExists('css', 'details#dcu-table-filters');
-    $assert->elementExists('css', 'a.dcu-table__download[href="http://example.com/second.csv"]');
+    $assert->elementExists('css', 'a.dcu-button.dcu-table__download-original[href="http://example.com/second.csv"]');
     // Switching back works from the reduced toolbar.
     $this->getSession()->getPage()->selectFieldOption('table', 'First');
     $this->getSession()->getPage()->find('css', 'form.dcu-table__chooser')->findButton('Show')->press();
@@ -309,7 +332,7 @@ class DataTableTest extends BrowserTestBase {
 
     $this->drupalGet('/dataset/ft-cache');
     $assert->responseHeaderEquals('X-Drupal-Cache', 'MISS');
-    $assert->pageTextContains('Displaying 1 - 25 of 30 rows');
+    $assert->pageTextContains('Rows 1–25 of 30');
 
     // Another state is a page-cache miss but a dynamic-page-cache hit: the
     // page shell is cached, the table renders per request.
