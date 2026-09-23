@@ -1,0 +1,24 @@
+{% set base_id = id|default('dataset-tabs') %}
+<div class="dcu-tabs" id="{{ base_id }}" data-dcu-tabs>
+  <ul class="dcu-tabs__list">
+    {% for tab in tabs %}
+      <li class="dcu-tabs__item">
+        <a class="dcu-tabs__link" id="{{ base_id }}-tab-{{ tab.id }}" href="#{{ tab.id }}">{{ tab.label }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  {% for tab in tabs %}
+    <section class="dcu-tabs__panel" id="{{ tab.id }}" aria-labelledby="{{ base_id }}-tab-{{ tab.id }}">
+      <h2 class="dcu-tabs__panel-heading">{{ tab.label }}</h2>
+      {% if tab.id == 'data-table' %}
+        {% block data_table %}{% endblock %}
+      {% elseif tab.id == 'overview' %}
+        {% block overview %}{% endblock %}
+      {% elseif tab.id == 'data-dictionary' %}
+        {% block data_dictionary %}{% endblock %}
+      {% elseif tab.id == 'api' %}
+        {% block api %}{% endblock %}
+      {% endif %}
+    </section>
+  {% endfor %}
+</div>

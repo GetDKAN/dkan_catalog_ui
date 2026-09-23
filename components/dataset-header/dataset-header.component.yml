@@ -1,0 +1,16 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Dataset header
+status: experimental
+description: Modified date and description shown above the dataset tabs.
+props:
+  type: object
+  properties:
+    updated:
+      type: string
+      title: Formatted modified date
+    updated_iso:
+      type: string
+      title: ISO 8601 modified date
+slots:
+  description:
+    title: Description

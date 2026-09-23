@@ -1,0 +1,45 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Dataset tabs
+status: experimental
+description: Tabbed sections of a dataset page. Works as anchored sections without JavaScript; JS upgrades it to an ARIA tablist and syncs the URL hash.
+props:
+  type: object
+  required:
+    - tabs
+  properties:
+    id:
+      type: string
+      title: Base id
+      default: dataset-tabs
+    tabs:
+      type: array
+      title: Tabs
+      description: Ordered tabs. id must be one of data-table, overview, data-dictionary, api.
+      items:
+        type: object
+        required:
+          - id
+          - label
+        properties:
+          id:
+            type: string
+            enum:
+              - data-table
+              - overview
+              - data-dictionary
+              - api
+          label:
+            type: string
+slots:
+  data_table:
+    title: Data Table panel
+  overview:
+    title: Overview panel
+  data_dictionary:
+    title: Data Dictionary panel
+  api:
+    title: API panel
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once

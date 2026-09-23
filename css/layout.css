@@ -1,0 +1,44 @@
+/**
+ * Layout primitives shared by catalog pages.
+ */
+.dcu-container {
+  max-width: var(--dcu-container-max);
+  margin-inline: auto;
+  padding-inline: var(--dcu-space-md);
+}
+
+.dcu-layout--sidebar {
+  display: grid;
+  gap: var(--dcu-space-lg);
+}
+
+/* Wide: sidebar in the first column although it follows the results in
+   the DOM. */
+@media (min-width: 64em) {
+  .dcu-layout--sidebar {
+    grid-template-columns: var(--dcu-sidebar-width) minmax(0, 1fr);
+  }
+
+  .dcu-layout--sidebar > .dcu-search__sidebar {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .dcu-layout--sidebar > .dcu-search__main {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.dcu-stack > * + * {
+  margin-block-start: var(--dcu-space-md);
+}
+
+.dcu-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

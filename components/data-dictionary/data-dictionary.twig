@@ -1,0 +1,26 @@
+{% set has_format = fields|filter(field => field.format is not empty)|length > 0 %}
+<div class="dcu-data-dictionary">
+  {% if title and show_title %}<h3 class="dcu-data-dictionary__heading">{{ title }}</h3>{% endif %}
+  <table class="dcu-data-dictionary__table">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'Name'|t }}</th>
+        <th scope="col">{{ 'Title'|t }}</th>
+        <th scope="col">{{ 'Type'|t }}</th>
+        {% if has_format %}<th scope="col">{{ 'Format'|t }}</th>{% endif %}
+        <th scope="col">{{ 'Description'|t }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for field in fields %}
+        <tr>
+          <td><code>{{ field.name }}</code></td>
+          <td>{{ field.title }}</td>
+          <td>{{ field.type }}</td>
+          {% if has_format %}<td>{{ field.format }}</td>{% endif %}
+          <td>{{ field.description }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

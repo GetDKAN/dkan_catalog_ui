@@ -1,0 +1,21 @@
+.dcu-data-dictionary {
+  margin-bottom: var(--dcu-space-lg);
+}
+
+.dcu-data-dictionary__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-data-dictionary__table th,
+.dcu-data-dictionary__table td {
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  border-bottom: 1px solid var(--dcu-color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.dcu-data-dictionary__table thead th {
+  background: var(--dcu-color-surface-alt);
+}

@@ -1,0 +1,26 @@
+views.row.dkan_dataset_card:
+  type: views_row
+  label: 'DKAN dataset card'
+  mapping:
+    view_mode:
+      type: string
+      label: 'View mode'
+
+views.area.dkan_catalog_ui_facets:
+  type: views_area
+  label: 'DKAN facet blocks'
+  mapping:
+    facets:
+      type: string
+      label: 'Facet ids, one per line'
+    heading:
+      type: label
+      label: 'Heading'
+
+plugin.plugin_configuration.facets_processor.dcu_case:
+  type: mapping
+  label: 'Re-case display values'
+  mapping:
+    mode:
+      type: string
+      label: 'Mode (ucwords or upper)'

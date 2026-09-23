@@ -1,0 +1,102 @@
+/**
+ * Dataset search page.
+ */
+.dcu-search__exposed form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--dcu-space-md);
+  margin-bottom: var(--dcu-space-lg);
+}
+
+.dcu-search__exposed .form-item {
+  margin: 0;
+}
+
+.dcu-search__exposed .form-item-fulltext {
+  flex: 1 1 20rem;
+}
+
+.dcu-search__exposed input[type="text"] {
+  width: 100%;
+  padding: var(--dcu-space-sm);
+  border: 1px solid var(--dcu-color-border);
+  border-radius: var(--dcu-radius);
+}
+
+.dcu-search__exposed .form-submit {
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  border: 0;
+  border-radius: var(--dcu-radius);
+  background: var(--dcu-color-primary);
+  color: var(--dcu-color-primary-contrast);
+  font-weight: 600;
+}
+
+.dcu-search__sidebar {
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-facets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--dcu-space-md);
+}
+
+.dcu-facets__heading {
+  flex: 1 1 auto;
+  font-size: var(--dcu-font-size-lg);
+  margin: 0 0 var(--dcu-space-sm);
+}
+
+.dcu-facets__clear {
+  flex: 0 0 auto;
+  margin-bottom: var(--dcu-space-sm);
+}
+
+.dcu-facets__facet {
+  flex: 0 0 100%;
+}
+
+.dcu-facets__facet--long .facets-widget-checkbox,
+.dcu-facets__facet--long .item-list {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.dcu-facets__facet {
+  margin-bottom: var(--dcu-space-lg);
+}
+
+.dcu-facets__facet-label {
+  font-size: var(--dcu-font-size-md);
+  margin: 0 0 var(--dcu-space-xs);
+}
+
+.dcu-facets__facet ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dcu-facets__facet li {
+  padding: var(--dcu-space-xs) 0;
+}
+
+.dcu-search__filter-link {
+  display: inline-block;
+  margin-bottom: var(--dcu-space-sm);
+}
+
+@media (min-width: 64em) {
+  .dcu-search__filter-link {
+    display: none;
+  }
+}
+
+.dcu-search__main .view-header,
+.dcu-search__main .dcu-search__summary {
+  margin-bottom: var(--dcu-space-md);
+  color: var(--dcu-color-text-muted);
+}

@@ -1,0 +1,17 @@
+.dcu-metadata-table__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dcu-metadata-table__table th,
+.dcu-metadata-table__table td {
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  border-bottom: 1px solid var(--dcu-color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.dcu-metadata-table__table th {
+  width: 30%;
+  font-weight: 600;
+}

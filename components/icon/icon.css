@@ -1,0 +1,6 @@
+.dcu-icon {
+  flex: none;
+  width: var(--dcu-icon-size, 1em);
+  height: var(--dcu-icon-size, 1em);
+  vertical-align: -0.125em;
+}

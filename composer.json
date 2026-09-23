@@ -1,0 +1,10 @@
+{
+  "name": "drupal/dkan_catalog_ui",
+  "description": "Drupal-native dataset search and dataset pages for DKAN.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/GetDKAN/dkan_catalog_ui",
+  "require": {
+    "drupal/dkan": "^4"
+  }
+}

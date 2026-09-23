@@ -1,0 +1,12 @@
+dkan_catalog_ui.datasets:
+  title: Datasets
+  description: Browse and search the catalog.
+  route_name: view.dkan_catalog_ui_search.page_1
+  menu_name: main
+  weight: 0
+dkan_catalog_ui.api:
+  title: API
+  description: Reference of the catalog's API endpoints.
+  route_name: dkan_catalog_ui.api_docs
+  menu_name: main
+  weight: 10

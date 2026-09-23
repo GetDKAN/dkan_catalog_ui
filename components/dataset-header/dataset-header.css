@@ -1,0 +1,5 @@
+.dcu-dataset-header__updated {
+  color: var(--dcu-color-text-muted);
+  font-size: var(--dcu-font-size-sm);
+  margin-block: 0 var(--dcu-space-sm);
+}

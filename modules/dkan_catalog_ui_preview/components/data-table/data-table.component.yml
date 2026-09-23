@@ -1,0 +1,14 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Data table
+status: experimental
+description: Wrapper for a datastore data table with its toolbar and pager. The root carries id="dcu-table" and tabindex="-1" so navigation can focus it, and a hidden top-right close button the script shows in full screen.
+props:
+  type: object
+  properties: {}
+slots:
+  toolbar:
+    title: Toolbar
+  table:
+    title: Table
+  pager:
+    title: Pager

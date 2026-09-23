@@ -1,0 +1,66 @@
+{% macro endpoint(endpoint) %}
+    <details class="dcu-endpoint">
+      <summary class="dcu-endpoint__summary">
+        <span class="dcu-endpoint__method dcu-endpoint__method--{{ endpoint.method|lower }}">{{ endpoint.method }}</span>
+        <code class="dcu-endpoint__path">{{ endpoint.path }}</code>
+        {% if endpoint.summary %}<span class="dcu-endpoint__title">{{ endpoint.summary }}</span>{% endif %}
+      </summary>
+      <div class="dcu-endpoint__body">
+        {% if endpoint.description %}<p>{{ endpoint.description }}</p>{% endif %}
+        {% if endpoint.example_url %}
+          <p class="dcu-endpoint__example">
+            {{ 'Example:'|t }} <a href="{{ endpoint.example_url }}"><code>{{ endpoint.example_path }}</code></a>
+          </p>
+        {% endif %}
+        {% if endpoint.parameters %}
+          <table class="dcu-endpoint__params">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'Parameter'|t }}</th>
+                <th scope="col">{{ 'In'|t }}</th>
+                <th scope="col">{{ 'Type'|t }}</th>
+                <th scope="col">{{ 'Description'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for param in endpoint.parameters %}
+                <tr>
+                  <td><code>{{ param.name }}</code>{% if param.required %} <span class="dcu-endpoint__required">{{ 'required'|t }}</span>{% endif %}</td>
+                  <td>{{ param.in }}</td>
+                  <td>{{ param.type }}</td>
+                  <td>{{ param.description }}{% if param.example %} <span class="dcu-endpoint__param-example">{{ 'Example:'|t }} <code>{{ param.example }}</code></span>{% endif %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+        {% if endpoint.request_example %}
+          <p class="dcu-endpoint__label">{{ 'Example request body'|t }}</p>
+          <pre class="dcu-endpoint__code"><code>{{ endpoint.request_example }}</code></pre>
+        {% endif %}
+      </div>
+    </details>
+{% endmacro %}
+{% import _self as api %}
+<div class="dcu-api-docs">
+  <p class="dcu-api-docs__intro">
+    {{ intro|default('The DKAN API provides programmatic access to this dataset, including filtering, querying and aggregating its data.'|t) }}
+  </p>
+  <p class="dcu-api-docs__links">
+    {% if links %}
+      {% for link in links %}<a class="dcu-button" href="{{ link.url }}">{{ link.label }}</a>{% endfor %}
+    {% else %}
+      <a class="dcu-button" href="{{ docs_url }}">{{ 'OpenAPI document (JSON)'|t }}</a>
+    {% endif %}
+  </p>
+  {% if endpoints is empty and groups is empty %}
+    <p>{{ empty|default('No API documentation is available for this dataset.'|t) }}</p>
+  {% endif %}
+  {% for group in groups %}
+    <section class="dcu-api-docs__group">
+      <h3 class="dcu-api-docs__group-title">{{ group.title }}</h3>
+      {% for endpoint in group.endpoints %}{{ api.endpoint(endpoint) }}{% endfor %}
+    </section>
+  {% endfor %}
+  {% for endpoint in endpoints %}{{ api.endpoint(endpoint) }}{% endfor %}
+</div>

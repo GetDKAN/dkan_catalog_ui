@@ -1,0 +1,47 @@
+.dcu-card {
+  padding: var(--dcu-space-md) 0 var(--dcu-space-lg);
+  border-bottom: 1px solid var(--dcu-color-border);
+}
+
+.dcu-card__updated {
+  margin: 0;
+  color: var(--dcu-color-text-muted);
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-card__title {
+  margin: var(--dcu-space-xs) 0 var(--dcu-space-sm);
+  font-size: var(--dcu-font-size-lg);
+}
+
+.dcu-card__formats,
+.dcu-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dcu-space-sm) var(--dcu-space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dcu-card__format {
+  padding: 0 var(--dcu-space-sm);
+  border-radius: var(--dcu-radius);
+  background: var(--dcu-color-surface-alt);
+  font-size: var(--dcu-font-size-sm);
+  font-weight: 600;
+}
+
+.dcu-card__description {
+  margin: var(--dcu-space-sm) 0;
+}
+
+.dcu-card__links {
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-card__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dcu-space-xs);
+}

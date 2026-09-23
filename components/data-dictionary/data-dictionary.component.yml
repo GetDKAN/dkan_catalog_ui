@@ -1,0 +1,35 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Data dictionary
+status: experimental
+description: Table of data dictionary fields (Frictionless table schema). The Format column renders only when a field has a format.
+props:
+  type: object
+  required:
+    - fields
+  properties:
+    title:
+      type: string
+      title: Title
+    show_title:
+      type: boolean
+      title: Render the title as a heading
+      description: False when the title would repeat the page title.
+      default: true
+    fields:
+      type: array
+      title: Fields
+      items:
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+          title:
+            type: string
+          type:
+            type: string
+          format:
+            type: string
+          description:
+            type: string

@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+  enforced:
+    module:
+      - dkan_catalog_ui
+id: node.search_result
+label: 'Search result'
+description: 'Dataset card in catalog search results.'
+targetEntityType: node
+cache: true

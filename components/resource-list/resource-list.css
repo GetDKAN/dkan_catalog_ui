@@ -1,0 +1,62 @@
+.dcu-resource-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dcu-resource {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--dcu-space-md);
+  padding: var(--dcu-space-md);
+  border: 1px solid var(--dcu-color-border);
+  border-radius: var(--dcu-radius);
+  margin-bottom: var(--dcu-space-sm);
+}
+
+.dcu-resource__title {
+  font-weight: 600;
+}
+
+.dcu-resource__format {
+  color: var(--dcu-color-text-muted);
+  font-weight: 400;
+}
+
+.dcu-resource__description {
+  margin-block: var(--dcu-space-xs) 0;
+}
+
+.dcu-resource__stats {
+  display: flex;
+  gap: var(--dcu-space-lg);
+  margin: var(--dcu-space-sm) 0 0;
+}
+
+.dcu-resource__stats dt {
+  color: var(--dcu-color-text-muted);
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-resource__stats dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.dcu-button {
+  display: inline-block;
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  border-radius: var(--dcu-radius);
+  background: var(--dcu-color-primary);
+  color: var(--dcu-color-primary-contrast);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dcu-button:hover,
+.dcu-button:focus {
+  background: var(--dcu-color-link-hover);
+  color: var(--dcu-color-primary-contrast);
+}

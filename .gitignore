@@ -1,0 +1,17 @@
+vendor/
+
+# PHPUnit
+.phpunit.cache/
+.phpunit.result.cache
+
+# Local tooling
+phpcs.xml
+.claude/settings.local.json
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+*~

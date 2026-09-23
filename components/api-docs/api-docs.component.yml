@@ -1,0 +1,93 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: API docs
+status: experimental
+description: 'Server-rendered reference of API endpoints from an OpenAPI document (a dataset''s, or the site''s at /api/docs), with links to the raw document.'
+props:
+  type: object
+  required:
+    - docs_url
+    - endpoints
+  properties:
+    docs_url:
+      type: string
+      title: OpenAPI document URL
+    intro:
+      type: string
+      title: Intro text
+      description: Defaults to the dataset wording.
+    empty:
+      type: string
+      title: Empty-state text
+      description: Defaults to the dataset wording.
+    links:
+      type: array
+      title: Document links
+      description: Replaces the single JSON link when given.
+      items:
+        type: object
+        required:
+          - label
+          - url
+        properties:
+          label:
+            type: string
+          url:
+            type: string
+    groups:
+      type: array
+      title: Endpoint groups
+      description: When given, endpoints render under these headings instead of the flat list.
+      items:
+        type: object
+        required:
+          - title
+          - endpoints
+        properties:
+          title:
+            type: string
+          endpoints:
+            type: array
+    endpoints:
+      type: array
+      title: Endpoints
+      items:
+        type: object
+        required:
+          - method
+          - path
+        properties:
+          method:
+            type: string
+          path:
+            type: string
+          summary:
+            type: string
+          description:
+            type: string
+          tag:
+            type: string
+          parameters:
+            type: array
+            items:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                in:
+                  type: string
+                required:
+                  type: boolean
+                description:
+                  type: string
+                type:
+                  type: string
+                example:
+                  type: string
+          request_example:
+            type: string
+          example_path:
+            type: string
+          example_url:
+            type: string

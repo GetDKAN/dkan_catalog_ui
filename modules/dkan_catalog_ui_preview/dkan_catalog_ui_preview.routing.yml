@@ -1,0 +1,15 @@
+dkan_catalog_ui_preview.apply:
+  path: '/dataset/{dataset}/table/apply'
+  defaults:
+    _controller: '\Drupal\dkan_catalog_ui_preview\Controller\TableApplyController::apply'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'
+
+dkan_catalog_ui_preview.fragment:
+  path: '/dataset/{dataset}/table'
+  defaults:
+    _controller: '\Drupal\dkan_catalog_ui_preview\Controller\TableFragmentController::fragment'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'

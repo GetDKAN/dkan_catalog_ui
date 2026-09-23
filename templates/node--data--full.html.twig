@@ -1,0 +1,27 @@
+{#
+/**
+ * @file
+ * Full-page dataset node: header plus tabbed sections.
+ *
+ * Extra variables (see ThemeHooks::preprocessNode()):
+ * - dcu_tabs: list of {id, label} for the non-empty tabs, in order.
+ */
+#}
+<article{{ attributes.addClass('dcu-dataset') }}>
+  {{ title_prefix }}
+  {% if label and not page %}
+    <h2{{ title_attributes }}><a href="{{ url }}" rel="bookmark">{{ label }}</a></h2>
+  {% endif %}
+  {{ title_suffix }}
+  <div{{ content_attributes.addClass('dcu-dataset__content') }}>
+    {{ content.dataset_header }}
+    {% if dcu_tabs is not empty %}
+      {% embed 'dkan_catalog_ui:dataset-tabs' with { id: 'dataset-' ~ node.id(), tabs: dcu_tabs } %}
+        {% block data_table %}{{ content.data_preview }}{% endblock %}
+        {% block overview %}{{ content.dataset_overview }}{% endblock %}
+        {% block data_dictionary %}{{ content.dataset_data_dictionary }}{% endblock %}
+        {% block api %}{{ content.dataset_api }}{% endblock %}
+      {% endembed %}
+    {% endif %}
+  </div>
+</article>

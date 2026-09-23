@@ -1,0 +1,175 @@
+{% macro hidden_inputs(values) %}
+  {% for name, value in values %}
+    <input type="hidden" name="{{ name }}" value="{{ value }}" />
+  {% endfor %}
+{% endmacro %}
+{% import _self as forms %}
+<div class="dcu-table__toolbar" data-dcu-apply="{{ apply_url }}"{% if fragment_url %} data-dcu-fragment="{{ fragment_url }}"{% endif %}>
+  {% if chooser or caption or download %}
+  <div class="dcu-table__file">
+    {% if chooser %}
+      <form method="get" action="{{ apply_url }}" class="dcu-table__chooser">
+        <label for="dcu-table-chooser">{{ 'Data file'|t }}</label>
+        <select id="dcu-table-chooser" name="table">
+          {% for table in chooser.tables %}
+            <option value="{{ table.value }}"{{ table.selected ? ' selected' }}>{{ table.label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">{{ 'Show'|t }}</button>
+      </form>
+    {% endif %}
+    {# The file name and the table's accessible name. The chooser lists
+       distribution titles, not file names, so this stays visible; its own
+       label is dropped there because the chooser already carries one. #}
+    {% if caption %}
+      <p class="dcu-table__caption" id="{{ caption.id }}">{% if not chooser %}<span class="dcu-table__file-label">{{ 'Data file'|t }}</span> {% endif %}{{ caption.text }}</p>
+    {% endif %}
+    {% if download %}
+      <a class="dcu-button dcu-table__download" href="{{ download.url }}">{{ include('dkan_catalog_ui:icon', {name: 'download'}, with_context = false) }}{{ download.label }}</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if show_panels %}
+  <div class="dcu-table__tools">
+
+    <details class="dcu-table__panel dcu-table__panel--filters" id="dcu-table-filters"{{ open_panel == 'filters' ? ' open' }}>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'filter'}, with_context = false) }}{{ labels.filters }}{% if filters.count %} <span class="dcu-table__panel-count">({{ filters.count }})</span>{% endif %}<span class="dcu-table__panel-chevron">{{ include('dkan_catalog_ui:icon', {name: 'chevron-down'}, with_context = false) }}</span></summary>
+      <form method="get" action="{{ apply_url }}" class="dcu-table__panel-body dcu-table__filters" data-dcu-operators="{{ filters.operator_sets|json_encode }}" data-dcu-max-filters="{{ filters.max }}">
+        {{ forms.hidden_inputs(filters.hidden) }}
+        <input type="hidden" name="panel" value="filters" />
+        <div class="dcu-table__panel-head"><h3 class="dcu-table__panel-heading">{{ labels.filters }}</h3><button type="button" class="dcu-table__panel-close" hidden data-dcu-panel-close aria-label="{{ 'Close'|t }}">{{ include('dkan_catalog_ui:icon', {name: 'close'}, with_context = false) }}</button></div>
+        <ul class="dcu-table__filter-rows">
+          {% for row in filters.rows %}
+            <li class="dcu-table__filter-row">
+              <label class="visually-hidden" for="dcu-filter-{{ row.index }}-property">{{ 'Column'|t }}</label>
+              <select id="dcu-filter-{{ row.index }}-property" name="conditions[{{ row.index }}][property]">
+                {% for column in filters.columns %}
+                  <option value="{{ column.value }}" data-category="{{ column.category }}"{{ column.value == row.property ? ' selected' }}>{{ column.label }}</option>
+                {% endfor %}
+              </select>
+              <label class="visually-hidden" for="dcu-filter-{{ row.index }}-operator">{{ 'Operator'|t }}</label>
+              <select id="dcu-filter-{{ row.index }}-operator" name="conditions[{{ row.index }}][operator]">
+                {% for operator in row.operators %}
+                  <option value="{{ operator.value }}"{{ operator.value == row.operator ? ' selected' }}>{{ operator.label }}</option>
+                {% endfor %}
+              </select>
+              <label class="visually-hidden" for="dcu-filter-{{ row.index }}-value">{{ 'Value'|t }}</label>
+              <input id="dcu-filter-{{ row.index }}-value" type="text" name="conditions[{{ row.index }}][value]" value="{{ row.value }}" maxlength="{{ filters.value_max_length }}" />
+              <button type="submit" name="remove" value="{{ row.index }}" aria-label="{{ 'Remove filter @n'|t({'@n': row.index + 1}) }}">{{ 'Remove'|t }}</button>
+            </li>
+          {% endfor %}
+          {% if filters.count < filters.max %}
+            <li class="dcu-table__filter-row dcu-table__filter-row--blank">
+              <label class="visually-hidden" for="dcu-filter-{{ filters.blank_index }}-property">{{ 'Column'|t }}</label>
+              <select id="dcu-filter-{{ filters.blank_index }}-property" name="conditions[{{ filters.blank_index }}][property]">
+                <option value="">{{ 'Select column'|t }}</option>
+                {% for column in filters.columns %}
+                  <option value="{{ column.value }}" data-category="{{ column.category }}">{{ column.label }}</option>
+                {% endfor %}
+              </select>
+              <label class="visually-hidden" for="dcu-filter-{{ filters.blank_index }}-operator">{{ 'Operator'|t }}</label>
+              <select id="dcu-filter-{{ filters.blank_index }}-operator" name="conditions[{{ filters.blank_index }}][operator]">
+                {% for operator in filters.all_operators %}
+                  <option value="{{ operator.value }}">{{ operator.label }}</option>
+                {% endfor %}
+              </select>
+              <label class="visually-hidden" for="dcu-filter-{{ filters.blank_index }}-value">{{ 'Value'|t }}</label>
+              <input id="dcu-filter-{{ filters.blank_index }}-value" type="text" name="conditions[{{ filters.blank_index }}][value]" value="" maxlength="{{ filters.value_max_length }}" />
+            </li>
+          {% endif %}
+        </ul>
+        <div class="dcu-table__panel-actions">
+          <button type="submit" class="dcu-button" name="close" value="1">{{ 'Apply filters'|t }}</button>
+          <button type="button" hidden data-dcu-add-filter>{{ '+ Add filter'|t }}</button>
+          <button type="submit" class="dcu-table__link-button" name="reset_filters" value="1">{{ 'Reset'|t }}</button>
+        </div>
+      </form>
+    </details>
+
+    <details class="dcu-table__panel dcu-table__panel--columns" id="dcu-table-columns"{{ open_panel == 'columns' ? ' open' }}>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'columns'}, with_context = false) }}{{ labels.columns }}{% if columns.hidden_count %} <span class="dcu-table__panel-count">({{ columns.hidden_count }})</span>{% endif %}<span class="dcu-table__panel-chevron">{{ include('dkan_catalog_ui:icon', {name: 'chevron-down'}, with_context = false) }}</span></summary>
+      <form method="get" action="{{ apply_url }}" class="dcu-table__panel-body dcu-table__columns">
+        {{ forms.hidden_inputs(columns.hidden) }}
+        <input type="hidden" name="panel" value="columns" />
+        <div class="dcu-table__panel-head"><h3 class="dcu-table__panel-heading">{{ labels.columns }}</h3><button type="button" class="dcu-table__panel-close" hidden data-dcu-panel-close aria-label="{{ 'Close'|t }}">{{ include('dkan_catalog_ui:icon', {name: 'close'}, with_context = false) }}</button></div>
+        <ul class="dcu-table__column-list{{ columns.items|length > 8 ? ' dcu-table__column-list--long' }}">
+          {% for item in columns.items %}
+            <li class="dcu-table__column-item">
+              <input type="checkbox" id="dcu-column-{{ item.name }}" name="columns[]" value="{{ item.name }}"{{ item.visible ? ' checked' }} />
+              <label for="dcu-column-{{ item.name }}">{{ item.label }}</label>
+              {% if item.can_move_up %}
+                <button type="submit" name="move_up" value="{{ item.name }}" aria-label="{{ 'Move @column up'|t({'@column': item.label}) }}">{{ include('dkan_catalog_ui:icon', {name: 'arrow-up'}, with_context = false) }}</button>
+              {% endif %}
+              {% if item.can_move_down %}
+                <button type="submit" name="move_down" value="{{ item.name }}" aria-label="{{ 'Move @column down'|t({'@column': item.label}) }}">{{ include('dkan_catalog_ui:icon', {name: 'arrow-down'}, with_context = false) }}</button>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="dcu-table__panel-actions">
+          <button type="submit" class="dcu-button" name="close" value="1">{{ 'Save'|t }}</button>
+          <button type="submit" class="dcu-table__link-button" name="reset_columns" value="1">{{ 'Reset columns'|t }}</button>
+          {% if columns.cancel_url %}<a class="dcu-table__cancel" href="{{ columns.cancel_url }}">{{ 'Cancel'|t }}</a>{% endif %}
+        </div>
+      </form>
+    </details>
+
+    <details class="dcu-table__panel dcu-table__panel--display" id="dcu-table-display"{{ open_panel == 'display' ? ' open' }}>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'sliders'}, with_context = false) }}{{ labels.display }}<span class="dcu-table__panel-chevron">{{ include('dkan_catalog_ui:icon', {name: 'chevron-down'}, with_context = false) }}</span></summary>
+      <form method="get" action="{{ apply_url }}" class="dcu-table__panel-body dcu-table__display">
+        {{ forms.hidden_inputs(display.hidden) }}
+        <input type="hidden" name="panel" value="display" />
+        <div class="dcu-table__panel-head"><h3 class="dcu-table__panel-heading">{{ labels.display }}</h3><button type="button" class="dcu-table__panel-close" hidden data-dcu-panel-close aria-label="{{ 'Close'|t }}">{{ include('dkan_catalog_ui:icon', {name: 'close'}, with_context = false) }}</button></div>
+        <label for="dcu-table-page-size">{{ 'Rows per page'|t }}</label>
+        <select id="dcu-table-page-size" name="page_size">
+          {% for size in display.page_sizes %}
+            <option value="{{ size }}"{{ size == display.current ? ' selected' }}>{{ size }}</option>
+          {% endfor %}
+        </select>
+        <fieldset class="dcu-table__density" hidden data-dcu-density>
+          <legend>{{ 'Row height'|t }}</legend>
+          <label><input type="radio" name="dcu_density" value="compact" /> {{ 'Compact'|t }}</label>
+          <label><input type="radio" name="dcu_density" value="normal" /> {{ 'Normal'|t }}</label>
+          <label><input type="radio" name="dcu_density" value="expanded" /> {{ 'Expanded'|t }}</label>
+        </fieldset>
+        <div class="dcu-table__panel-actions">
+          <button type="submit" class="dcu-button" name="close" value="1">{{ 'Apply'|t }}</button>
+        </div>
+      </form>
+    </details>
+
+    <details class="dcu-table__panel dcu-table__panel--share" id="dcu-table-share"{{ open_panel == 'share' ? ' open' }}>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'share'}, with_context = false) }}{{ labels.share }}<span class="dcu-table__panel-chevron">{{ include('dkan_catalog_ui:icon', {name: 'chevron-down'}, with_context = false) }}</span></summary>
+      <div class="dcu-table__panel-body dcu-table__share">
+        <div class="dcu-table__panel-head"><h3 class="dcu-table__panel-heading">{{ labels.share }}</h3><button type="button" class="dcu-table__panel-close" hidden data-dcu-panel-close aria-label="{{ 'Close'|t }}">{{ include('dkan_catalog_ui:icon', {name: 'close'}, with_context = false) }}</button></div>
+        {% if share.copy_url %}
+          <button type="button" hidden data-dcu-copy="{{ share.copy_url }}">{{ include('dkan_catalog_ui:icon', {name: 'link'}, with_context = false) }}{{ 'Copy link to filtered data'|t }}</button>
+          <span class="dcu-table__copy-status" aria-live="polite"></span>
+        {% endif %}
+        {% if share.download_url %}
+          <a class="dcu-button dcu-table__filtered-download" href="{{ share.download_url }}">{{ include('dkan_catalog_ui:icon', {name: 'download'}, with_context = false) }}{{ 'Download filtered data (CSV)'|t }}</a>
+        {% endif %}
+      </div>
+    </details>
+
+    <button type="button" class="dcu-table__fullscreen" hidden data-dcu-fullscreen aria-pressed="false">{{ include('dkan_catalog_ui:icon', {name: 'expand'}, with_context = false) }}{{ include('dkan_catalog_ui:icon', {name: 'collapse'}, with_context = false) }}<span class="dcu-table__button-label">{{ 'Full Screen'|t }}</span></button>
+  </div>
+  {% endif %}
+
+  {% if has_summary or (show_panels and chips.items) %}
+  <div class="dcu-table__status">
+    {% block summary %}{% endblock %}
+    {% if show_panels and chips.items %}
+      <ul class="dcu-table__chips" aria-label="{{ 'Active filters'|t }}">
+        {% for chip in chips.items %}
+          <li class="dcu-table__chip">
+            <a href="{{ chip.url }}" aria-label="{{ chip.remove_label }}">{{ chip.label }} {{ include('dkan_catalog_ui:icon', {name: 'close', size: 12}, with_context = false) }}</a>
+          </li>
+        {% endfor %}
+        <li class="dcu-table__chip dcu-table__chip--clear"><a href="{{ chips.clear_all_url }}">{{ 'Clear all'|t }}</a></li>
+      </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

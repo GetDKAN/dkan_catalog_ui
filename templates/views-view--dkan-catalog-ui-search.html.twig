@@ -1,0 +1,49 @@
+{#
+/**
+ * @file
+ * Dataset search page: facets in a sidebar, results in the main column.
+ *
+ * Extra variables (see ThemeHooks::preprocessViewsView()):
+ * - dcu_facets: the facet blocks area, removed from header. The sidebar
+ *   follows the results in the DOM (so keyboard order matches the narrow
+ *   layout, where the "Filter results" link jumps to it); the wide layout
+ *   places it in the first grid column.
+ */
+#}
+{%
+  set classes = [
+    'view',
+    'view-' ~ id|clean_class,
+    'view-id-' ~ id,
+    'view-display-id-' ~ display_id,
+    dom_id ? 'js-view-dom-id-' ~ dom_id,
+    'dcu-search',
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {{ title_prefix }}
+  {{ title }}
+  {{ title_suffix }}
+  <div class="dcu-search__exposed">
+    {{ exposed }}
+  </div>
+  <div class="dcu-layout--sidebar">
+    <div class="dcu-search__main">
+      {% if dcu_facets %}
+        <a class="dcu-search__filter-link" href="#dcu-facets">{{ 'Filter results'|t }}</a>
+      {% endif %}
+      <div class="dcu-search__summary">{{ header }}</div>
+      {{ attachment_before }}
+      {{ rows }}
+      {{ empty }}
+      {{ pager }}
+      {{ attachment_after }}
+      {{ more }}
+      {{ footer }}
+      {{ feed_icons }}
+    </div>
+    <aside class="dcu-search__sidebar">
+      {{ dcu_facets }}
+    </aside>
+  </div>
+</div>

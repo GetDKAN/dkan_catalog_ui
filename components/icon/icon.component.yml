@@ -1,0 +1,47 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Icon
+status: experimental
+description: Inline SVG icon drawn with currentColor. Decorative (aria-hidden) unless a label is given. An unknown name fails prop validation.
+props:
+  type: object
+  required:
+    - name
+  properties:
+    name:
+      type: string
+      title: Icon
+      enum:
+        - filter
+        - columns
+        - sliders
+        - expand
+        - collapse
+        - share
+        - link
+        - download
+        - close
+        - chevron-down
+        - chevron-up
+        - chevron-left
+        - chevron-right
+        - chevrons-left
+        - chevrons-right
+        - sort-asc
+        - sort-desc
+        - arrow-up
+        - arrow-down
+        - table
+        - book
+        - code
+        - file
+        - menu
+        - user
+        - search
+    size:
+      type: integer
+      title: Size in pixels
+      description: Fixed pixel size; omit to size by font-size (1em).
+    label:
+      type: string
+      title: Accessible label
+      description: Set when the icon carries meaning on its own.

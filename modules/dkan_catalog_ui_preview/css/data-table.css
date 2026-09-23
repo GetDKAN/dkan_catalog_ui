@@ -1,0 +1,16 @@
+/* Base table styles live in the data-table and data-table-toolbar
+   components; this library only styles the pager, which is a theme hook. */
+.dcu-table__footer .pager__item a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dcu-space-xs, 0.25rem);
+  padding: var(--dcu-space-xs, 0.25rem) var(--dcu-space-sm, 0.5rem);
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+  text-decoration: none;
+}
+
+.dcu-table__footer .pager__item.is-active a {
+  background: var(--dcu-color-primary, #1a4480);
+  color: var(--dcu-color-primary-contrast, #fff);
+}

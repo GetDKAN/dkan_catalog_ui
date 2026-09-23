@@ -1,0 +1,183 @@
+.dcu-table__toolbar [hidden] {
+  display: none !important;
+}
+
+/* Three rows: the file and its download, the view tools, the status. */
+.dcu-table__file,
+.dcu-table__tools,
+.dcu-table__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
+  margin-block-end: var(--dcu-space-sm, 0.5rem);
+}
+
+.dcu-table__status {
+  align-items: baseline;
+}
+
+/* End of their row, after the file identity and the view tools. The
+   two-class selectors outrank a theme's own margin reset on buttons. */
+.dcu-table__file .dcu-table__download,
+.dcu-table__tools .dcu-table__fullscreen {
+  margin-inline-start: auto;
+}
+
+.dcu-table__caption {
+  margin: 0;
+  font-size: var(--dcu-font-size-sm, 0.875rem);
+}
+
+.dcu-table__file-label {
+  color: var(--dcu-color-text-muted, #565c65);
+}
+
+.dcu-table__panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dcu-space-sm, 0.5rem);
+  margin: 0 0 var(--dcu-space-sm, 0.5rem);
+}
+
+.dcu-table__panel-heading {
+  margin: 0;
+  font-size: var(--dcu-font-size-sm, 0.875rem);
+}
+
+.dcu-table__panel-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dcu-space-xs, 0.25rem);
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+  background: var(--dcu-color-surface, #fff);
+  color: inherit;
+  cursor: pointer;
+}
+
+.dcu-table__link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--dcu-color-link, #005ea2);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dcu-table__summary {
+  margin: 0;
+}
+
+.dcu-table__panel {
+  position: relative;
+}
+
+.dcu-table__panel-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dcu-space-xs, 0.25rem);
+}
+
+.dcu-table__panel-summary::-webkit-details-marker {
+  display: none;
+}
+
+.dcu-table__panel-chevron {
+  display: inline-flex;
+}
+
+/* Icon and label controls. */
+.dcu-table__download,
+.dcu-table__filtered-download,
+.dcu-table__fullscreen,
+.dcu-table__share button,
+.dcu-table__chip a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dcu-space-xs, 0.25rem);
+}
+
+.dcu-table__panel[open] > .dcu-table__panel-summary .dcu-table__panel-chevron {
+  transform: rotate(180deg);
+}
+
+.dcu-table__fullscreen[aria-pressed="true"] .dcu-icon--expand,
+.dcu-table__fullscreen[aria-pressed="false"] .dcu-icon--collapse {
+  display: none;
+}
+
+.dcu-table__panel-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: var(--dcu-space-xs, 0.25rem) var(--dcu-space-sm, 0.5rem);
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+}
+
+.dcu-table__panel-body {
+  position: absolute;
+  z-index: 10;
+  inset-inline-end: 0;
+  min-width: 20rem;
+  margin-block-start: var(--dcu-space-xs, 0.25rem);
+  padding: var(--dcu-space-md, 1rem);
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+  background: var(--dcu-color-surface, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dcu-table__filter-rows,
+.dcu-table__column-list {
+  margin: 0 0 var(--dcu-space-sm, 0.5rem);
+  padding: 0;
+  list-style: none;
+}
+
+.dcu-table__filter-row,
+.dcu-table__column-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dcu-space-xs, 0.25rem);
+  margin-block-end: var(--dcu-space-xs, 0.25rem);
+}
+
+.dcu-table__panel-actions {
+  display: flex;
+  gap: var(--dcu-space-sm, 0.5rem);
+}
+
+.dcu-table__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dcu-space-xs, 0.25rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dcu-table__chip a {
+  padding: 0.1em 0.6em;
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: 1em;
+  text-decoration: none;
+}
+
+@media (max-width: 48em) {
+  .dcu-table__panel-body {
+    position: static;
+    min-width: 0;
+  }
+}
+
+/* Popovers close on outside click and Escape; the button is for sheets. */
+@media (min-width: 48.01em) {
+  .dcu-table__panel-close {
+    display: none;
+  }
+}

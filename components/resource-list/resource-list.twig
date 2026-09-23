@@ -1,0 +1,22 @@
+<div class="dcu-resource-list">
+  {% if heading %}<h3 class="dcu-resource-list__heading">{{ heading }}</h3>{% endif %}
+  <ul class="dcu-resource-list__items">
+    {% for resource in resources %}
+      <li class="dcu-resource">
+        <div class="dcu-resource__main">
+          <span class="dcu-resource__title">{{ include('dkan_catalog_ui:icon', {name: 'file'}, with_context = false) }} {{ resource.title }}{% if resource.format %} <span class="dcu-resource__format">({{ resource.format }})</span>{% endif %}</span>
+          {% if resource.description %}<p class="dcu-resource__description">{{ resource.description }}</p>{% endif %}
+          {% if resource.rows or resource.columns %}
+            <dl class="dcu-resource__stats">
+              {% if resource.rows %}<div><dt>{{ 'Rows'|t }}</dt><dd>{{ resource.rows }}</dd></div>{% endif %}
+              {% if resource.columns %}<div><dt>{{ 'Columns'|t }}</dt><dd>{{ resource.columns }}</dd></div>{% endif %}
+            </dl>
+          {% endif %}
+        </div>
+        {% if resource.url %}
+          <a class="dcu-button dcu-resource__download" href="{{ resource.url }}">{{ 'Download'|t }}</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>

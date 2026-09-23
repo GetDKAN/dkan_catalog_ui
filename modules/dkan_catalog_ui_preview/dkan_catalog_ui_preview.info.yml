@@ -1,0 +1,10 @@
+name: DKAN Catalog UI Preview
+description: Filterable, sortable data table for dataset pages.
+type: module
+core_version_requirement: ^10.4 || ^11
+package: DKAN
+dependencies:
+  - dkan_catalog_ui:dkan_catalog_ui
+  - dkan:dkan_common
+  - dkan:dkan_datastore
+  - dkan:dkan_metastore

@@ -1,0 +1,17 @@
+<div class="dcu-card">
+  {% if updated %}<p class="dcu-card__updated">{{ 'Updated'|t }} {{ updated }}</p>{% endif %}
+  <h3 class="dcu-card__title"><a href="{{ url }}">{{ title }}</a></h3>
+  {% if formats %}
+    <ul class="dcu-card__formats">
+      {% for format in formats %}<li class="dcu-card__format">{{ format }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% if description %}<p class="dcu-card__description">{{ description }}</p>{% endif %}
+  {% if links %}
+    <ul class="dcu-card__links">
+      {% for link in links %}
+        <li><a href="{{ link.url }}">{% if link.icon %}{{ include('dkan_catalog_ui:icon', {name: link.icon}, with_context = false) }}{% endif %}{{ link.label }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

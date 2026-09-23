@@ -1,0 +1,10 @@
+preview:
+  css:
+    component:
+      css/data-table.css: {}
+  js:
+    js/data-table.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.announce

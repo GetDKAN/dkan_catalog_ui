@@ -1,0 +1,200 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Data table toolbar
+status: experimental
+description: File row (distribution chooser or file caption, then the download link); tools row (the filter / manage columns / display settings / share panels, details elements with a heading and GET forms to the apply route, then full screen); status row (result summary and active-filter chips). Works without JavaScript.
+props:
+  type: object
+  required:
+    - apply_url
+    - filters
+    - columns
+    - display
+    - chips
+    - share
+    - labels
+  properties:
+    apply_url:
+      type: string
+      title: Apply route URL
+    fragment_url:
+      type: string
+      title: Fragment route URL (empty disables in-place updates)
+    show_panels:
+      type: boolean
+      title: Render the panels and chips
+      default: true
+    has_summary:
+      type: boolean
+      title: The summary slot has content (renders the status row)
+      default: false
+    caption:
+      type:
+        - object
+        - 'null'
+      title: File caption (the table's accessible name)
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+    open_panel:
+      type: string
+      title: Panel rendered open
+      enum:
+        - ''
+        - filters
+        - columns
+        - display
+        - share
+    download:
+      type:
+        - object
+        - 'null'
+      title: Full dataset download
+      properties:
+        url:
+          type: string
+        label:
+          type: string
+    chooser:
+      type:
+        - object
+        - 'null'
+      title: Distribution chooser
+      properties:
+        tables:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              label:
+                type: string
+              selected:
+                type: boolean
+    filters:
+      type: object
+      title: Filter panel
+      properties:
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              label:
+                type: string
+              category:
+                type: string
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              property:
+                type: string
+              operator:
+                type: string
+              value:
+                type: string
+              operators:
+                type: array
+        blank_index:
+          type: integer
+        all_operators:
+          type: array
+        operator_sets:
+          type: object
+          description: Operator options per column category, for the script.
+        hidden:
+          type: object
+        count:
+          type: integer
+        max:
+          type: integer
+        value_max_length:
+          type: integer
+    columns:
+      type: object
+      title: Manage columns panel
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              label:
+                type: string
+              visible:
+                type: boolean
+              can_move_up:
+                type: boolean
+              can_move_down:
+                type: boolean
+        hidden:
+          type: object
+        hidden_count:
+          type: integer
+        cancel_url:
+          type: string
+          description: Canonical URL of the current state (discards unsaved changes).
+    display:
+      type: object
+      title: Display settings panel
+      properties:
+        page_sizes:
+          type: array
+          items:
+            type: integer
+        current:
+          type: integer
+        hidden:
+          type: object
+    chips:
+      type: object
+      title: Active filter chips
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              url:
+                type: string
+              remove_label:
+                type: string
+        clear_all_url:
+          type: string
+    share:
+      type: object
+      title: Share panel
+      properties:
+        download_url:
+          type: string
+          description: Filtered CSV on the datastore download route; empty without a resource.
+        copy_url:
+          type: string
+          description: Absolute canonical URL of the current state.
+    labels:
+      type: object
+      title: Panel labels
+      properties:
+        filters:
+          type: string
+        columns:
+          type: string
+        display:
+          type: string
+        share:
+          type: string
+slots:
+  summary:
+    title: Result summary

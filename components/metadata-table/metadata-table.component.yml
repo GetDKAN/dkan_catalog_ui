@@ -1,0 +1,28 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Metadata table
+status: experimental
+description: Two-column label/value table of dataset metadata.
+props:
+  type: object
+  required:
+    - rows
+  properties:
+    heading:
+      type: string
+      title: Heading
+    rows:
+      type: array
+      title: Rows
+      items:
+        type: object
+        required:
+          - label
+          - value
+        properties:
+          label:
+            type: string
+          value:
+            type: string
+          href:
+            type: string
+            description: Optional link target for the value.

@@ -1,0 +1,64 @@
+services:
+  logger.channel.dkan_catalog_ui_preview:
+    parent: logger.channel_base
+    arguments: ['dkan_catalog_ui_preview']
+
+  dkan_catalog_ui.preview.tabular_distributions:
+    class: \Drupal\dkan_catalog_ui_preview\TabularDistributions
+    arguments:
+      - '@dkan_catalog_ui.distribution_info'
+      - '@dkan.metastore.metastore_item_factory'
+  Drupal\dkan_catalog_ui_preview\TabularDistributionsInterface: '@dkan_catalog_ui.preview.tabular_distributions'
+
+  dkan_catalog_ui.preview.builder:
+    class: \Drupal\dkan_catalog_ui_preview\DataPreviewBuilder
+    arguments:
+      - '@request_stack'
+      - '@entity_type.manager'
+      - '@dkan_catalog_ui.preview.tabular_distributions'
+      - '@dkan_catalog_ui.preview.data_source.database'
+      - '@dkan_catalog_ui.preview.import_status_message'
+      - '@config.factory'
+      - '@logger.channel.dkan_catalog_ui_preview'
+      - '@dkan_catalog_ui.preview.like_escaper'
+      - '@dkan_catalog_ui.preview.toolbar_builder'
+      - '@dkan_catalog_ui.preview.dictionary_headers'
+  Drupal\dkan_catalog_ui_preview\DataPreviewBuilderInterface: '@dkan_catalog_ui.preview.builder'
+
+  dkan_catalog_ui.preview.dictionary_headers:
+    class: \Drupal\dkan_catalog_ui_preview\DictionaryHeaders
+    arguments:
+      - '@dkan.metastore.data_dictionary_discovery'
+      - '@dkan.metastore.service'
+      - '@dkan.metastore.metastore_item_factory'
+  Drupal\dkan_catalog_ui_preview\DictionaryHeadersInterface: '@dkan_catalog_ui.preview.dictionary_headers'
+
+  dkan_catalog_ui.preview.toolbar_builder:
+    class: \Drupal\dkan_catalog_ui_preview\Toolbar\ToolbarBuilder
+    arguments:
+      - '@dkan_catalog_ui.preview.like_escaper'
+  Drupal\dkan_catalog_ui_preview\Toolbar\ToolbarBuilderInterface: '@dkan_catalog_ui.preview.toolbar_builder'
+
+  dkan_catalog_ui.preview.like_escaper:
+    class: \Drupal\dkan_catalog_ui_preview\LikeEscaper
+    arguments:
+      - '@database'
+
+  dkan_catalog_ui.preview.data_source.database:
+    class: \Drupal\dkan_catalog_ui_preview\DataSource\DatabaseDataSource
+    arguments:
+      - '@dkan.datastore.service'
+  Drupal\dkan_catalog_ui_preview\DataSource\DataSourceInterface: '@dkan_catalog_ui.preview.data_source.database'
+
+  dkan_catalog_ui.preview.import_status_message:
+    class: \Drupal\dkan_catalog_ui_preview\ImportStatusMessage
+    arguments:
+      - '@dkan.datastore.import_info'
+      - '@dkan.metastore.resource_mapper'
+  Drupal\dkan_catalog_ui_preview\ImportStatusMessageInterface: '@dkan_catalog_ui.preview.import_status_message'
+
+  Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks:
+    class: \Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks
+    arguments:
+      - '@entity_type.manager'
+      - '@dkan_catalog_ui.preview.tabular_distributions'

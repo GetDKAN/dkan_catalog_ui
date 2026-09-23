@@ -1,0 +1,14 @@
+name: DKAN Catalog UI
+description: Drupal-native dataset search and dataset pages for DKAN.
+type: module
+core_version_requirement: ^10.4 || ^11
+package: DKAN
+dependencies:
+  - dkan:dkan_common
+  - dkan:dkan_metastore
+  - dkan:dkan_metastore_search
+  - dkan:dkan_datastore
+  - drupal:path
+  - drupal:views
+  - facets:facets
+  - search_api:search_api

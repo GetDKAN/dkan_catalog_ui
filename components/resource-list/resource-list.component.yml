@@ -1,0 +1,34 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Resource list
+status: experimental
+description: Distributions of a dataset with format, download link and datastore row/column counts.
+props:
+  type: object
+  required:
+    - resources
+  properties:
+    heading:
+      type: string
+      title: Heading
+    resources:
+      type: array
+      title: Resources
+      items:
+        type: object
+        required:
+          - title
+        properties:
+          title:
+            type: string
+          format:
+            type: string
+          url:
+            type: string
+          description:
+            type: string
+          rows:
+            type: string
+            description: Formatted row count, empty when not imported.
+          columns:
+            type: string
+            description: Formatted column count, empty when not imported.

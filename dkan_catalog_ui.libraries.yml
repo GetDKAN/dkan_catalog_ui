@@ -1,0 +1,15 @@
+base:
+  version: 0.1.0
+  css:
+    base:
+      css/tokens.css: {}
+    layout:
+      css/layout.css: {}
+
+search:
+  version: 0.1.0
+  css:
+    component:
+      css/search.css: {}
+  dependencies:
+    - dkan_catalog_ui/base

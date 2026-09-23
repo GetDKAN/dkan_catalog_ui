@@ -1,0 +1,104 @@
+.dcu-table {
+  margin-block: var(--dcu-space-md, 1rem) 0;
+}
+
+.dcu-table__table th.dcu-table__cell--number,
+.dcu-table__table td.dcu-table__cell--number {
+  text-align: end;
+}
+
+.dcu-table__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+}
+
+.dcu-table__table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.dcu-table__table thead th {
+  padding: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
+  border-block-end: 2px solid var(--dcu-color-border, #dfe1e2);
+  background: var(--dcu-color-surface-alt, #f0f0f0);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.dcu-table__table tbody td {
+  padding: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
+  border-block-end: 1px solid var(--dcu-color-border, #dfe1e2);
+  white-space: nowrap;
+}
+
+.dcu-table__message {
+  padding: var(--dcu-space-md, 1rem);
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+  background: var(--dcu-color-surface-alt, #f0f0f0);
+}
+
+.dcu-table__footer .pager__items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--dcu-space-xs, 0.25rem);
+  margin-block: var(--dcu-space-md, 1rem) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dcu-table--density-compact .dcu-table__table th,
+.dcu-table--density-compact .dcu-table__table td {
+  padding-block: 0.25rem;
+}
+
+.dcu-table--density-expanded .dcu-table__table th,
+.dcu-table--density-expanded .dcu-table__table td {
+  padding-block: 1rem;
+}
+
+.dcu-table--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: auto;
+  margin: 0;
+  padding: var(--dcu-space-md, 1rem) 3.5rem var(--dcu-space-md, 1rem) var(--dcu-space-md, 1rem);
+  background: var(--dcu-color-surface, #fff);
+}
+
+.dcu-table [hidden] {
+  display: none !important;
+}
+
+.dcu-table__close {
+  position: absolute;
+  top: var(--dcu-space-sm, 0.5rem);
+  right: var(--dcu-space-sm, 0.5rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 0.25rem);
+  background: var(--dcu-color-surface, #fff);
+  line-height: 0;
+  cursor: pointer;
+}
+
+.dcu-table__close svg {
+  display: block;
+}
+
+.dcu-table-scroll-lock {
+  overflow: hidden;
+}
+
+.dcu-table.is-loading {
+  opacity: 0.6;
+}

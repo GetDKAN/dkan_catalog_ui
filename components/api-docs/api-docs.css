@@ -1,0 +1,94 @@
+.dcu-endpoint {
+  border: 1px solid var(--dcu-color-border);
+  border-radius: var(--dcu-radius);
+  margin-bottom: var(--dcu-space-sm);
+}
+
+.dcu-endpoint__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--dcu-space-sm);
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  cursor: pointer;
+}
+
+.dcu-api-docs__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dcu-space-sm);
+}
+
+.dcu-api-docs__group-title {
+  margin: var(--dcu-space-lg) 0 var(--dcu-space-sm);
+  font-size: var(--dcu-font-size-lg);
+}
+
+.dcu-endpoint__method {
+  min-width: 3.5em;
+  padding: 0 var(--dcu-space-sm);
+  border-radius: var(--dcu-radius);
+  background: var(--dcu-color-text-muted);
+  color: var(--dcu-color-primary-contrast);
+  font-size: var(--dcu-font-size-sm);
+  font-weight: 700;
+  text-align: center;
+}
+
+.dcu-endpoint__method--get {
+  background: var(--dcu-color-success);
+}
+
+.dcu-endpoint__method--post {
+  background: var(--dcu-color-primary);
+}
+
+.dcu-endpoint__path {
+  word-break: break-all;
+}
+
+.dcu-endpoint__title {
+  color: var(--dcu-color-text-muted);
+}
+
+.dcu-endpoint__body {
+  padding: 0 var(--dcu-space-md) var(--dcu-space-md);
+  border-top: 1px solid var(--dcu-color-border);
+}
+
+.dcu-endpoint__params {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-endpoint__params th,
+.dcu-endpoint__params td {
+  padding: var(--dcu-space-xs) var(--dcu-space-sm);
+  border-bottom: 1px solid var(--dcu-color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.dcu-endpoint__required {
+  color: var(--dcu-color-error);
+  font-size: var(--dcu-font-size-sm);
+}
+
+.dcu-endpoint__param-example {
+  display: block;
+  color: var(--dcu-color-text-muted);
+}
+
+.dcu-endpoint__label {
+  margin: var(--dcu-space-md) 0 var(--dcu-space-xs);
+  font-weight: 600;
+}
+
+.dcu-endpoint__code {
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  border-radius: var(--dcu-radius);
+  background: var(--dcu-color-surface-alt);
+  overflow-x: auto;
+  font-size: var(--dcu-font-size-sm);
+}

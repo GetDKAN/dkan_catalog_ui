@@ -1,0 +1,10 @@
+<div class="dcu-dataset-header">
+  {% if updated %}
+    <p class="dcu-dataset-header__updated">
+      {{ 'Updated'|t }}
+      {% if updated_iso %}<time datetime="{{ updated_iso }}">{{ updated }}</time>{% else %}{{ updated }}{% endif %}
+    </p>
+  {% endif %}
+  {% set description %}{% block description %}{% endblock %}{% endset %}
+  {% if description|trim %}<div class="dcu-dataset-header__description">{{ description }}</div>{% endif %}
+</div>

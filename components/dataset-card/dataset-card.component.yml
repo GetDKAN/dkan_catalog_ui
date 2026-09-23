@@ -1,0 +1,38 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Dataset card
+status: experimental
+description: 'A dataset search result: title, updated date, summary and quick links into the dataset page.'
+props:
+  type: object
+  required:
+    - title
+    - url
+  properties:
+    title:
+      type: string
+    url:
+      type: string
+    updated:
+      type: string
+    description:
+      type: string
+      description: Plain-text summary, already truncated.
+    formats:
+      type: array
+      items:
+        type: string
+    links:
+      type: array
+      items:
+        type: object
+        required:
+          - label
+          - url
+        properties:
+          label:
+            type: string
+          url:
+            type: string
+          icon:
+            type: string
+            description: Icon component name, optional.

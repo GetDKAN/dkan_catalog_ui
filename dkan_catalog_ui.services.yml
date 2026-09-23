@@ -1,0 +1,92 @@
+services:
+  logger.channel.dkan_catalog_ui:
+    parent: logger.channel_base
+    arguments: ['dkan_catalog_ui']
+
+  dkan_catalog_ui.dataset_alias:
+    class: Drupal\dkan_catalog_ui\Alias\DatasetAliasManager
+    arguments:
+      - '@entity_type.manager'
+  Drupal\dkan_catalog_ui\Alias\DatasetAliasManagerInterface: '@dkan_catalog_ui.dataset_alias'
+
+  dkan_catalog_ui.dataset_metadata:
+    class: Drupal\dkan_catalog_ui\DatasetPage\DatasetMetadata
+    arguments:
+      - '@dkan.metastore.service'
+      - '@dkan.metastore.schema_retriever'
+      - '@logger.channel.dkan_catalog_ui'
+  Drupal\dkan_catalog_ui\DatasetPage\DatasetMetadataInterface: '@dkan_catalog_ui.dataset_metadata'
+
+  dkan_catalog_ui.distribution_info:
+    class: Drupal\dkan_catalog_ui\DatasetPage\DistributionInfo
+    arguments:
+      - '@dkan.common.dataset_info'
+      - '@dkan.metastore.metastore_item_factory'
+  Drupal\dkan_catalog_ui\DatasetPage\DistributionInfoInterface: '@dkan_catalog_ui.distribution_info'
+
+  dkan_catalog_ui.overview_builder:
+    class: Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilder
+    arguments:
+      - '@dkan_catalog_ui.dataset_metadata'
+      - '@dkan_catalog_ui.distribution_info'
+      - '@dkan.datastore.service'
+      - '@date.formatter'
+  Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilderInterface: '@dkan_catalog_ui.overview_builder'
+
+  dkan_catalog_ui.data_dictionary_builder:
+    class: Drupal\dkan_catalog_ui\DatasetPage\DataDictionaryBuilder
+    arguments:
+      - '@dkan.metastore.data_dictionary_discovery'
+      - '@dkan.metastore.service'
+      - '@dkan.metastore.metastore_item_factory'
+      - '@dkan_catalog_ui.distribution_info'
+  Drupal\dkan_catalog_ui\DatasetPage\DataDictionaryBuilderInterface: '@dkan_catalog_ui.data_dictionary_builder'
+
+  dkan_catalog_ui.openapi_reference:
+    class: Drupal\dkan_catalog_ui\DatasetPage\OpenApiReference
+    arguments:
+      - '@string_translation'
+  Drupal\dkan_catalog_ui\DatasetPage\OpenApiReferenceInterface: '@dkan_catalog_ui.openapi_reference'
+
+  dkan_catalog_ui.api_builder:
+    class: Drupal\dkan_catalog_ui\DatasetPage\ApiBuilder
+    arguments:
+      - '@dkan.metastore.dataset_api_docs'
+      - '@dkan_catalog_ui.openapi_reference'
+      - '@dkan_catalog_ui.distribution_info'
+      - '@logger.channel.dkan_catalog_ui'
+  Drupal\dkan_catalog_ui\DatasetPage\ApiBuilderInterface: '@dkan_catalog_ui.api_builder'
+
+  dkan_catalog_ui.breadcrumb:
+    class: Drupal\dkan_catalog_ui\Breadcrumb\DatasetBreadcrumbBuilder
+    arguments:
+      - '@string_translation'
+    tags:
+      - { name: breadcrumb_builder, priority: 100 }
+
+  dkan_catalog_ui.search_result_builder:
+    class: Drupal\dkan_catalog_ui\Search\SearchResultBuilder
+    arguments:
+      - '@date.formatter'
+      - '@dkan.metastore.data_dictionary_discovery'
+  Drupal\dkan_catalog_ui\Search\SearchResultBuilderInterface: '@dkan_catalog_ui.search_result_builder'
+
+  Drupal\dkan_catalog_ui\Hook\EntityHooks:
+    class: Drupal\dkan_catalog_ui\Hook\EntityHooks
+    arguments:
+      - '@entity_type.manager'
+      - '@dkan_catalog_ui.dataset_alias'
+      - '@dkan_catalog_ui.dataset_metadata'
+      - '@dkan_catalog_ui.overview_builder'
+      - '@dkan_catalog_ui.data_dictionary_builder'
+      - '@dkan_catalog_ui.api_builder'
+      - '@dkan_catalog_ui.search_result_builder'
+      - '@date.formatter'
+
+  Drupal\dkan_catalog_ui\Hook\ThemeHooks:
+    class: Drupal\dkan_catalog_ui\Hook\ThemeHooks
+    arguments:
+      - '@extension.list.module'
+
+  Drupal\dkan_catalog_ui\Hook\ViewsHooks:
+    class: Drupal\dkan_catalog_ui\Hook\ViewsHooks

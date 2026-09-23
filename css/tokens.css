@@ -1,0 +1,35 @@
+/**
+ * Design tokens. Themes override these on :root; components only consume them.
+ */
+:root {
+  --dcu-color-text: #1b1b1b;
+  --dcu-color-text-muted: #5c5c5c;
+  --dcu-color-link: #005ea2;
+  --dcu-color-link-hover: #1a4480;
+  --dcu-color-primary: #005ea2;
+  --dcu-color-primary-contrast: #ffffff;
+  --dcu-color-surface: #ffffff;
+  --dcu-color-surface-alt: #f0f0f0;
+  --dcu-color-border: #dfe1e2;
+  --dcu-color-success: #007a16;
+  --dcu-color-warning: #ffbe2e;
+  --dcu-color-error: #d83933;
+
+  --dcu-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --dcu-font-size-sm: 0.875rem;
+  --dcu-font-size-md: 1rem;
+  --dcu-font-size-lg: 1.25rem;
+  --dcu-font-size-xl: 1.75rem;
+  --dcu-font-size-xxl: 2.25rem;
+  --dcu-line-height: 1.5;
+
+  --dcu-space-xs: 0.25rem;
+  --dcu-space-sm: 0.5rem;
+  --dcu-space-md: 1rem;
+  --dcu-space-lg: 1.5rem;
+  --dcu-space-xl: 2.5rem;
+
+  --dcu-radius: 4px;
+  --dcu-container-max: 75rem;
+  --dcu-sidebar-width: 18rem;
+}

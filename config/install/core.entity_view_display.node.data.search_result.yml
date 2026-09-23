@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.search_result
+    - field.field.node.data.field_data_type
+    - field.field.node.data.field_json_metadata
+    - node.type.data
+  enforced:
+    module:
+      - dkan_catalog_ui
+id: node.data.search_result
+targetEntityType: node
+bundle: data
+mode: search_result
+content:
+  dataset_card:
+    weight: 0
+    region: content
+hidden:
+  content_moderation_control: true
+  created: true
+  data_preview: true
+  dataset_api: true
+  dataset_data_dictionary: true
+  dataset_header: true
+  dataset_overview: true
+  field_data_type: true
+  field_json_metadata: true
+  links: true
+  title: true
+  uid: true

@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for the DKAN Catalog UI module.
+ */
+
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\dkan_catalog_ui\Alias\DatasetAliasManagerInterface;
+use Drupal\dkan_catalog_ui\Hook\EntityHooks;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field;
+
+/**
+ * Implements hook_install().
+ *
+ * Orders the dataset page sections on the default display and backfills
+ * /dataset/{uuid} aliases for existing datasets.
+ */
+function dkan_catalog_ui_install(): void {
+  $display = EntityViewDisplay::load('node.data.default');
+  if ($display) {
+    $weights = [
+      EntityHooks::FIELD_HEADER => 0,
+      EntityHooks::FIELD_PREVIEW => 10,
+      EntityHooks::FIELD_OVERVIEW => 20,
+      EntityHooks::FIELD_DATA_DICTIONARY => 30,
+      EntityHooks::FIELD_API => 40,
+    ];
+    foreach ($weights as $field => $weight) {
+      // The preview field belongs to the preview submodule; only reorder it
+      // when it is already on the display.
+      if ($field === EntityHooks::FIELD_PREVIEW && !$display->getComponent($field)) {
+        continue;
+      }
+      $display->setComponent($field, ['weight' => $weight]);
+    }
+    $display->removeComponent(EntityHooks::FIELD_CARD);
+    $display->save();
+  }
+
+  \Drupal::service(DatasetAliasManagerInterface::class)->backfill();
+  dkan_catalog_ui_ensure_format_index_field();
+}
+
+/**
+ * Add the distribution format field to the dkan search index (for facets).
+ *
+ * The dkan_dataset datasource already exposes distribution__item__format;
+ * it is just not in dkan_metastore_search's shipped index. Marks the index
+ * for reindexing when the field is added.
+ */
+function dkan_catalog_ui_ensure_format_index_field(): void {
+  $index = Index::load('dkan');
+  if (!$index || $index->getField('distribution__item__format')) {
+    return;
+  }
+  $field = new Field($index, 'distribution__item__format');
+  $field->setDatasourceId('dkan_dataset');
+  $field->setPropertyPath('distribution__item__format');
+  $field->setType('string');
+  $field->setLabel('distribution__item__format');
+  $index->addField($field);
+  $index->save();
+  $index->reindex();
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function dkan_catalog_ui_requirements(string $phase): array {
+  $requirements = [];
+  if ($phase === 'runtime' && \Drupal::moduleHandler()->moduleExists('dkan_js_frontend')) {
+    $requirements['dkan_catalog_ui_js_frontend'] = [
+      'title' => t('DKAN Catalog UI'),
+      'value' => t('The dkan_js_frontend module is also enabled.'),
+      'description' => t('Both modules claim /dataset/{id} and /search. Aliased dataset pages resolve to the catalog UI; other paths go to the JavaScript frontend. Uninstall one of them.'),
+      'severity' => REQUIREMENT_WARNING,
+    ];
+  }
+  return $requirements;
+}

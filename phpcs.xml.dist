@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="dkan_catalog_ui">
+
+    <arg name="extensions" value="inc,install,module,php,profile,test,theme,yml"/>
+    <description>PHP CodeSniffer configuration for dkan_catalog_ui.</description>
+
+    <rule ref="Drupal" />
+    <rule ref="DrupalPractice" />
+
+    <rule ref="Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps">
+        <exclude-pattern>*/StreamWrapper/*\.php</exclude-pattern>
+    </rule>
+    <rule ref="Drupal.Commenting.FunctionComment.Missing">
+        <exclude-pattern>*/tests/*\.php</exclude-pattern>
+    </rule>
+    <rule ref="Drupal.Commenting.VariableComment.Missing">
+        <exclude-pattern>*/tests/*\.php</exclude-pattern>
+    </rule>
+
+</ruleset>

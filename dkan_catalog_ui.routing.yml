@@ -1,0 +1,7 @@
+dkan_catalog_ui.api_docs:
+  path: '/api/docs'
+  defaults:
+    _controller: '\Drupal\dkan_catalog_ui\Controller\ApiDocsController::page'
+    _title: 'API'
+  requirements:
+    _permission: 'access content'

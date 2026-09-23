@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the DKAN Catalog UI module.
+ *
+ * Hooks live in \Drupal\dkan_catalog_ui\Hook. These stubs keep Drupal 10
+ * working; Drupal 11.1+ uses the #[Hook] attributes and skips functions
+ * marked #[LegacyHook].
+ */
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\dkan_catalog_ui\Hook\EntityHooks;
+use Drupal\dkan_catalog_ui\Hook\ThemeHooks;
+use Drupal\dkan_catalog_ui\Hook\ViewsHooks;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function dkan_catalog_ui_theme(): array {
+  return \Drupal::service(ThemeHooks::class)->theme();
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for node templates.
+ */
+#[LegacyHook]
+function dkan_catalog_ui_preprocess_node(array &$variables): void {
+  \Drupal::service(ThemeHooks::class)->preprocessNode($variables);
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+#[LegacyHook]
+function dkan_catalog_ui_entity_extra_field_info(): array {
+  return \Drupal::service(EntityHooks::class)->entityExtraFieldInfo();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ */
+#[LegacyHook]
+function dkan_catalog_ui_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode): void {
+  \Drupal::service(EntityHooks::class)->nodeView($build, $entity, $display, $view_mode);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for node entities.
+ */
+#[LegacyHook]
+function dkan_catalog_ui_node_presave(NodeInterface $node): void {
+  \Drupal::service(EntityHooks::class)->nodePresave($node);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for views templates.
+ */
+#[LegacyHook]
+function dkan_catalog_ui_preprocess_views_view(array &$variables): void {
+  \Drupal::service(ThemeHooks::class)->preprocessViewsView($variables);
+}
+
+/**
+ * Implements hook_views_data().
+ */
+#[LegacyHook]
+function dkan_catalog_ui_views_data(): array {
+  return \Drupal::service(ViewsHooks::class)->viewsData();
+}

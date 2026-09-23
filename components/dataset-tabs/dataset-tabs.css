@@ -1,0 +1,59 @@
+.dcu-tabs {
+  margin-block: var(--dcu-space-lg);
+}
+
+.dcu-tabs__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dcu-space-xs);
+  margin: 0 0 var(--dcu-space-md);
+  padding: 0;
+  list-style: none;
+  border-bottom: 2px solid var(--dcu-color-border);
+}
+
+.dcu-tabs__link {
+  display: inline-block;
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  margin-bottom: -2px;
+  border: 2px solid transparent;
+  border-bottom: 0;
+  border-radius: var(--dcu-radius) var(--dcu-radius) 0 0;
+  color: var(--dcu-color-link);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dcu-tabs__link:hover,
+.dcu-tabs__link:focus {
+  background: var(--dcu-color-surface-alt);
+}
+
+.dcu-tabs__link[aria-selected="true"] {
+  border-color: var(--dcu-color-border);
+  background: var(--dcu-color-surface);
+  color: var(--dcu-color-text);
+}
+
+.dcu-tabs__panel-heading {
+  font-size: var(--dcu-font-size-lg);
+  margin-block: var(--dcu-space-md) var(--dcu-space-sm);
+}
+
+/* No JS: once a panel is targeted, show only that one. */
+.dcu-tabs:not(.dcu-tabs--enhanced):has(.dcu-tabs__panel:target) .dcu-tabs__panel:not(:target) {
+  display: none;
+}
+
+/* JS: the active panel is the only visible one; headings become redundant. */
+.dcu-tabs--enhanced .dcu-tabs__panel[hidden] {
+  display: none;
+}
+
+.dcu-tabs--enhanced .dcu-tabs__panel-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
