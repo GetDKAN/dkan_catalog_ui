@@ -57,7 +57,7 @@ display:
         type: none
         options: {  }
       cache:
-        type: tag
+        type: search_api_tag
         options: {  }
       empty:
         area_text_custom:
@@ -126,9 +126,6 @@ display:
             multiple: false
             remember_roles:
               authenticated: authenticated
-              anonymous: '0'
-              api_user: '0'
-              administrator: '0'
             expose_fields: false
             placeholder: 'Search datasets'
             searched_fields_id: search_api_fulltext_searched_fields

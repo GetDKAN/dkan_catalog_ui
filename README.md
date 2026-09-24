@@ -37,7 +37,7 @@ drush search-api:index
 ```
 
 `dkan_catalog_ui_preview` is a fork of DKAN core's `dkan_datastore_preview`
-(GetDKAN/dkan#4784 at `0aa181ff7`), maintained here. It cannot be enabled together with `dkan_datastore_preview`.
+(GetDKAN/dkan#4784 at `0aa181ff7`), maintained here. Its table replaces DKAN core's `dkan_datastore_preview` on dataset pages: installing it while that module is enabled is refused, and the status report warns when both are enabled.
 
 ## Tests and standards
 

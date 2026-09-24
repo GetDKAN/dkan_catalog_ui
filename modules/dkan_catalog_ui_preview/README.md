@@ -2,7 +2,7 @@
 
 Server-rendered data table for the dataset page (`/dataset/{uuid}`, `/node/{nid}`). Forked from DKAN core `dkan_datastore_preview` (GetDKAN/dkan#4784, commit `0aa181ff7`) on 2026-09-17 and maintained here; see `PLAN-data-table.md` in the site root for the roadmap.
 
-Enable with `drush en dkan_catalog_ui_preview`. Install adds a **Data Preview** extra field to the `data` node type's default view display; toggle or reorder it under *Structure → Content types → Data → Manage display*. Cannot be enabled together with `dkan_datastore_preview`.
+Enable with `drush en dkan_catalog_ui_preview`. Install adds a **Data Table** extra field (`dkan_catalog_ui_table`) to the `data` node type's default view display; toggle it under *Structure → Content types → Data → Manage display* (tab order is fixed by the parent module). DKAN core's `dkan_datastore_preview` renders through a different field (`data_preview`); installing this module while it is enabled is refused, and if both are enabled the core preview is dropped from the full dataset page and the status report warns. Sites installed before the field was renamed from `data_preview` re-import `core.entity_view_display.node.data.search_result` from `config/install` and re-run the display setup: `drush php:eval "\Drupal::moduleHandler()->loadInclude('dkan_catalog_ui_preview', 'install'); dkan_catalog_ui_preview_install();"`.
 
 ## Behavior
 

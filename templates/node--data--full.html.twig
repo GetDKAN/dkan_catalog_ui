@@ -17,7 +17,7 @@
     {{ content.dataset_header }}
     {% if dcu_tabs is not empty %}
       {% embed 'dkan_catalog_ui:dataset-tabs' with { id: 'dataset-' ~ node.id(), tabs: dcu_tabs } %}
-        {% block data_table %}{{ content.data_preview }}{% endblock %}
+        {% block data_table %}{{ content.dkan_catalog_ui_table }}{% endblock %}
         {% block overview %}{{ content.dataset_overview }}{% endblock %}
         {% block data_dictionary %}{{ content.dataset_data_dictionary }}{% endblock %}
         {% block api %}{{ content.dataset_api }}{% endblock %}

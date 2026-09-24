@@ -50,6 +50,29 @@ abstract class CatalogUiKernelTestBase extends KernelTestBase {
   }
 
   /**
+   * Install the search index, the format index field and the module config.
+   *
+   * Needs views, search_api, search_api_db, facets and dkan_metastore_search
+   * in $modules. Rebuilds the container afterwards: saving a facet whose
+   * source view caches permanently pre-executes the search query, which
+   * leaves the facets manager's static cache holding only the facets saved
+   * so far in this process.
+   */
+  protected function installSearchConfig(): void {
+    $this->installSchema('search_api', ['search_api_item']);
+    $this->installEntitySchema('search_api_task');
+    \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
+    $this->installConfig(['search_api', 'dkan_metastore_search']);
+    // hook_install() does not run in kernel tests.
+    \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui', 'install');
+    dkan_catalog_ui_ensure_format_index_field();
+    $this->installConfig(['dkan_catalog_ui']);
+    $kernel = $this->container->get('kernel');
+    $kernel->rebuildContainer();
+    $this->container = $kernel->getContainer();
+  }
+
+  /**
    * Post a dataset through the metastore and return its node.
    */
   protected function createDataset(string $identifier, array $overrides = []): NodeInterface {

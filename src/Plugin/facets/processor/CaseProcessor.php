@@ -2,6 +2,7 @@
 
 namespace Drupal\dkan_catalog_ui\Plugin\facets\processor;
 
+use Drupal\Core\Cache\UnchangingCacheableDependencyTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\BuildProcessorInterface;
@@ -24,6 +25,10 @@ use Drupal\facets\Processor\ProcessorPluginBase;
  * )
  */
 class CaseProcessor extends ProcessorPluginBase implements BuildProcessorInterface {
+
+  // A pure string transform: without this, ProcessorPluginBase's max-age 0
+  // makes every facet, the search query and the search page uncacheable.
+  use UnchangingCacheableDependencyTrait;
 
   /**
    * {@inheritdoc}

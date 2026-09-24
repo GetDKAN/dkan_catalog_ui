@@ -47,7 +47,7 @@ class EntityHooks {
   /**
    * Extra field provided by the preview submodule (Data Table tab).
    */
-  const FIELD_PREVIEW = 'data_preview';
+  const FIELD_PREVIEW = 'dkan_catalog_ui_table';
 
   /**
    * Extra field: dataset card for search results (hidden by default).
