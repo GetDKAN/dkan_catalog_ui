@@ -47,4 +47,5 @@ drush search-api:index
 ddev exec "DRUPAL_ROOT=/var/www/html/docroot SIMPLETEST_BASE_URL=\$DDEV_PRIMARY_URL SIMPLETEST_DB=mysql://db:db@db:3306/db vendor/bin/phpunit -c docroot/modules/custom/dkan_catalog_ui --testsuite unit,kernel"
 # Functional (BrowserTestBase, needs BROWSERTEST_OUTPUT_DIRECTORY): --testsuite functional
 ddev exec "cd docroot/modules/custom/dkan_catalog_ui && ../../../../vendor/bin/phpcs --standard=phpcs.xml.dist ."
+ddev exec "vendor/bin/phpstan analyse -c docroot/modules/custom/dkan_catalog_ui/phpstan.neon.dist --memory-limit=1G"
 ```
