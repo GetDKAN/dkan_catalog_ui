@@ -13,8 +13,8 @@ the site repo (`PLAN-native-frontend.md`).
   (sitewide or reference mode), API (server-rendered endpoint reference from
   the dataset's OpenAPI document, plus the raw JSON link; no client library).
 - `/api/docs`: the site API reference, the same endpoint list rendered from
-  DKAN's `/api/1` document grouped by tag (cached for an hour; the
-  generator has no cache tags). Main-menu links Datasets and API ship in
+  DKAN's `/api/1` document grouped by tag (cached until the set of enabled
+  modules changes; an hour at most where max-age applies). Main-menu links Datasets and API ship in
   `dkan_catalog_ui.links.menu.yml`; a post-update removes a legacy content
   link titled "Datasets" pointing at `/search` (exact match only).
 - `/search`: Views page on the `dkan` search index with fulltext, exposed sort,

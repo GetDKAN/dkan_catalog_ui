@@ -15,6 +15,7 @@ services:
       - '@dkan.metastore.service'
       - '@dkan.metastore.schema_retriever'
       - '@logger.channel.dkan_catalog_ui'
+      - '@dkan.metastore.metastore_item_factory'
   Drupal\dkan_catalog_ui\DatasetPage\DatasetMetadataInterface: '@dkan_catalog_ui.dataset_metadata'
 
   dkan_catalog_ui.distribution_info:
@@ -69,6 +70,7 @@ services:
     arguments:
       - '@date.formatter'
       - '@dkan.metastore.data_dictionary_discovery'
+      - '@dkan_catalog_ui.dataset_metadata'
   Drupal\dkan_catalog_ui\Search\SearchResultBuilderInterface: '@dkan_catalog_ui.search_result_builder'
 
   Drupal\dkan_catalog_ui\Hook\EntityHooks:

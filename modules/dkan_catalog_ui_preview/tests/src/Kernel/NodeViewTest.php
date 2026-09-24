@@ -60,9 +60,12 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertArrayNotHasKey('contexts', $element['#cache']);
     $this->assertArrayNotHasKey('max-age', $element['#cache']);
 
-    // Dataset and distribution node tags are both attached.
+    // Dataset and distribution node tags are both attached, plus the
+    // settings the table reads (dictionary mode, row limit).
     $tags = $element['#cache']['tags'];
     $this->assertContains('node:' . $node->id(), $tags);
+    $this->assertContains('config:dkan_metastore.settings', $tags);
+    $this->assertContains('config:dkan_datastore.settings', $tags);
     $info = $this->container->get('dkan.common.dataset_info')->gather($node->uuid());
     $distributionUuid = $info['latest_revision']['distributions'][0]['distribution_uuid'];
     $distributionNodes = $this->container->get('entity_type.manager')->getStorage('node')

@@ -3,6 +3,7 @@
 namespace Drupal\dkan_catalog_ui_preview;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\dkan_catalog_ui\DatasetPage\DataDictionaryBuilderInterface;
 use Drupal\dkan_catalog_ui\DatasetPage\DistributionInfoInterface;
 use Drupal\dkan_common\DataResource;
 use Drupal\dkan_metastore\NodeWrapper\NodeDataFactory;
@@ -53,7 +54,11 @@ class TabularDistributions implements TabularDistributionsInterface {
    * {@inheritdoc}
    */
   public function cacheTags(NodeInterface $node): array {
-    return Cache::mergeTags($node->getCacheTags(), $this->distributionInfo->cacheTags($node));
+    // The table reads the dictionary mode and the datastore row limit.
+    return Cache::mergeTags(
+      [DataDictionaryBuilderInterface::SETTINGS_CACHE_TAG, 'config:dkan_datastore.settings'],
+      Cache::mergeTags($node->getCacheTags(), $this->distributionInfo->cacheTags($node))
+    );
   }
 
   /**

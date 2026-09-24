@@ -36,14 +36,18 @@ class DataDictionaryBuilder implements DataDictionaryBuilderInterface {
   public function build(NodeInterface $node, object $metadata): array {
     $mode = $this->discovery->getDataDictionaryMode();
     if ($mode === DataDictionaryDiscoveryInterface::MODE_NONE) {
-      return [];
+      // Nothing to show, but the outcome depends on the setting.
+      return ['#cache' => ['tags' => [self::SETTINGS_CACHE_TAG]]];
     }
 
     $build = [
       '#type' => 'container',
       '#attributes' => ['class' => ['dcu-dataset-dictionaries']],
       '#cache' => [
-        'tags' => Cache::mergeTags($node->getCacheTags(), $this->distributionInfo->cacheTags($node)),
+        'tags' => Cache::mergeTags(
+          [self::SETTINGS_CACHE_TAG],
+          Cache::mergeTags($node->getCacheTags(), $this->distributionInfo->cacheTags($node))
+        ),
       ],
     ];
 

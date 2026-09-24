@@ -56,6 +56,15 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $this->assertSame('', $resources[0]['rows']);
     $this->assertSame('PDF', $resources[1]['format']);
     $this->assertContains('node:' . $node->id(), $overview['#cache']['tags']);
+    // Referenced items (publisher, theme, keyword, distribution) are
+    // dependencies of the overview and the card.
+    $publisher = $this->nodeByType('publisher');
+    $this->assertContains('node:' . $publisher->id(), $overview['#cache']['tags']);
+    $card = $this->container->get('dkan_catalog_ui.search_result_builder')
+      ->build($node, $this->container->get('dkan_catalog_ui.dataset_metadata')->load($node));
+    $this->assertContains('node:' . $publisher->id(), $card['#cache']['tags']);
+    $this->assertContains('node:' . $node->id(), $card['#cache']['tags']);
+    $this->assertContains('config:dkan_metastore.settings', $card['#cache']['tags']);
 
     $rows = [];
     foreach ($overview['metadata']['#props']['rows'] as $row) {
@@ -121,12 +130,40 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
   }
 
   /**
-   * Dictionaries disabled: no section at all.
+   * Dictionaries disabled: no section, but the node depends on the setting.
    */
   public function testDataDictionaryNone(): void {
     $node = $this->createDataset('dict-none');
     $build = $this->buildNodeView($node);
     $this->assertArrayNotHasKey(EntityHooks::FIELD_DATA_DICTIONARY, $build);
+    $this->assertContains('config:dkan_metastore.settings', $build['#cache']['tags']);
+  }
+
+  /**
+   * Dates render as UTC calendar dates whatever the viewer's timezone.
+   */
+  public function testDatesAreUtc(): void {
+    date_default_timezone_set('Pacific/Auckland');
+    $node = $this->createDataset('utc-test', ['modified' => '2020-01-15T23:30:00Z', 'issued' => '2019-06-01']);
+    $build = $this->buildNodeView($node);
+    $this->assertSame('January 15, 2020', $build[EntityHooks::FIELD_HEADER]['#props']['updated']);
+    $this->assertSame('2020-01-15', $build[EntityHooks::FIELD_HEADER]['#props']['updated_iso']);
+    $rows = array_column($build[EntityHooks::FIELD_OVERVIEW]['metadata']['#props']['rows'], 'value', 'label');
+    $this->assertSame('January 15, 2020', $rows['Last Update']);
+    $this->assertSame('June 1, 2019', $rows['Release Date']);
+    $card = $this->container->get('dkan_catalog_ui.search_result_builder')
+      ->build($node, $this->container->get('dkan_catalog_ui.dataset_metadata')->load($node));
+    $this->assertSame('January 15, 2020', $card['#props']['updated']);
+  }
+
+  /**
+   * The first node of a metastore type (publisher, theme, ...).
+   */
+  protected function nodeByType(string $type): NodeInterface {
+    $nodes = $this->container->get('entity_type.manager')->getStorage('node')
+      ->loadByProperties(['type' => 'data', 'field_data_type' => $type]);
+    $this->assertNotEmpty($nodes, $type);
+    return reset($nodes);
   }
 
   /**
@@ -139,6 +176,8 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $node = $this->createDataset('dict-sitewide');
     $build = $this->buildNodeView($node);
     $section = $build[EntityHooks::FIELD_DATA_DICTIONARY];
+    $this->assertContains('config:dkan_metastore.settings', $section['#cache']['tags']);
+    $this->assertContains('config:dkan_metastore.settings', $build['#cache']['tags']);
     $this->assertArrayNotHasKey('empty', $section);
     $this->assertArrayNotHasKey(1, $section);
     $this->assertSame('dkan_catalog_ui:data-dictionary', $section[0]['#component']);
@@ -190,6 +229,7 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $node = $this->createDataset('dict-reference');
     $build = $this->buildNodeView($node);
     $section = $build[EntityHooks::FIELD_DATA_DICTIONARY];
+    $this->assertContains('config:dkan_metastore.settings', $section['#cache']['tags']);
     $this->assertArrayHasKey('empty', $section);
     $this->assertArrayNotHasKey(0, $section);
   }

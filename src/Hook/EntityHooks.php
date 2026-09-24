@@ -3,16 +3,19 @@
 namespace Drupal\dkan_catalog_ui\Hook;
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dkan_catalog_ui\Alias\DatasetAliasManagerInterface;
 use Drupal\dkan_catalog_ui\DatasetPage\ApiBuilderInterface;
 use Drupal\dkan_catalog_ui\DatasetPage\DataDictionaryBuilderInterface;
 use Drupal\dkan_catalog_ui\DatasetPage\DatasetMetadataInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\MetadataDate;
 use Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilderInterface;
 use Drupal\dkan_catalog_ui\Search\SearchResultBuilderInterface;
 use Drupal\node\NodeInterface;
@@ -156,8 +159,11 @@ class EntityHooks {
       $build[self::FIELD_OVERVIEW] = $this->overviewBuilder->build($entity, $metadata);
     }
     if (in_array(self::FIELD_DATA_DICTIONARY, $wanted, TRUE)) {
+      // The section is only printed when it has content, so its tags would
+      // not bubble from an empty element: tag the node build itself.
+      $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'] ?? [], [DataDictionaryBuilderInterface::SETTINGS_CACHE_TAG]);
       $dictionary = $this->dataDictionaryBuilder->build($entity, $metadata);
-      if ($dictionary) {
+      if (!Element::isEmpty($dictionary)) {
         $build[self::FIELD_DATA_DICTIONARY] = $dictionary;
       }
     }
@@ -171,15 +177,14 @@ class EntityHooks {
    */
   protected function buildHeader(object $metadata): array {
     $modified = (string) ($metadata->modified ?? '');
-    $timestamp = $modified !== '' ? strtotime($modified) : FALSE;
     $description = (string) ($metadata->description ?? '');
 
     $build = [
       '#type' => 'component',
       '#component' => 'dkan_catalog_ui:dataset-header',
       '#props' => [
-        'updated' => $timestamp ? $this->dateFormatter->format($timestamp, 'custom', 'F j, Y') : $modified,
-        'updated_iso' => $timestamp ? date('Y-m-d', $timestamp) : '',
+        'updated' => MetadataDate::display($this->dateFormatter, $modified),
+        'updated_iso' => MetadataDate::iso($modified),
       ],
     ];
     if ($description !== '') {
