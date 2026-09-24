@@ -20,6 +20,7 @@ class ApiDocsPageTest extends CatalogUiKernelTestBase {
     $build = ApiDocsController::create($this->container)->page();
     $this->assertSame(ApiDocsController::MAX_AGE, $build['#cache']['max-age']);
     $this->assertSame(['config:core.extension'], $build['#cache']['tags']);
+    $this->assertSame(['dkan_catalog_ui/base'], $build['#attached']['library']);
     $props = $build['#props'];
     $this->assertSame('/api/1', $props['docs_url']);
     $this->assertSame(['/api/1', '/api/1.yml'], array_column($props['links'], 'url'));

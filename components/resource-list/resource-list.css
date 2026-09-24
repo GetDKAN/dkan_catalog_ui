@@ -44,19 +44,3 @@
   margin: 0;
   font-weight: 600;
 }
-
-.dcu-button {
-  display: inline-block;
-  padding: var(--dcu-space-sm) var(--dcu-space-md);
-  border-radius: var(--dcu-radius);
-  background: var(--dcu-color-primary);
-  color: var(--dcu-color-primary-contrast);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.dcu-button:hover,
-.dcu-button:focus {
-  background: var(--dcu-color-link-hover);
-  color: var(--dcu-color-primary-contrast);
-}
