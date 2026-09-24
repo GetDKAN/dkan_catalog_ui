@@ -58,6 +58,11 @@ class EntityHooks {
   const FIELD_CARD = 'dataset_card';
 
   /**
+   * State key recording that install added the format index field.
+   */
+  const FORMAT_FIELD_STATE_KEY = 'dkan_catalog_ui.added_format_field';
+
+  /**
    * Constructor.
    */
   public function __construct(

@@ -28,6 +28,17 @@ class DatasetAliasTest extends CatalogUiKernelTestBase {
   }
 
   /**
+   * An editor-entered alias is replaced on save.
+   */
+  public function testEditorAliasIsOverwritten(): void {
+    $node = $this->createDataset('forced-test');
+    $node->set('path', ['alias' => '/my-dataset'])->save();
+    $aliasManager = $this->container->get('path_alias.manager');
+    $aliasManager->cacheClear();
+    $this->assertSame('/dataset/forced-test', $aliasManager->getAliasByPath('/node/' . $node->id()));
+  }
+
+  /**
    * Backfill creates aliases only where they are missing.
    */
   public function testBackfill(): void {

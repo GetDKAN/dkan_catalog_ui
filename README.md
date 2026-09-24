@@ -6,8 +6,9 @@ the site repo (`PLAN-native-frontend.md`).
 
 ## What it provides
 
-- `/dataset/{uuid}` aliases on dataset nodes (presave hook; `drush dkan-catalog-ui:aliases` backfills)
-  and a breadcrumb builder (Home > Datasets) for them.
+- `/dataset/{uuid}` aliases on dataset nodes (forced on presave, overriding
+  editor-entered aliases; `drush dkan-catalog-ui:aliases` backfills; uninstall
+  removes them) and a breadcrumb builder (Home > Datasets) for them.
 - Dataset page (`node--data--full`) with tabs: Data Table (preview submodule),
   Overview (resources with row/column counts, metadata table), Data Dictionary
   (sitewide or reference mode), API (server-rendered endpoint reference from
@@ -15,8 +16,8 @@ the site repo (`PLAN-native-frontend.md`).
 - `/api/docs`: the site API reference, the same endpoint list rendered from
   DKAN's `/api/1` document grouped by tag (cached until the set of enabled
   modules changes; an hour at most where max-age applies). Main-menu links Datasets and API ship in
-  `dkan_catalog_ui.links.menu.yml`; a post-update removes a legacy content
-  link titled "Datasets" pointing at `/search` (exact match only).
+  `dkan_catalog_ui.links.menu.yml`; install and a post-update remove a legacy
+  content link titled "Datasets" pointing at `/search` (exact match only).
 - `/search`: Views page on the `dkan` search index with fulltext, exposed sort,
   result cards (`search_result` view mode), and facet blocks rendered inside the
   view (theme, keyword, publisher, format). Adds `distribution__item__format` to

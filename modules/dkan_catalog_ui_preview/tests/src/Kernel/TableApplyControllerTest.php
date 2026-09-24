@@ -58,6 +58,23 @@ class TableApplyControllerTest extends CatalogUiKernelTestBase {
   }
 
   /**
+   * The route is excluded from the page cache.
+   *
+   * The response depends on the full query string and, for JSON, on the
+   * Accept header.
+   */
+  public function testRouteIsNotPageCached(): void {
+    $route = $this->container->get('router.route_provider')->getRouteByName('dkan_catalog_ui_preview.apply');
+    $this->assertTrue($route->getOption('no_cache'));
+    $controller = TableApplyController::create($this->container);
+    $request = Request::create('/x', 'GET', ['sort' => 'age']);
+    $request->headers->set('Accept', 'application/json');
+    $response = $controller->apply($this->uuid, $request);
+    $this->assertSame(200, $response->getStatusCode());
+    $this->assertStringContainsString('private', (string) $response->headers->get('Cache-Control'));
+  }
+
+  /**
    * Input is normalized, unknown parameters dropped, the panel kept.
    */
   public function testCanonicalRedirect(): void {

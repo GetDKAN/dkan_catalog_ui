@@ -25,6 +25,20 @@ function dkan_catalog_ui_preview_install(): void {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function dkan_catalog_ui_preview_uninstall(): void {
+  $display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('node.data.default');
+
+  if ($display) {
+    $display->removeComponent(DataPreviewHooks::EXTRA_FIELD);
+    $display->save();
+  }
+}
+
+/**
  * Implements hook_requirements().
  *
  * DKAN core's dkan_datastore_preview renders its own preview through the
