@@ -9,7 +9,8 @@ the site repo (`PLAN-native-frontend.md`).
 - `/dataset/{uuid}` aliases on dataset nodes (forced on presave, overriding
   editor-entered aliases; `drush dkan-catalog-ui:aliases` backfills; uninstall
   removes them) and a breadcrumb builder (Home > Datasets) for them.
-- Dataset page (`node--data--full`) with tabs: Data Table (preview submodule),
+- Dataset page (`node--data--full`) with tabs (the no-JS fallback relies on
+  CSS `:has()`; without it every panel shows): Data Table (preview submodule),
   Overview (resources with row/column counts, metadata table), Data Dictionary
   (sitewide or reference mode), API (server-rendered endpoint reference from
   the dataset's OpenAPI document, plus the raw JSON link; no client library).
@@ -44,6 +45,6 @@ drush search-api:index
 
 ```bash
 ddev exec "DRUPAL_ROOT=/var/www/html/docroot SIMPLETEST_BASE_URL=\$DDEV_PRIMARY_URL SIMPLETEST_DB=mysql://db:db@db:3306/db vendor/bin/phpunit -c docroot/modules/custom/dkan_catalog_ui --testsuite unit,kernel"
-# Functional (BrowserTestBase): see modules/dkan_catalog_ui_preview/README.md
+# Functional (BrowserTestBase, needs BROWSERTEST_OUTPUT_DIRECTORY): --testsuite functional
 ddev exec "cd docroot/modules/custom/dkan_catalog_ui && ../../../../vendor/bin/phpcs --standard=phpcs.xml.dist ."
 ```

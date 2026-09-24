@@ -3,6 +3,7 @@
 namespace Drupal\Tests\dkan_catalog_ui\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\dkan_catalog_ui\Hook\EntityHooks;
 use Drupal\node\NodeInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -88,6 +89,8 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $html = (string) $this->container->get('renderer')->renderRoot($build);
 
     $this->assertStringContainsString('class="dcu-dataset', $html);
+    // The date sits inside the translatable sentence, unescaped.
+    $this->assertStringContainsString('Updated <time datetime="2020-01-15">January 15, 2020</time>', $html);
     $this->assertStringContainsString('href="#overview"', $html);
     $this->assertStringContainsString('<section class="dcu-tabs__panel" id="overview"', $html);
     $this->assertStringContainsString('Additional Information', $html);
@@ -164,6 +167,22 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
       ->loadByProperties(['type' => 'data', 'field_data_type' => $type]);
     $this->assertNotEmpty($nodes, $type);
     return reset($nodes);
+  }
+
+  /**
+   * Sitewide mode without a dictionary id renders the empty state and logs.
+   */
+  public function testDataDictionarySitewideUnconfigured(): void {
+    $this->setDictionaryMode('sitewide');
+    // Swap the channel before the builder (an EntityHooks dependency) is
+    // instantiated by the first node save.
+    $logger = $this->createMock(LoggerChannelInterface::class);
+    $logger->expects($this->once())->method('warning')
+      ->with($this->stringContains('data dictionary'));
+    $this->container->set('logger.channel.dkan_catalog_ui', $logger);
+    $node = $this->createDataset('dict-unconfigured');
+    $section = $this->buildNodeView($node)[EntityHooks::FIELD_DATA_DICTIONARY];
+    $this->assertArrayHasKey('empty', $section);
   }
 
   /**

@@ -8,6 +8,7 @@ dependencies:
   - dkan:dkan_metastore
   - dkan:dkan_metastore_search
   - dkan:dkan_datastore
+  - drupal:node
   - drupal:path
   - drupal:views
   - facets:facets

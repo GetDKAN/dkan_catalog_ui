@@ -48,9 +48,10 @@ class ImportStatusMessage implements ImportStatusMessageInterface {
    * Resolve the message for the resource's current import state.
    *
    * Only a resource that is known to the mapper and whose fetch/import is
-   * waiting or running is described as "processing"; anything else (unknown
-   * resource, stopped or finished-but-missing import) gets the generic
-   * message so the page never promises data that will not arrive.
+   * waiting or running gets the import message; anything else (unknown
+   * resource, stopped or failed import) gets the generic message. A dropped
+   * datastore also reads as waiting (ImportInfo defaults a missing job to
+   * WAITING), so the wording does not promise that an import is running.
    */
   protected function getMessage(string $resource_id): string {
     $generic = (string) $this->t('Data preview is not yet available.');
@@ -73,7 +74,7 @@ class ImportStatusMessage implements ImportStatusMessageInterface {
       }
       $processing = [Result::WAITING, Result::IN_PROGRESS];
       if (in_array($statuses[0], $processing, TRUE) || in_array($statuses[1], $processing, TRUE)) {
-        return (string) $this->t('Data preview is not yet available. The data for this distribution is still being processed.');
+        return (string) $this->t('Data preview is not yet available. The data for this distribution has not been imported into the datastore.');
       }
       return $generic;
     }

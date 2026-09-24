@@ -11,9 +11,9 @@
 .dcu-data-dictionary__table th,
 .dcu-data-dictionary__table td {
   padding: var(--dcu-space-sm) var(--dcu-space-md);
-  border-bottom: 1px solid var(--dcu-color-border);
   text-align: left;
   vertical-align: top;
+  border-bottom: 1px solid var(--dcu-color-border);
 }
 
 .dcu-data-dictionary__table thead th {

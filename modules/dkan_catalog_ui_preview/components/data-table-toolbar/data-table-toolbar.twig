@@ -8,6 +8,9 @@
 {% endmacro %}
 {% macro chevron() %}<span class="dcu-table__panel-chevron">{{ include('dkan_catalog_ui:icon', {name: 'chevron-down'}, with_context = false) }}</span>{% endmacro %}
 {% import _self as ui %}
+{# Schema defaults are documentation only; apply them here. #}
+{% set show_panels = show_panels is defined ? show_panels : true %}
+{% set has_summary = has_summary is defined ? has_summary : false %}
 <div class="dcu-table__toolbar" data-dcu-apply="{{ apply_url }}"{% if fragment_url %} data-dcu-fragment="{{ fragment_url }}"{% endif %}>
   {% if chooser or caption or download %}
   <div class="dcu-table__file">
@@ -75,7 +78,7 @@
   <div class="dcu-table__tools">
 
     <details class="dcu-table__panel dcu-table__panel--filters" id="dcu-table-filters"{{ open_panel == 'filters' ? ' open' }}>
-      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'filter'}, with_context = false) }}{{ labels.filters }}{% if filters.count %} <span class="dcu-table__panel-count">({{ filters.count }}<span class="visually-hidden"> {{ 'active'|t }}</span>)</span>{% endif %}{{ ui.chevron() }}</summary>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'filter'}, with_context = false) }}{{ labels.filters }}{% if filters.count %} <span class="dcu-table__panel-count">({{ filters.count }}<span class="visually-hidden"> {{ 'active'|t({}, {'context': 'Count of active filters'}) }}</span>)</span>{% endif %}{{ ui.chevron() }}</summary>
       <form method="get" action="{{ apply_url }}" class="dcu-table__panel-body dcu-table__filters" data-dcu-operators="{{ filters.operator_sets|json_encode }}" data-dcu-max-filters="{{ filters.max }}">
         {{ ui.hidden_inputs(filters.hidden) }}
         <input type="hidden" name="panel" value="filters" />
@@ -134,8 +137,8 @@
         </ul>
         <div class="dcu-table__panel-actions">
           <button type="submit" class="dcu-button" name="close" value="1">{{ 'Apply filters'|t }}</button>
-          <button type="button" hidden data-dcu-add-filter>{{ '+ Add filter'|t }}</button>
-          <button type="submit" class="dcu-table__link-button" name="reset_filters" value="1">{{ 'Reset'|t }}</button>
+          {% if filters.count < filters.max %}<button type="button" hidden data-dcu-add-filter>{{ '+ Add filter'|t }}</button>{% endif %}
+          <button type="submit" class="dcu-table__link-button" name="reset_filters" value="1">{{ 'Reset'|t({}, {'context': 'Clear the filter rows'}) }}</button>
         </div>
       </form>
     </details>

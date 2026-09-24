@@ -26,10 +26,10 @@
 
 .dcu-search__exposed .form-submit {
   padding: var(--dcu-space-sm) var(--dcu-space-md);
+  color: var(--dcu-color-primary-contrast);
   border: 0;
   border-radius: var(--dcu-radius);
   background: var(--dcu-color-primary);
-  color: var(--dcu-color-primary-contrast);
   font-weight: 600;
 }
 
@@ -46,8 +46,8 @@
 
 .dcu-facets__heading {
   flex: 1 1 auto;
-  font-size: var(--dcu-font-size-lg);
   margin: 0 0 var(--dcu-space-sm);
+  font-size: var(--dcu-font-size-lg);
 }
 
 .dcu-facets__clear {
@@ -61,8 +61,8 @@
 
 .dcu-facets__facet--long .facets-widget-checkbox,
 .dcu-facets__facet--long .item-list {
-  max-height: 16rem;
   overflow-y: auto;
+  max-height: 16rem;
 }
 
 .dcu-facets__facet {
@@ -70,8 +70,8 @@
 }
 
 .dcu-facets__facet-label {
-  font-size: var(--dcu-font-size-md);
   margin: 0 0 var(--dcu-space-xs);
+  font-size: var(--dcu-font-size-md);
 }
 
 .dcu-facets__facet ul {

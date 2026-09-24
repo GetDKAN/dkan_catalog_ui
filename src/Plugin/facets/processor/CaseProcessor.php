@@ -60,9 +60,19 @@ class CaseProcessor extends ProcessorPluginBase implements BuildProcessorInterfa
     $mode = $this->getConfiguration()['mode'] ?? 'ucwords';
     foreach ($results as $result) {
       $value = (string) $result->getDisplayValue();
-      $result->setDisplayValue($mode === 'upper' ? strtoupper($value) : ucwords($value, " -_/"));
+      $result->setDisplayValue($mode === 'upper' ? mb_strtoupper($value) : self::capitalizeWords($value));
     }
     return $results;
+  }
+
+  /**
+   * Upper-case the first letter of each word; other letters are untouched.
+   *
+   * Words start after whitespace, "-", "_" or "/", as with ucwords(), but
+   * any Unicode lower-case letter qualifies.
+   */
+  public static function capitalizeWords(string $value): string {
+    return preg_replace_callback('@(^|[\s\-_/])(\p{Ll})@u', fn(array $m) => $m[1] . mb_strtoupper($m[2]), $value) ?? $value;
   }
 
 }

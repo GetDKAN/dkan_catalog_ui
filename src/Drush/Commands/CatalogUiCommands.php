@@ -26,7 +26,8 @@ class CatalogUiCommands extends DrushCommands {
   /**
    * Create missing /dataset/{uuid} aliases for existing dataset nodes.
    */
-  #[CLI\Command(name: 'dkan-catalog-ui:aliases', description: 'Create missing /dataset/{uuid} aliases for existing dataset nodes.')]
+  #[CLI\Command(name: 'dkan-catalog-ui:aliases')]
+  #[CLI\Help(description: 'Create missing /dataset/{uuid} aliases for existing dataset nodes.')]
   public function aliases(): void {
     $created = $this->aliasManager->backfill();
     $this->logger()->success(dt('Created @count dataset aliases.', ['@count' => $created]));

@@ -33,6 +33,10 @@ props:
             type: string
           url:
             type: string
+    heading_level:
+      type: integer
+      title: Heading level of the group titles
+      description: 2 on a page whose h1 is the page title; the template defaults to 2.
     groups:
       type: array
       title: Endpoint groups

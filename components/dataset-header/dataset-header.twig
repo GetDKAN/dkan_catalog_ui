@@ -1,9 +1,9 @@
 <div class="dcu-dataset-header">
   {% if updated %}
-    <p class="dcu-dataset-header__updated">
-      {{ 'Updated'|t }}
-      {% if updated_iso %}<time datetime="{{ updated_iso }}">{{ updated }}</time>{% else %}{{ updated }}{% endif %}
-    </p>
+    {# A render array: the trans tag renders it to safe markup, so the
+       <time> element survives inside the translated sentence. #}
+    {% set date = updated_iso ? {'#type': 'html_tag', '#tag': 'time', '#attributes': {'datetime': updated_iso}, '#value': updated} : updated %}
+    <p class="dcu-dataset-header__updated">{% trans %}Updated {{ date }}{% endtrans %}</p>
   {% endif %}
   {% set description %}{% block description %}{% endblock %}{% endset %}
   {% if description|trim %}<div class="dcu-dataset-header__description">{{ description }}</div>{% endif %}

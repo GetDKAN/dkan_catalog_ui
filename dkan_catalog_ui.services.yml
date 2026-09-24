@@ -41,6 +41,7 @@ services:
       - '@dkan.metastore.service'
       - '@dkan.metastore.metastore_item_factory'
       - '@dkan_catalog_ui.distribution_info'
+      - '@logger.channel.dkan_catalog_ui'
   Drupal\dkan_catalog_ui\DatasetPage\DataDictionaryBuilderInterface: '@dkan_catalog_ui.data_dictionary_builder'
 
   dkan_catalog_ui.openapi_reference:

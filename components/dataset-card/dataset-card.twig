@@ -1,5 +1,5 @@
 <div class="dcu-card">
-  {% if updated %}<p class="dcu-card__updated">{{ 'Updated'|t }} {{ updated }}</p>{% endif %}
+  {% if updated %}<p class="dcu-card__updated">{{ 'Updated @date'|t({'@date': updated}) }}</p>{% endif %}
   <h3 class="dcu-card__title"><a href="{{ url }}">{{ title }}</a></h3>
   {% if formats %}
     <ul class="dcu-card__formats">

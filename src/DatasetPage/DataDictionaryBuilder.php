@@ -5,9 +5,11 @@ namespace Drupal\dkan_catalog_ui\DatasetPage;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dkan_metastore\DataDictionary\DataDictionaryDiscoveryInterface;
+use Drupal\dkan_metastore\Exception\MissingObjectException;
 use Drupal\dkan_metastore\MetastoreService;
 use Drupal\dkan_metastore\NodeWrapper\NodeDataFactory;
 use Drupal\node\NodeInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Builds the Data Dictionary tab.
@@ -28,6 +30,7 @@ class DataDictionaryBuilder implements DataDictionaryBuilderInterface {
     protected readonly MetastoreService $metastore,
     protected readonly NodeDataFactory $itemFactory,
     protected readonly DistributionInfoInterface $distributionInfo,
+    protected readonly LoggerInterface $logger,
   ) {}
 
   /**
@@ -78,7 +81,8 @@ class DataDictionaryBuilder implements DataDictionaryBuilderInterface {
     try {
       $id = $this->discovery->getSitewideDictionaryId();
     }
-    catch (\Throwable) {
+    catch (\OutOfBoundsException | \OutOfRangeException $e) {
+      $this->logger->warning('Sitewide data dictionary is not configured: @message', ['@message' => $e->getMessage()]);
       return [];
     }
     $table = $this->table($id, NULL, $node->getTitle());
@@ -98,7 +102,11 @@ class DataDictionaryBuilder implements DataDictionaryBuilderInterface {
       try {
         $id = $this->discovery->dictionaryIdFromResource($entry['resource_id'], (int) $entry['resource_version']);
       }
-      catch (\Throwable) {
+      catch (\RuntimeException $e) {
+        $this->logger->warning('Data dictionary lookup failed for resource @id: @message', [
+          '@id' => $entry['resource_id'],
+          '@message' => $e->getMessage(),
+        ]);
         continue;
       }
       if (!$id) {
@@ -139,7 +147,8 @@ class DataDictionaryBuilder implements DataDictionaryBuilderInterface {
     try {
       $dictionary = json_decode((string) $this->metastore->get('data-dictionary', $id));
     }
-    catch (\Throwable) {
+    catch (MissingObjectException $e) {
+      $this->logger->warning('Data dictionary @id is referenced but does not exist.', ['@id' => $id]);
       return NULL;
     }
     if (!is_object($dictionary)) {

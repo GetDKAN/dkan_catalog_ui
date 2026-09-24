@@ -3,6 +3,8 @@
 namespace Drupal\dkan_catalog_ui_preview\Toolbar;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Component\Render\PlainTextOutput;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\dkan_catalog_ui\DatasetPage\DownloadUrl;
 use Drupal\dkan_catalog_ui_preview\Condition;
@@ -150,10 +152,10 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
     if ($url) {
       $original = [
         'url' => $url->toString(),
-        'label' => (string) ($format
+        'label' => $this->plain($format
           ? $this->t('Original file (@format)', ['@format' => $format])
           : $this->t('Original file')),
-        'button_label' => (string) ($format
+        'button_label' => $this->plain($format
           ? $this->t('Download (@format)', ['@format' => $format])
           : $this->t('Download')),
       ];
@@ -186,7 +188,7 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
     foreach ($tables as $index => $table) {
       $items[] = [
         'value' => (string) $index,
-        'label' => $table['title'] ?: ($table['label'] ?: (string) $this->t('Distribution @n', ['@n' => $index + 1])),
+        'label' => $table['title'] ?: ($table['label'] ?: $this->plain($this->t('Distribution @n', ['@n' => $index + 1]))),
         'selected' => $index === $state->table,
       ];
     }
@@ -277,7 +279,7 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
       $items[] = [
         'label' => $text,
         'url' => $this->stateUrl($baseUrl, $state->withoutCondition($index)),
-        'remove_label' => (string) $this->t('Remove filter: @filter', ['@filter' => $text]),
+        'remove_label' => $this->plain($this->t('Remove filter: @filter', ['@filter' => $text])),
       ];
     }
     $hiddenCount = count($fields) - count($state->visibleColumns($fields));
@@ -351,6 +353,17 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
     }
     $url = clone $baseUrl;
     return $url->setOption('query', $state->toQuery())->toString();
+  }
+
+  /**
+   * A translated string as plain text.
+   *
+   * Component props are plain strings that Twig escapes once; t() has
+   * already escaped the placeholders, which would double-escape "&", "<"
+   * and quotes in an aria-label.
+   */
+  protected function plain(TranslatableMarkup $text): string {
+    return PlainTextOutput::renderFromHtml((string) $text);
   }
 
 }

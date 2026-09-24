@@ -4,6 +4,7 @@ namespace Drupal\Tests\dkan_catalog_ui\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\NodeInterface;
+use Drupal\user\RoleInterface;
 
 /**
  * Shared setup for catalog UI kernel tests: a working metastore.
@@ -67,6 +68,9 @@ abstract class CatalogUiKernelTestBase extends KernelTestBase {
     \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui', 'install');
     dkan_catalog_ui_ensure_format_index_field();
     $this->installConfig(['dkan_catalog_ui']);
+    // Cards check node access; anonymous needs the permission a site grants.
+    $this->installConfig(['user']);
+    user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, ['access content']);
     $kernel = $this->container->get('kernel');
     $kernel->rebuildContainer();
     $this->container = $kernel->getContainer();

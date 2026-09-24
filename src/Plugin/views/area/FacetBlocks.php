@@ -5,6 +5,7 @@ namespace Drupal\dkan_catalog_ui\Plugin\views\area;
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\views\Attribute\ViewsArea;
@@ -39,12 +40,18 @@ class FacetBlocks extends AreaPluginBase {
   protected AccountInterface $currentUser;
 
   /**
+   * The facet storage.
+   */
+  protected EntityStorageInterface $facetStorage;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->blockManager = $container->get('plugin.manager.block');
     $instance->currentUser = $container->get('current_user');
+    $instance->facetStorage = $container->get('entity_type.manager')->getStorage('facets_facet');
     return $instance;
   }
 
@@ -96,18 +103,24 @@ class FacetBlocks extends AreaPluginBase {
       $build['heading'] = [
         '#type' => 'html_tag',
         '#tag' => 'h2',
-        '#value' => $this->options['heading'],
+        // The default is translatable; an admin-entered heading is not.
+        '#value' => $this->options['heading'] === 'Filter' ? $this->t('Filter') : $this->options['heading'],
         '#attributes' => ['class' => ['dcu-facets__heading']],
       ];
     }
-    // Facets use the "f" query key (facet source filter_key); the link is
-    // only useful with an active facet. url.query_args above covers it.
-    $active = (array) ($this->view->getRequest()->query->all()['f'] ?? []);
+    // The facet source's filter key ("f" by default) carries the active
+    // facets; the link is only useful with one. It drops the facets and the
+    // page, keeping the search term and sort. url.query_args above covers it.
+    $query = $this->view->getRequest()->query->all();
+    $filterKey = $this->filterKey($ids);
+    $active = (array) ($query[$filterKey] ?? []);
     if (array_filter($active, fn($value) => is_string($value) && $value !== '')) {
       $build['clear'] = [
         '#type' => 'link',
         '#title' => $this->t('Clear all filters'),
-        '#url' => Url::fromRoute('<current>'),
+        '#url' => Url::fromRoute('<current>', [], [
+          'query' => array_diff_key($query, [$filterKey => TRUE, 'page' => TRUE]),
+        ]),
         '#attributes' => ['class' => ['dcu-facets__clear']],
       ];
     }
@@ -148,6 +161,23 @@ class FacetBlocks extends AreaPluginBase {
 
     $cacheability->applyTo($build);
     return $build;
+  }
+
+  /**
+   * The query key the facets' source uses for active filters.
+   *
+   * @param string[] $ids
+   *   Facet ids; the first that loads decides.
+   */
+  protected function filterKey(array $ids): string {
+    foreach ($ids as $id) {
+      /** @var \Drupal\facets\FacetInterface|null $facet */
+      $facet = $this->facetStorage->load($id);
+      if ($facet && ($source = $facet->getFacetSourceConfig())) {
+        return (string) ($source->getFilterKey() ?: 'f');
+      }
+    }
+    return 'f';
   }
 
 }

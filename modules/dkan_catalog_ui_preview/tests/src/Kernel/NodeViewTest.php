@@ -184,6 +184,22 @@ class NodeViewTest extends CatalogUiKernelTestBase {
   }
 
   /**
+   * Markup in a filter value is escaped once, in the chip and its label.
+   */
+  public function testChipEscaping(): void {
+    $node = $this->createDataset('preview-escape');
+    $this->importDatasetFixture($node);
+    $this->container->get('request_stack')->getCurrentRequest()->query->replace([
+      'conditions' => [['property' => 'name', 'operator' => 'contains', 'value' => '<img src=x> & "q"']],
+    ]);
+    $build = $this->buildNodeView($node);
+    $html = (string) $this->container->get('renderer')->renderRoot($build);
+    $this->assertStringNotContainsString('<img src=x>', $html);
+    $this->assertStringNotContainsString('&amp;lt;', $html);
+    $this->assertStringContainsString('aria-label="Remove filter: name Contains &lt;img src=x&gt; &amp; &quot;q&quot;"', $html);
+  }
+
+  /**
    * A disabled display component renders nothing.
    */
   public function testDisabledComponent(): void {

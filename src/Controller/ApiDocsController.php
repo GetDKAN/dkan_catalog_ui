@@ -104,6 +104,7 @@ class ApiDocsController implements ContainerInjectionInterface {
         ],
         'endpoints' => [],
         'groups' => $groups,
+        'heading_level' => 2,
       ],
       '#cache' => ['max-age' => self::MAX_AGE, 'tags' => ['config:core.extension']],
       // Tokens and the shared button: the page is not a node or the view.
