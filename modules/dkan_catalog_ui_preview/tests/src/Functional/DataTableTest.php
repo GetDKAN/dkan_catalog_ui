@@ -349,6 +349,34 @@ class DataTableTest extends BrowserTestBase {
     $assert->responseHeaderEquals('X-Drupal-Cache', 'MISS');
     $assert->responseHeaderEquals('X-Drupal-Dynamic-Cache', 'HIT');
     $assert->elementExists('css', 'th[aria-sort="ascending"]');
+    $assert->elementAttributeContains('css', 'th[aria-sort="ascending"] a', 'rel', 'nofollow');
+
+    // State, junk and sanitized-array variants of the page and the fragment
+    // expire from the page cache; the canonical URL stays permanent.
+    $this->drupalGet('/dataset/ft-cache', ['query' => ['junk' => '1']]);
+    $this->drupalGet('/dataset/ft-cache', ['query' => ['sort' => ['age']]]);
+    $this->drupalGet('/dataset/ft-cache/table', ['query' => ['page' => '2']]);
+    $expires = $this->container->get('database')->select('cache_page', 'c')
+      ->fields('c', ['cid', 'expire'])
+      ->execute()
+      ->fetchAllKeyed();
+    $now = $this->container->get('datetime.time')->getCurrentTime();
+    $variants = 0;
+    foreach ($expires as $cid => $expire) {
+      $uri = parse_url((string) $cid);
+      if (!str_starts_with($uri['path'] ?? '', '/dataset/ft-cache')) {
+        continue;
+      }
+      if (isset($uri['query'])) {
+        $variants++;
+        $this->assertGreaterThan($now, (int) $expire, $cid);
+        $this->assertLessThanOrEqual($now + 3600, (int) $expire, $cid);
+      }
+      else {
+        $this->assertSame(-1, (int) $expire, $cid);
+      }
+    }
+    $this->assertSame(4, $variants);
   }
 
 }

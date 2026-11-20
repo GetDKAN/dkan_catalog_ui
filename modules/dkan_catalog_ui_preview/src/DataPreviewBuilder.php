@@ -281,6 +281,8 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
           '#title' => $label,
           '#url' => $this->stateUrl($baseUrl, $state->withSort($machineName, $nextDirection)),
           '#attributes' => [
+            // State links: crawlers would otherwise fill the page cache.
+            'rel' => 'nofollow',
             'aria-label' => $this->t('Sort by @label, @direction', [
               '@label' => $label,
               '@direction' => $nextDirection === 'asc' ? $this->t('ascending') : $this->t('descending'),

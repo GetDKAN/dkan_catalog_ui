@@ -61,3 +61,10 @@ services:
     class: Drupal\dkan_catalog_ui_preview\EventSubscriber\TableSortQuerySubscriber
     tags:
       - { name: event_subscriber }
+
+  dkan_catalog_ui.preview.state_url_expires_subscriber:
+    class: Drupal\dkan_catalog_ui_preview\EventSubscriber\StateUrlExpiresSubscriber
+    arguments:
+      - '@datetime.time'
+    tags:
+      - { name: event_subscriber }

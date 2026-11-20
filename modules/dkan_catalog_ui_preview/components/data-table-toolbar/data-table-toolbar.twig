@@ -166,7 +166,7 @@
         <div class="dcu-table__panel-actions">
           <button type="submit" class="dcu-button" name="close" value="1">{{ 'Save'|t }}</button>
           <button type="submit" class="dcu-table__link-button" name="reset_columns" value="1">{{ 'Reset columns'|t }}</button>
-          {% if columns.cancel_url %}<a class="dcu-table__cancel" href="{{ columns.cancel_url }}">{{ 'Cancel'|t }}</a>{% endif %}
+          {% if columns.cancel_url %}<a class="dcu-table__cancel" href="{{ columns.cancel_url }}" rel="nofollow">{{ 'Cancel'|t }}</a>{% endif %}
         </div>
       </form>
     </details>
@@ -210,10 +210,10 @@
       <ul class="dcu-table__chips" aria-label="{{ chips.label }}">
         {% for chip in chips.items %}
           <li class="dcu-table__chip">
-            <a href="{{ chip.url }}" aria-label="{{ chip.remove_label }}">{{ chip.label }} {{ include('dkan_catalog_ui:icon', {name: 'close', size: 12}, with_context = false) }}</a>
+            <a href="{{ chip.url }}" rel="nofollow" aria-label="{{ chip.remove_label }}">{{ chip.label }} {{ include('dkan_catalog_ui:icon', {name: 'close', size: 12}, with_context = false) }}</a>
           </li>
         {% endfor %}
-        <li class="dcu-table__chip dcu-table__chip--clear"><a href="{{ chips.clear_all_url }}" aria-label="{{ chips.clear_all_label }}">{{ 'Clear all'|t }}</a></li>
+        <li class="dcu-table__chip dcu-table__chip--clear"><a href="{{ chips.clear_all_url }}" rel="nofollow" aria-label="{{ chips.clear_all_label }}">{{ 'Clear all'|t }}</a></li>
       </ul>
     {% endif %}
   </div>
