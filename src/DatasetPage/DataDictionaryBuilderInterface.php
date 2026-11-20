@@ -10,6 +10,11 @@ use Drupal\node\NodeInterface;
 interface DataDictionaryBuilderInterface {
 
   /**
+   * Cache tag of the config that holds the data dictionary mode.
+   */
+  const SETTINGS_CACHE_TAG = 'config:dkan_metastore.settings';
+
+  /**
    * Build the data dictionary render array.
    *
    * @param \Drupal\node\NodeInterface $node

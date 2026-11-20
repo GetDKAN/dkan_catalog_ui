@@ -30,10 +30,7 @@ class DatasetBreadcrumbTest extends CatalogUiKernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installSchema('search_api', ['search_api_item']);
-    $this->installEntitySchema('search_api_task');
-    \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
-    $this->installConfig(['search_api', 'dkan_metastore_search', 'dkan_catalog_ui']);
+    $this->installSearchConfig();
   }
 
   /**

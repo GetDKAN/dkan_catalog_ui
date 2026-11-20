@@ -60,9 +60,12 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $this->assertArrayNotHasKey('contexts', $element['#cache']);
     $this->assertArrayNotHasKey('max-age', $element['#cache']);
 
-    // Dataset and distribution node tags are both attached.
+    // Dataset and distribution node tags are both attached, plus the
+    // settings the table reads (dictionary mode, row limit).
     $tags = $element['#cache']['tags'];
     $this->assertContains('node:' . $node->id(), $tags);
+    $this->assertContains('config:dkan_metastore.settings', $tags);
+    $this->assertContains('config:dkan_datastore.settings', $tags);
     $info = $this->container->get('dkan.common.dataset_info')->gather($node->uuid());
     $distributionUuid = $info['latest_revision']['distributions'][0]['distribution_uuid'];
     $distributionNodes = $this->container->get('entity_type.manager')->getStorage('node')
@@ -178,6 +181,22 @@ class NodeViewTest extends CatalogUiKernelTestBase {
     $footer = $xpath->query('//div[@class="dcu-table__footer"]/*');
     $this->assertSame('dcu-table__page-size', $footer->item(0)->getAttribute('class'));
     $this->assertCount(0, $xpath->query('//form[@class="dcu-table__page-size"]//input[@name="panel" or @name="page" or @name="page_size"]'));
+  }
+
+  /**
+   * Markup in a filter value is escaped once, in the chip and its label.
+   */
+  public function testChipEscaping(): void {
+    $node = $this->createDataset('preview-escape');
+    $this->importDatasetFixture($node);
+    $this->container->get('request_stack')->getCurrentRequest()->query->replace([
+      'conditions' => [['property' => 'name', 'operator' => 'contains', 'value' => '<img src=x> & "q"']],
+    ]);
+    $build = $this->buildNodeView($node);
+    $html = (string) $this->container->get('renderer')->renderRoot($build);
+    $this->assertStringNotContainsString('<img src=x>', $html);
+    $this->assertStringNotContainsString('&amp;lt;', $html);
+    $this->assertStringContainsString('aria-label="Remove filter: name Contains &lt;img src=x&gt; &amp; &quot;q&quot;"', $html);
   }
 
   /**

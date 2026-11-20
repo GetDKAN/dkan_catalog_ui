@@ -4,6 +4,7 @@ namespace Drupal\Tests\dkan_catalog_ui\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\NodeInterface;
+use Drupal\user\RoleInterface;
 
 /**
  * Shared setup for catalog UI kernel tests: a working metastore.
@@ -47,6 +48,32 @@ abstract class CatalogUiKernelTestBase extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('path_alias');
     $this->installEntitySchema('resource_mapping');
+  }
+
+  /**
+   * Install the search index, the format index field and the module config.
+   *
+   * Needs views, search_api, search_api_db, facets and dkan_metastore_search
+   * in $modules. Rebuilds the container afterwards: saving a facet whose
+   * source view caches permanently pre-executes the search query, which
+   * leaves the facets manager's static cache holding only the facets saved
+   * so far in this process.
+   */
+  protected function installSearchConfig(): void {
+    $this->installSchema('search_api', ['search_api_item']);
+    $this->installEntitySchema('search_api_task');
+    \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
+    $this->installConfig(['search_api', 'dkan_metastore_search']);
+    // hook_install() does not run in kernel tests.
+    \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui', 'install');
+    dkan_catalog_ui_ensure_format_index_field();
+    $this->installConfig(['dkan_catalog_ui']);
+    // Cards check node access; anonymous needs the permission a site grants.
+    $this->installConfig(['user']);
+    user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, ['access content']);
+    $kernel = $this->container->get('kernel');
+    $kernel->rebuildContainer();
+    $this->container = $kernel->getContainer();
   }
 
   /**

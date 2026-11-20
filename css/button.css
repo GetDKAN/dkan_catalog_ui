@@ -1,0 +1,18 @@
+/**
+ * Primary button, shared by the resource list, API docs and the data table.
+ */
+.dcu-button {
+  display: inline-block;
+  padding: var(--dcu-space-sm) var(--dcu-space-md);
+  text-decoration: none;
+  color: var(--dcu-color-primary-contrast);
+  border-radius: var(--dcu-radius);
+  background: var(--dcu-color-primary);
+  font-weight: 600;
+}
+
+.dcu-button:hover,
+.dcu-button:focus {
+  color: var(--dcu-color-primary-contrast);
+  background: var(--dcu-color-link-hover);
+}

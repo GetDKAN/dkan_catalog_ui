@@ -2,7 +2,9 @@
 
 namespace Drupal\dkan_catalog_ui\DatasetPage;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\dkan_metastore\MetastoreService;
+use Drupal\dkan_metastore\NodeWrapper\NodeDataFactory;
 use Drupal\dkan_metastore\SchemaRetriever;
 use Drupal\node\NodeInterface;
 use Psr\Log\LoggerInterface;
@@ -37,6 +39,7 @@ class DatasetMetadata implements DatasetMetadataInterface {
     protected readonly MetastoreService $metastore,
     protected readonly SchemaRetriever $schemaRetriever,
     protected readonly LoggerInterface $logger,
+    protected readonly NodeDataFactory $itemFactory,
   ) {}
 
   /**
@@ -80,6 +83,39 @@ class DatasetMetadata implements DatasetMetadataInterface {
       }
     }
     return $this->labels;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Reads the stored (referenced) metadata: every `%Ref:*` property holds
+   * the identifiers of the items its values were dereferenced from, as
+   * \Drupal\dkan_metastore\MetastoreApiResponse does for API responses.
+   */
+  public function referenceCacheTags(NodeInterface $node): array {
+    $tags = [];
+    if (!$node->hasField('field_json_metadata')) {
+      return $tags;
+    }
+    $stored = json_decode((string) $node->get('field_json_metadata')->value);
+    foreach (is_object($stored) ? get_object_vars($stored) : [] as $property => $value) {
+      if (!str_starts_with((string) $property, '%Ref')) {
+        continue;
+      }
+      foreach (is_array($value) ? $value : [$value] as $reference) {
+        $identifier = is_object($reference) ? ($reference->identifier ?? NULL) : NULL;
+        if (!is_string($identifier) || $identifier === '') {
+          continue;
+        }
+        try {
+          $tags = Cache::mergeTags($tags, $this->itemFactory->getInstance($identifier)->getCacheTags());
+        }
+        catch (\Throwable) {
+          // A dangling reference has nothing to depend on.
+        }
+      }
+    }
+    return $tags;
   }
 
 }

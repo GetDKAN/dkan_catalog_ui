@@ -25,6 +25,7 @@ hidden:
   dataset_data_dictionary: true
   dataset_header: true
   dataset_overview: true
+  dkan_catalog_ui_table: true
   field_data_type: true
   field_json_metadata: true
   links: true

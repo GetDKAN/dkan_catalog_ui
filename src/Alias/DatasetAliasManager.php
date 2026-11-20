@@ -9,8 +9,11 @@ use Drupal\node\NodeInterface;
  * Maintains /dataset/{uuid} path aliases for dataset nodes.
  *
  * Aliases are written through the core path field so langcode, updates and
- * deletion follow the node. When pathauto is installed the item is flagged
- * PathautoState::SKIP so a site pattern never overwrites the alias.
+ * deletion follow the node; an alias entered by an editor is overwritten on
+ * save. When pathauto is installed the item is flagged PathautoState::SKIP
+ * so a site pattern never overwrites the alias. Aliases created by
+ * backfill() go straight to path_alias storage and carry no such flag.
+ * hook_uninstall() removes every managed alias.
  */
 class DatasetAliasManager implements DatasetAliasManagerInterface {
 
@@ -49,13 +52,13 @@ class DatasetAliasManager implements DatasetAliasManagerInterface {
     $alias = $this->aliasFor($node);
     $list = $node->get('path');
     $item = $list->first() ?? $list->appendItem();
-    if ($item->alias !== $alias) {
-      $item->alias = $alias;
+    if ($item->get('alias')->getValue() !== $alias) {
+      $item->set('alias', $alias);
     }
     // Value 0 is \Drupal\pathauto\PathautoState::SKIP; the property only
     // exists when pathauto is installed.
     if ($item->getDataDefinition()->getPropertyDefinition('pathauto')) {
-      $item->pathauto = 0;
+      $item->set('pathauto', 0);
     }
   }
 

@@ -6,17 +6,19 @@ the site repo (`PLAN-native-frontend.md`).
 
 ## What it provides
 
-- `/dataset/{uuid}` aliases on dataset nodes (presave hook; `drush dkan-catalog-ui:aliases` backfills)
-  and a breadcrumb builder (Home > Datasets) for them.
-- Dataset page (`node--data--full`) with tabs: Data Table (preview submodule),
+- `/dataset/{uuid}` aliases on dataset nodes (forced on presave, overriding
+  editor-entered aliases; `drush dkan-catalog-ui:aliases` backfills; uninstall
+  removes them) and a breadcrumb builder (Home > Datasets) for them.
+- Dataset page (`node--data--full`) with tabs (the no-JS fallback relies on
+  CSS `:has()`; without it every panel shows): Data Table (preview submodule),
   Overview (resources with row/column counts, metadata table), Data Dictionary
   (sitewide or reference mode), API (server-rendered endpoint reference from
   the dataset's OpenAPI document, plus the raw JSON link; no client library).
 - `/api/docs`: the site API reference, the same endpoint list rendered from
-  DKAN's `/api/1` document grouped by tag (cached for an hour; the
-  generator has no cache tags). Main-menu links Datasets and API ship in
-  `dkan_catalog_ui.links.menu.yml`; a post-update removes a legacy content
-  link titled "Datasets" pointing at `/search` (exact match only).
+  DKAN's `/api/1` document grouped by tag (cached until the set of enabled
+  modules changes; an hour at most where max-age applies). Main-menu links Datasets and API ship in
+  `dkan_catalog_ui.links.menu.yml`; install and a post-update remove a legacy
+  content link titled "Datasets" pointing at `/search` (exact match only).
 - `/search`: Views page on the `dkan` search index with fulltext, exposed sort,
   result cards (`search_result` view mode), and facet blocks rendered inside the
   view (theme, keyword, publisher, format). Adds `distribution__item__format` to
@@ -37,12 +39,13 @@ drush search-api:index
 ```
 
 `dkan_catalog_ui_preview` is a fork of DKAN core's `dkan_datastore_preview`
-(GetDKAN/dkan#4784 at `0aa181ff7`), maintained here. It cannot be enabled together with `dkan_datastore_preview`.
+(GetDKAN/dkan#4784 at `0aa181ff7`), maintained here. Its table replaces DKAN core's `dkan_datastore_preview` on dataset pages: installing it while that module is enabled is refused, and the status report warns when both are enabled.
 
 ## Tests and standards
 
 ```bash
 ddev exec "DRUPAL_ROOT=/var/www/html/docroot SIMPLETEST_BASE_URL=\$DDEV_PRIMARY_URL SIMPLETEST_DB=mysql://db:db@db:3306/db vendor/bin/phpunit -c docroot/modules/custom/dkan_catalog_ui --testsuite unit,kernel"
-# Functional (BrowserTestBase): see modules/dkan_catalog_ui_preview/README.md
+# Functional (BrowserTestBase, needs BROWSERTEST_OUTPUT_DIRECTORY): --testsuite functional
 ddev exec "cd docroot/modules/custom/dkan_catalog_ui && ../../../../vendor/bin/phpcs --standard=phpcs.xml.dist ."
+ddev exec "vendor/bin/phpstan analyse -c docroot/modules/custom/dkan_catalog_ui/phpstan.neon.dist --memory-limit=1G"
 ```

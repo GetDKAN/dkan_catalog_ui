@@ -22,4 +22,15 @@ interface DatasetMetadataInterface {
    */
   public function propertyLabels(): array;
 
+  /**
+   * Cache tags of every metastore item the dataset references.
+   *
+   * Publisher, theme, keyword and distribution values are dereferenced into
+   * the metadata; a render that shows them must also depend on those items.
+   *
+   * @return string[]
+   *   Cache tags, possibly empty.
+   */
+  public function referenceCacheTags(NodeInterface $node): array;
+
 }

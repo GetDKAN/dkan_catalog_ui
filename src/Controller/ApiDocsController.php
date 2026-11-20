@@ -14,8 +14,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * The site API reference at /api/docs.
  *
  * Renders the same document DKAN serves at /api/1 as a grouped endpoint
- * list. The generator exposes no cache metadata and reads live data, so the
- * page caches for an hour without tags.
+ * list. The generator exposes no cache metadata; the document changes when
+ * modules providing docs plugins are enabled or disabled, so the page is
+ * tagged with the extension list, with an hour as the upper bound where
+ * max-age is honoured (the anonymous page cache ignores it).
  */
 class ApiDocsController implements ContainerInjectionInterface {
 
@@ -102,8 +104,11 @@ class ApiDocsController implements ContainerInjectionInterface {
         ],
         'endpoints' => [],
         'groups' => $groups,
+        'heading_level' => 2,
       ],
-      '#cache' => ['max-age' => self::MAX_AGE],
+      '#cache' => ['max-age' => self::MAX_AGE, 'tags' => ['config:core.extension']],
+      // Tokens and the shared button: the page is not a node or the view.
+      '#attached' => ['library' => ['dkan_catalog_ui/base']],
     ];
   }
 

@@ -87,8 +87,7 @@ class TableApplyController implements ContainerInjectionInterface {
       $response->setPrivate()->setMaxAge(0);
       return $response;
     }
-    // A plain RedirectResponse is never cached: the target depends on the
-    // full query string.
+    // The route's no_cache option keeps this redirect out of the page cache.
     return new RedirectResponse($url->toString(), 302);
   }
 

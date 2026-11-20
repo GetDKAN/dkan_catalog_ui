@@ -2,6 +2,7 @@
 
 namespace Drupal\dkan_catalog_ui\DatasetPage;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dkan_common\DataResource;
@@ -68,7 +69,10 @@ class OverviewBuilder implements OverviewBuilderInterface {
     $build = [
       '#type' => 'container',
       '#attributes' => ['class' => ['dcu-dataset-overview']],
-      '#cache' => ['tags' => $node->getCacheTags()],
+      '#cache' => [
+        // Publisher, theme and keyword values come from referenced items.
+        'tags' => Cache::mergeTags($node->getCacheTags(), $this->datasetMetadata->referenceCacheTags($node)),
+      ],
     ];
 
     $resources = $this->buildResources($node, $metadata);
@@ -227,11 +231,7 @@ class OverviewBuilder implements OverviewBuilderInterface {
       return $name === '' ? NULL : ['value' => $name, 'href' => ''];
     }
     if (in_array($property, ['modified', 'issued'], TRUE) && is_string($value)) {
-      $timestamp = strtotime($value);
-      return [
-        'value' => $timestamp ? $this->dateFormatter->format($timestamp, 'custom', 'F j, Y') : $value,
-        'href' => '',
-      ];
+      return ['value' => MetadataDate::display($this->dateFormatter, $value), 'href' => ''];
     }
     if (is_array($value)) {
       $strings = array_values(array_filter($value, 'is_string'));

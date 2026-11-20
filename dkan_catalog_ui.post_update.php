@@ -5,6 +5,9 @@
  * Post update functions for the DKAN Catalog UI module.
  */
 
+use Drupal\dkan_catalog_ui\Hook\EntityHooks;
+use Drupal\search_api\Entity\Index;
+
 /**
  * Remove the legacy "Datasets" content link now that the module ships one.
  *
@@ -13,6 +16,21 @@
  */
 function dkan_catalog_ui_post_update_remove_search_menu_link(): string {
   return dkan_catalog_ui_remove_search_menu_link();
+}
+
+/**
+ * Record ownership of the format index field on sites installed before it.
+ *
+ * The field this module adds carries the label it writes; a field a site
+ * added itself would normally have a human label.
+ */
+function dkan_catalog_ui_post_update_flag_format_field(): string {
+  $field = Index::load('dkan')?->getField('distribution__item__format');
+  if ($field && $field->getLabel() === 'distribution__item__format') {
+    \Drupal::state()->set(EntityHooks::FORMAT_FIELD_STATE_KEY, TRUE);
+    return 'The format index field is now recorded as added by dkan_catalog_ui.';
+  }
+  return 'No module-added format index field found; nothing recorded.';
 }
 
 /**

@@ -3,8 +3,12 @@
 namespace Drupal\dkan_catalog_ui\Search;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dkan_catalog_ui\DatasetPage\DataDictionaryBuilderInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\DatasetMetadataInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\MetadataDate;
 use Drupal\dkan_metastore\DataDictionary\DataDictionaryDiscoveryInterface;
 use Drupal\node\NodeInterface;
 
@@ -26,6 +30,7 @@ class SearchResultBuilder implements SearchResultBuilderInterface {
   public function __construct(
     protected readonly DateFormatterInterface $dateFormatter,
     protected readonly DataDictionaryDiscoveryInterface $dictionaryDiscovery,
+    protected readonly DatasetMetadataInterface $datasetMetadata,
   ) {}
 
   /**
@@ -34,7 +39,6 @@ class SearchResultBuilder implements SearchResultBuilderInterface {
   public function build(NodeInterface $node, object $metadata): array {
     $url = $node->toUrl()->toString();
     $modified = (string) ($metadata->modified ?? '');
-    $timestamp = $modified !== '' ? strtotime($modified) : FALSE;
 
     $formats = [];
     $hasTabular = FALSE;
@@ -70,12 +74,19 @@ class SearchResultBuilder implements SearchResultBuilderInterface {
       '#props' => [
         'title' => (string) ($metadata->title ?? $node->label()),
         'url' => $url,
-        'updated' => $timestamp ? $this->dateFormatter->format($timestamp, 'custom', 'F j, Y') : $modified,
+        'updated' => MetadataDate::display($this->dateFormatter, $modified),
         'description' => $this->summary((string) ($metadata->description ?? '')),
         'formats' => array_values($formats),
         'links' => $links,
       ],
-      '#cache' => ['tags' => $node->getCacheTags()],
+      '#cache' => [
+        // The dictionary link depends on the mode setting; title, formats
+        // and description come from referenced items.
+        'tags' => Cache::mergeTags(
+          [DataDictionaryBuilderInterface::SETTINGS_CACHE_TAG],
+          Cache::mergeTags($node->getCacheTags(), $this->datasetMetadata->referenceCacheTags($node))
+        ),
+      ],
     ];
   }
 

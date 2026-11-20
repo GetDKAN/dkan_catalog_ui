@@ -5,6 +5,10 @@ dkan_catalog_ui_preview.apply:
   methods: [GET]
   requirements:
     _permission: 'access content'
+  options:
+    # The response (a redirect, or JSON for the script) depends on the full
+    # query string and the Accept header: keep it out of the page cache.
+    no_cache: TRUE
 
 dkan_catalog_ui_preview.fragment:
   path: '/dataset/{dataset}/table'

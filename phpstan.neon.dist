@@ -1,0 +1,18 @@
+# Run from the Drupal project root so phpstan-drupal finds the site:
+#   vendor/bin/phpstan analyse -c <path-to-module>/phpstan.neon.dist
+includes:
+  - phpstan-baseline.neon
+parameters:
+  level: 6
+  paths:
+    - .
+  fileExtensions:
+    - php
+    - module
+    - install
+    - theme
+  scanFiles:
+    - dkan_catalog_ui.post_update.php
+  ignoreErrors:
+    # Drupal's create() factories return new static() by convention.
+    - '#Unsafe usage of new static\(\)#'

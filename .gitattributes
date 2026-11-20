@@ -1,0 +1,6 @@
+# Keep development files out of packaged releases.
+/tests export-ignore
+/modules/dkan_catalog_ui_preview/tests export-ignore
+/phpcs.xml.dist export-ignore
+/phpunit.xml export-ignore
+/.gitattributes export-ignore

@@ -23,7 +23,7 @@ class DataPreviewHooks {
   /**
    * Extra field name on the data node display.
    */
-  const EXTRA_FIELD = 'data_preview';
+  const EXTRA_FIELD = 'dkan_catalog_ui_table';
 
   /**
    * Constructor.
@@ -106,6 +106,21 @@ class DataPreviewHooks {
         'tags' => $this->tabularDistributions->cacheTags($entity),
       ],
     ];
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_view_alter() for node entities.
+   *
+   * DKAN core's dkan_datastore_preview adds a data_preview element to the
+   * same nodes. The full dataset page belongs to dkan_catalog_ui's
+   * node--data--full template, which has no slot for it, so it is dropped
+   * there; every other view mode keeps it.
+   */
+  #[Hook('node_view_alter')]
+  public function nodeViewAlter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display): void {
+    if (($build['#view_mode'] ?? '') === 'full' && $entity instanceof NodeInterface && $entity->bundle() === 'data') {
+      unset($build['data_preview']);
+    }
   }
 
 }

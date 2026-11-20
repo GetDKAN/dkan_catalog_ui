@@ -1,19 +1,19 @@
 .dcu-resource-list__items {
-  list-style: none;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .dcu-resource {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: var(--dcu-space-md);
+  justify-content: space-between;
+  margin-bottom: var(--dcu-space-sm);
   padding: var(--dcu-space-md);
   border: 1px solid var(--dcu-color-border);
   border-radius: var(--dcu-radius);
-  margin-bottom: var(--dcu-space-sm);
+  gap: var(--dcu-space-md);
 }
 
 .dcu-resource__title {
@@ -43,20 +43,4 @@
 .dcu-resource__stats dd {
   margin: 0;
   font-weight: 600;
-}
-
-.dcu-button {
-  display: inline-block;
-  padding: var(--dcu-space-sm) var(--dcu-space-md);
-  border-radius: var(--dcu-radius);
-  background: var(--dcu-color-primary);
-  color: var(--dcu-color-primary-contrast);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.dcu-button:hover,
-.dcu-button:focus {
-  background: var(--dcu-color-link-hover);
-  color: var(--dcu-color-primary-contrast);
 }

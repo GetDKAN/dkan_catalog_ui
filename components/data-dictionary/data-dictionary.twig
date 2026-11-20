@@ -1,6 +1,6 @@
 {% set has_format = fields|filter(field => field.format is not empty)|length > 0 %}
 <div class="dcu-data-dictionary">
-  {% if title and show_title %}<h3 class="dcu-data-dictionary__heading">{{ title }}</h3>{% endif %}
+  {% if title and (show_title is not defined or show_title) %}<h3 class="dcu-data-dictionary__heading">{{ title }}</h3>{% endif %}
   <table class="dcu-data-dictionary__table">
     <thead>
       <tr>

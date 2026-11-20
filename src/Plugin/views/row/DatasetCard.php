@@ -2,6 +2,7 @@
 
 namespace Drupal\dkan_catalog_ui\Plugin\views\row;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\search_api\Utility\Utility;
@@ -79,10 +80,16 @@ class DatasetCard extends RowPluginBase {
     if (!$uuids) {
       return;
     }
-    $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties([
-      'uuid' => array_values($uuids),
-      'type' => 'data',
-    ]);
+    // No access check here: an access-checked query would drop restricted
+    // nodes silently, and the empty row would be cached without the grants
+    // context. render() checks access and bubbles its cacheability.
+    $storage = $this->entityTypeManager->getStorage('node');
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('uuid', array_values($uuids), 'IN')
+      ->condition('type', 'data')
+      ->execute();
+    $nodes = $storage->loadMultiple($ids);
     $byUuid = [];
     foreach ($nodes as $node) {
       $byUuid[$node->uuid()] = $node;
@@ -100,7 +107,14 @@ class DatasetCard extends RowPluginBase {
     if (!$node) {
       return [];
     }
-    return $this->entityTypeManager->getViewBuilder('node')->view($node, $this->options['view_mode']);
+    // The datasource loads published nodes without consulting node access
+    // grants; a site that restricts datasets must not see them here.
+    $access = $node->access('view', NULL, TRUE);
+    $build = $access->isAllowed()
+      ? $this->entityTypeManager->getViewBuilder('node')->view($node, $this->options['view_mode'])
+      : [];
+    CacheableMetadata::createFromRenderArray($build)->addCacheableDependency($access)->applyTo($build);
+    return $build;
   }
 
   /**

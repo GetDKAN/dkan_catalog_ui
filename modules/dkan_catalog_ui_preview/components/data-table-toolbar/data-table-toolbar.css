@@ -56,7 +56,7 @@
 
 .dcu-table__file-label,
 .dcu-table__meta {
-  color: var(--dcu-color-text-muted, #565c65);
+  color: var(--dcu-color-text-muted, #5c5c5c);
 }
 
 .dcu-table__panel-head {
@@ -77,21 +77,21 @@
   align-items: center;
   justify-content: center;
   padding: var(--dcu-space-xs, 0.25rem);
-  border: 1px solid var(--dcu-color-border, #dfe1e2);
-  border-radius: var(--dcu-radius, 0.25rem);
-  background: var(--dcu-color-surface, #fff);
-  color: inherit;
   cursor: pointer;
+  color: inherit;
+  border: 1px solid var(--dcu-color-border, #dfe1e2);
+  border-radius: var(--dcu-radius, 4px);
+  background: var(--dcu-color-surface, #fff);
 }
 
 .dcu-table__link-button {
   padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--dcu-color-link, #005ea2);
   border: 0;
   background: none;
-  color: var(--dcu-color-link, #005ea2);
   font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 .dcu-table__summary {
@@ -136,11 +136,11 @@
 }
 
 .dcu-table__panel-summary {
-  cursor: pointer;
-  list-style: none;
   padding: var(--dcu-space-xs, 0.25rem) var(--dcu-space-sm, 0.5rem);
+  list-style: none;
+  cursor: pointer;
   border: 1px solid var(--dcu-color-border, #dfe1e2);
-  border-radius: var(--dcu-radius, 0.25rem);
+  border-radius: var(--dcu-radius, 4px);
 }
 
 .dcu-table__panel-body {
@@ -152,9 +152,9 @@
   margin-block-start: var(--dcu-space-xs, 0.25rem);
   padding: var(--dcu-space-md, 1rem);
   border: 1px solid var(--dcu-color-border, #dfe1e2);
-  border-radius: var(--dcu-radius, 0.25rem);
+  border-radius: var(--dcu-radius, 4px);
   background: var(--dcu-color-surface, #fff);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgb(0, 0, 0, 0.15);
 }
 
 .dcu-table__filter-rows,
@@ -208,13 +208,13 @@
 }
 
 .dcu-table__download-note {
-  color: var(--dcu-color-text-muted, #565c65);
+  color: var(--dcu-color-text-muted, #5c5c5c);
   font-size: var(--dcu-font-size-sm, 0.875rem);
 }
 
 .dcu-table__download-option.is-disabled {
-  color: var(--dcu-color-text-muted, #565c65);
   cursor: not-allowed;
+  color: var(--dcu-color-text-muted, #5c5c5c);
 }
 
 .dcu-table__share-url {
@@ -237,9 +237,9 @@
 
 .dcu-table__chip a {
   padding: 0.1em 0.6em;
+  text-decoration: none;
   border: 1px solid var(--dcu-color-border, #dfe1e2);
   border-radius: 1em;
-  text-decoration: none;
 }
 
 @media (max-width: 48em) {

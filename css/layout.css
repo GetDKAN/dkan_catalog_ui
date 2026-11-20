@@ -20,25 +20,16 @@
   }
 
   .dcu-layout--sidebar > .dcu-search__sidebar {
-    grid-column: 1;
     grid-row: 1;
+    grid-column: 1;
   }
 
   .dcu-layout--sidebar > .dcu-search__main {
-    grid-column: 2;
     grid-row: 1;
+    grid-column: 2;
   }
 }
 
 .dcu-stack > * + * {
   margin-block-start: var(--dcu-space-md);
-}
-
-.dcu-visually-hidden {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
 }

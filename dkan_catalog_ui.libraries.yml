@@ -5,6 +5,8 @@ base:
       css/tokens.css: {}
     layout:
       css/layout.css: {}
+    component:
+      css/button.css: {}
 
 search:
   version: 0.1.0

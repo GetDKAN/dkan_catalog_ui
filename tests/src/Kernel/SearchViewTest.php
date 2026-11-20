@@ -2,6 +2,10 @@
 
 namespace Drupal\Tests\dkan_catalog_ui\Kernel;
 
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Cache\Cache;
+use Drupal\facets\Entity\Facet;
+use Drupal\user\Entity\User;
 use Drupal\search_api\Entity\Index;
 use Drupal\views\Views;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,13 +33,7 @@ class SearchViewTest extends CatalogUiKernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installSchema('search_api', ['search_api_item']);
-    $this->installEntitySchema('search_api_task');
-    \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
-    $this->installConfig(['search_api', 'dkan_metastore_search', 'dkan_catalog_ui']);
-    // hook_install() does not run in kernel tests.
-    \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui', 'install');
-    dkan_catalog_ui_ensure_format_index_field();
+    $this->installSearchConfig();
   }
 
   /**
@@ -108,7 +106,12 @@ class SearchViewTest extends CatalogUiKernelTestBase {
 
     $view = Views::getView('dkan_catalog_ui_search');
     $view->setDisplay('page_1');
-    $view->setRequest(Request::create('/search', 'GET', ['f' => ['dcu_theme:Transportation']]));
+    $view->setRequest(Request::create('/search', 'GET', [
+      'fulltext' => 'bike',
+      'f' => ['dcu_theme:Transportation'],
+      'sort_by' => 'title',
+      'page' => '2',
+    ]));
     $view->setExposedInput(['fulltext' => '']);
     $view->execute();
 
@@ -116,6 +119,8 @@ class SearchViewTest extends CatalogUiKernelTestBase {
     $html = (string) $this->container->get('renderer')->renderRoot($build);
     $this->assertStringContainsString('class="dcu-facets__clear"', $html);
     $this->assertStringContainsString('Clear all filters', $html);
+    // The link drops the facets and the page, keeping the term and sort.
+    $this->assertMatchesRegularExpression('@href="[^"]*\?fulltext=bike&amp;sort_by=title"[^>]*class="dcu-facets__clear"@', $html);
 
     // Empty values are not active facets.
     foreach ([['f' => ''], ['f' => ['']]] as $query) {
@@ -128,6 +133,35 @@ class SearchViewTest extends CatalogUiKernelTestBase {
       $html = (string) $this->container->get('renderer')->renderRoot($build);
       $this->assertStringNotContainsString('Clear all filters', $html);
     }
+  }
+
+  /**
+   * A node access module's grants hide the card; the row bubbles the context.
+   */
+  public function testNodeGrantsHideCard(): void {
+    $node = $this->createDataset('search-grants', ['title' => 'Restricted']);
+    $this->index();
+    // node_access_test grants view only to the node's author and to users
+    // with "node test view"; anonymous (the metastore's author in tests)
+    // must not own the node.
+    $this->enableModules(['node_access_test']);
+    $author = User::create(['name' => 'author']);
+    $author->save();
+    $node->setOwnerId($author->id())->save();
+
+    $view = Views::getView('dkan_catalog_ui_search');
+    $view->setDisplay('page_1');
+    $view->setExposedInput(['fulltext' => '']);
+    $view->execute();
+    $this->assertCount(1, $view->result);
+    $view->rowPlugin->preRender($view->result);
+    $row = $view->rowPlugin->render($view->result[0]);
+    $this->assertArrayNotHasKey('#theme', $row);
+    $this->assertContains('user.node_grants:view', $row['#cache']['contexts']);
+    $build = $view->render('page_1');
+    $html = (string) $this->container->get('renderer')->renderRoot($build);
+    $this->assertStringNotContainsString('dcu-card__title', $html);
+    $this->assertStringNotContainsString('Restricted', $html);
   }
 
   /**
@@ -144,6 +178,61 @@ class SearchViewTest extends CatalogUiKernelTestBase {
     $view->execute();
     $this->assertCount(1, $view->result);
     $this->assertSame('dkan_dataset/search-parks', $view->result[0]->_item->getId());
+  }
+
+  /**
+   * Facets survive a views results-cache hit on a later request.
+   *
+   * Core's `tag` cache plugin stores only the rows; facets read the Search
+   * API result set, which only the search_api_* plugins restore. Regression
+   * for the live failure where the second user class saw empty facets.
+   * Search API's view presave swaps `none`/`tag`/`time` for
+   * `search_api_none`, which never caches, so the second run also asserts
+   * a results-cache hit: shipping anything but search_api_tag fails here.
+   */
+  public function testFacetsSurviveResultsCache(): void {
+    $this->createDataset('search-one', ['title' => 'Bike Lanes', 'theme' => ['Transportation']]);
+    $this->createDataset('search-two', ['title' => 'Bike Parks', 'theme' => ['Recreation']]);
+    $this->index();
+
+    $cache = Views::getView('dkan_catalog_ui_search')->getDisplay('page_1')->getOption('cache');
+    $this->assertStringStartsWith('search_api_', $cache['type']);
+    // Every shipped facet is permanently cacheable (the dcu_case processor
+    // declares it), so the query can be cached at all.
+    foreach (Facet::loadMultiple() as $facet) {
+      $this->assertSame(Cache::PERMANENT, $facet->getCacheMaxAge(), $facet->id());
+    }
+
+    $helper = $this->container->get('search_api.query_helper');
+    $counts = [];
+    foreach ([0, 1] as $run) {
+      $request = Request::create('/search', 'GET', ['fulltext' => 'Bike']);
+      if ($run === 1) {
+        // A later request by another user class: Search API's per-request
+        // results and the facets manager's static state are gone, the
+        // rendered output is not cached for this user, and the views results
+        // cache primed by run 0 answers.
+        foreach (array_keys($helper->getAllResults()) as $searchId) {
+          $helper->removeResults($searchId);
+        }
+        $this->container->set('facets.manager', NULL);
+        $this->container->get('cache.render')->deleteAll();
+      }
+      $view = Views::getView('dkan_catalog_ui_search');
+      $view->setDisplay('page_1');
+      $view->setRequest($request);
+      $view->setExposedInput(['fulltext' => 'Bike']);
+      $view->execute();
+      if ($run === 1) {
+        // Served from the views results cache, not by a new search.
+        $this->assertSame(0, $view->execute_time);
+      }
+      $build = $view->render('page_1');
+      $html = (string) $this->container->get('renderer')->renderRoot($build);
+      $xpath = new \DOMXPath(Html::load($html));
+      $counts[] = $xpath->query('//*[contains(@class, "dcu-facets__facet--dcu_theme")]//a')->length;
+    }
+    $this->assertSame([2, 2], $counts);
   }
 
 }

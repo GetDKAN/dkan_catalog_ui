@@ -25,16 +25,16 @@
 
 .dcu-table__table thead th {
   padding: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
-  border-block-end: 2px solid var(--dcu-color-border, #dfe1e2);
-  background: var(--dcu-color-surface-alt, #f0f0f0);
   text-align: start;
   white-space: nowrap;
+  border-block-end: 2px solid var(--dcu-color-border, #dfe1e2);
+  background: var(--dcu-color-surface-alt, #f0f0f0);
 }
 
 .dcu-table__table tbody td {
   padding: var(--dcu-space-sm, 0.5rem) var(--dcu-space-md, 1rem);
-  border-block-end: 1px solid var(--dcu-color-border, #dfe1e2);
   white-space: nowrap;
+  border-block-end: 1px solid var(--dcu-color-border, #dfe1e2);
 }
 
 .dcu-table__message {
@@ -86,16 +86,17 @@
    too little room, the root itself scrolls. */
 .dcu-table--fullscreen {
   position: fixed;
-  inset: 0;
   z-index: 1000;
   display: flex;
-  flex-direction: column;
   overflow: auto;
+  flex-direction: column;
   margin: 0;
-  padding: var(--dcu-space-md, 1rem) 3.5rem var(--dcu-space-md, 1rem) var(--dcu-space-md, 1rem);
+  padding: var(--dcu-space-md, 1rem) 3.5rem var(--dcu-space-md, 1rem)
+    var(--dcu-space-md, 1rem);
   border: 0;
   border-radius: 0;
   background: var(--dcu-color-surface, #fff);
+  inset: 0;
 }
 
 .dcu-table--fullscreen > * {
@@ -103,15 +104,15 @@
 }
 
 .dcu-table--fullscreen > .dcu-table__wrapper {
+  overflow: auto;
   flex: 1 1 auto;
   min-height: 12rem;
-  overflow: auto;
 }
 
 .dcu-table--fullscreen .dcu-table__table thead th {
   position: sticky;
-  top: 0;
   z-index: 1;
+  top: 0;
 }
 
 .dcu-table [hidden] {
@@ -128,11 +129,11 @@
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
+  cursor: pointer;
   border: 1px solid var(--dcu-color-border, #dfe1e2);
   border-radius: var(--dcu-radius, 0.25rem);
   background: var(--dcu-color-surface, #fff);
   line-height: 0;
-  cursor: pointer;
 }
 
 .dcu-table__close svg {

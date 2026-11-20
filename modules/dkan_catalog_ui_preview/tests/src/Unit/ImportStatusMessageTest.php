@@ -46,7 +46,7 @@ class ImportStatusMessageTest extends UnitTestCase {
     $build = $this->getService(TRUE)->build('abc__1');
     $this->assertSame('p', $build['#tag']);
     $this->assertSame(['dcu-table__message'], $build['#attributes']['class']);
-    $this->assertStringContainsString('still being processed', $build['#value']);
+    $this->assertStringContainsString('not been imported', $build['#value']);
   }
 
   /**
@@ -63,9 +63,9 @@ class ImportStatusMessageTest extends UnitTestCase {
    */
   public static function messageProvider(): array {
     return [
-      'waiting' => [TRUE, Result::WAITING, Result::WAITING, 'still being processed'],
-      'fetching' => [TRUE, Result::IN_PROGRESS, Result::WAITING, 'still being processed'],
-      'importing' => [TRUE, Result::DONE, Result::IN_PROGRESS, 'still being processed'],
+      'waiting' => [TRUE, Result::WAITING, Result::WAITING, 'not been imported'],
+      'fetching' => [TRUE, Result::IN_PROGRESS, Result::WAITING, 'not been imported'],
+      'importing' => [TRUE, Result::DONE, Result::IN_PROGRESS, 'not been imported'],
       'fetch error' => [TRUE, Result::ERROR, Result::WAITING, 'could not be generated'],
       'import error' => [TRUE, Result::DONE, Result::ERROR, 'could not be generated'],
       'stopped' => [TRUE, Result::DONE, Result::STOPPED, self::GENERIC],

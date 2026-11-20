@@ -1,7 +1,7 @@
 .dcu-endpoint {
+  margin-bottom: var(--dcu-space-sm);
   border: 1px solid var(--dcu-color-border);
   border-radius: var(--dcu-radius);
-  margin-bottom: var(--dcu-space-sm);
 }
 
 .dcu-endpoint__summary {
@@ -27,12 +27,12 @@
 .dcu-endpoint__method {
   min-width: 3.5em;
   padding: 0 var(--dcu-space-sm);
+  text-align: center;
+  color: var(--dcu-color-primary-contrast);
   border-radius: var(--dcu-radius);
   background: var(--dcu-color-text-muted);
-  color: var(--dcu-color-primary-contrast);
   font-size: var(--dcu-font-size-sm);
   font-weight: 700;
-  text-align: center;
 }
 
 .dcu-endpoint__method--get {
@@ -65,9 +65,9 @@
 .dcu-endpoint__params th,
 .dcu-endpoint__params td {
   padding: var(--dcu-space-xs) var(--dcu-space-sm);
-  border-bottom: 1px solid var(--dcu-color-border);
   text-align: left;
   vertical-align: top;
+  border-bottom: 1px solid var(--dcu-color-border);
 }
 
 .dcu-endpoint__required {
@@ -86,9 +86,9 @@
 }
 
 .dcu-endpoint__code {
+  overflow-x: auto;
   padding: var(--dcu-space-sm) var(--dcu-space-md);
   border-radius: var(--dcu-radius);
   background: var(--dcu-color-surface-alt);
-  overflow-x: auto;
   font-size: var(--dcu-font-size-sm);
 }

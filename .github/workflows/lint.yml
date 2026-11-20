@@ -1,0 +1,63 @@
+# Coding standards and static analysis. PHPUnit needs a DKAN site and is
+# not run here yet.
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      - run: composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+      - run: composer global require drupal/coder:^8.3 --no-interaction
+      - run: ~/.composer/vendor/bin/phpcs --standard=phpcs.xml.dist .
+
+  phpstan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: module
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      # A minimal Drupal project with DKAN, so Drupal and DKAN classes resolve.
+      - run: composer create-project drupal/recommended-project:^11 site --no-interaction --no-install
+      - run: |
+          cd site
+          composer config minimum-stability dev
+          composer config allow-plugins.phpstan/extension-installer true
+          composer require drupal/dkan:^4 drupal/facets:^3 drupal/search_api:^1 drush/drush:^13 \
+            phpstan/phpstan:^2 mglaman/phpstan-drupal:^2 phpstan/extension-installer:^1 \
+            --no-interaction --with-all-dependencies
+          ln -s "$GITHUB_WORKSPACE/module" web/modules/custom/dkan_catalog_ui
+      - run: cd site && vendor/bin/phpstan analyse -c web/modules/custom/dkan_catalog_ui/phpstan.neon.dist --memory-limit=1G --no-progress
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: module
+      # Drupal core's eslint and stylelint configuration, as core CI applies it.
+      - run: git clone --depth 1 --branch 11.4.x https://git.drupalcode.org/project/drupal.git drupal
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable
+      - run: cd drupal/core && yarn install --immutable
+      - run: |
+          cd drupal/core
+          yarn run eslint --no-eslintrc -c .eslintrc.json --resolve-plugins-relative-to . --rule 'strict: off' --max-warnings 1000 \
+            "$GITHUB_WORKSPACE/module/components" \
+            "$GITHUB_WORKSPACE/module/modules/dkan_catalog_ui_preview/js" \
+            "$GITHUB_WORKSPACE/module/modules/dkan_catalog_ui_preview/components"
+      - run: cd drupal/core && yarn run stylelint --config .stylelintrc.json "$GITHUB_WORKSPACE/module/**/*.css"

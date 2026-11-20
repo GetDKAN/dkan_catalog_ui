@@ -5,21 +5,57 @@
  * Install hooks for the DKAN Catalog UI Preview module.
  */
 
+use Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks;
+
 /**
  * Implements hook_install().
  *
- * Enables the data_preview extra field on the default view display for the
- * data node type so previews appear out of the box.
+ * Enables the table extra field on the default view display for the data
+ * node type, at the weight the parent module's install uses for it.
  */
-function dkan_catalog_ui_preview_install() {
+function dkan_catalog_ui_preview_install(): void {
   $display = \Drupal::entityTypeManager()
     ->getStorage('entity_view_display')
     ->load('node.data.default');
 
   if ($display) {
-    $display->setComponent('data_preview', [
-      'weight' => 100,
-    ]);
+    $display->setComponent(DataPreviewHooks::EXTRA_FIELD, ['weight' => 10]);
     $display->save();
   }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function dkan_catalog_ui_preview_uninstall(): void {
+  $display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('node.data.default');
+
+  if ($display) {
+    $display->removeComponent(DataPreviewHooks::EXTRA_FIELD);
+    $display->save();
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * DKAN core's dkan_datastore_preview renders its own preview through the
+ * data_preview extra field; on dataset pages this module drops it
+ * (DataPreviewHooks::nodeViewAlter()). Installing alongside it is refused;
+ * enabling it afterwards cannot be prevented, so runtime warns.
+ */
+function dkan_catalog_ui_preview_requirements(string $phase): array {
+  if (!in_array($phase, ['install', 'runtime'], TRUE) || !\Drupal::moduleHandler()->moduleExists('dkan_datastore_preview')) {
+    return [];
+  }
+  return [
+    'dkan_catalog_ui_preview_conflict' => [
+      'title' => t('DKAN Catalog UI Preview'),
+      'value' => t('The dkan_datastore_preview module is also enabled.'),
+      'description' => t('Both modules render a datastore preview for dataset nodes. The catalog UI table replaces the core preview on dataset pages; uninstall dkan_datastore_preview.'),
+      'severity' => $phase === 'install' ? REQUIREMENT_ERROR : REQUIREMENT_WARNING,
+    ],
+  ];
 }

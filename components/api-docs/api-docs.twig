@@ -17,7 +17,7 @@
             <thead>
               <tr>
                 <th scope="col">{{ 'Parameter'|t }}</th>
-                <th scope="col">{{ 'In'|t }}</th>
+                <th scope="col">{{ 'In'|t({}, {'context': 'Where an API parameter is sent'}) }}</th>
                 <th scope="col">{{ 'Type'|t }}</th>
                 <th scope="col">{{ 'Description'|t }}</th>
               </tr>
@@ -58,7 +58,8 @@
   {% endif %}
   {% for group in groups %}
     <section class="dcu-api-docs__group">
-      <h3 class="dcu-api-docs__group-title">{{ group.title }}</h3>
+      {% set level = heading_level is defined ? heading_level : 2 %}
+      <h{{ level }} class="dcu-api-docs__group-title">{{ group.title }}</h{{ level }}>
       {% for endpoint in group.endpoints %}{{ api.endpoint(endpoint) }}{% endfor %}
     </section>
   {% endfor %}

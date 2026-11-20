@@ -19,6 +19,8 @@ class ApiDocsPageTest extends CatalogUiKernelTestBase {
   public function testPage(): void {
     $build = ApiDocsController::create($this->container)->page();
     $this->assertSame(ApiDocsController::MAX_AGE, $build['#cache']['max-age']);
+    $this->assertSame(['config:core.extension'], $build['#cache']['tags']);
+    $this->assertSame(['dkan_catalog_ui/base'], $build['#attached']['library']);
     $props = $build['#props'];
     $this->assertSame('/api/1', $props['docs_url']);
     $this->assertSame(['/api/1', '/api/1.yml'], array_column($props['links'], 'url'));
@@ -35,7 +37,7 @@ class ApiDocsPageTest extends CatalogUiKernelTestBase {
 
     $html = (string) $this->container->get('renderer')->renderInIsolation($build);
     $this->assertStringContainsString('href="/api/1.yml"', $html);
-    $this->assertStringContainsString('class="dcu-api-docs__group-title"', $html);
+    $this->assertStringContainsString('<h2 class="dcu-api-docs__group-title"', $html);
     $this->assertStringContainsString('programmatic access to the catalog', $html);
     $this->assertStringNotContainsString('this dataset', $html);
   }
