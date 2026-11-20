@@ -302,6 +302,15 @@ class DataTableTest extends BrowserTestBase {
     $this->drupalGet('/dataset/nope/table/apply');
     $assert->statusCodeEquals(404);
 
+    // Array sort/order would make core's TableSort throw on the table.
+    foreach (['/dataset/ft-apply', '/dataset/ft-apply/table'] as $path) {
+      foreach (['sort', 'order'] as $key) {
+        $this->drupalGet($path, ['query' => [$key => ['age']]]);
+        $assert->statusCodeEquals(200);
+        $assert->elementExists('css', '#dcu-table');
+      }
+    }
+
     user_role_revoke_permissions(RoleInterface::ANONYMOUS_ID, ['access content']);
     $this->drupalGet('/dataset/ft-apply/table/apply');
     $assert->statusCodeEquals(403);

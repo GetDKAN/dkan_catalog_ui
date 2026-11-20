@@ -4,9 +4,13 @@ namespace Drupal\Tests\dkan_catalog_ui\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\DistributionInfoInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilder;
 use Drupal\dkan_catalog_ui\Hook\EntityHooks;
+use Drupal\dkan_datastore\DatastoreService;
 use Drupal\node\NodeInterface;
 use PHPUnit\Framework\Attributes\Group;
+use Procrastinator\Result;
 
 /**
  * Tests the dataset page sections and template.
@@ -33,6 +37,42 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $viewBuilder = $this->container->get('entity_type.manager')->getViewBuilder('node');
     $build = $viewBuilder->view($node, 'full');
     return $viewBuilder->build($build);
+  }
+
+  /**
+   * Row counts are read only for finished imports (DKAN warns otherwise).
+   */
+  public function testRowCountsOnlyForFinishedImports(): void {
+    $node = $this->createDataset('counts-test');
+    $metadata = $this->container->get('dkan_catalog_ui.dataset_metadata')->load($node);
+    $realInfo = $this->container->get('dkan_catalog_ui.distribution_info');
+    $entries = $realInfo->byPath($node);
+    $info = function (string $status) use ($entries, $realInfo): DistributionInfoInterface {
+      $mock = $this->createMock(DistributionInfoInterface::class);
+      $mock->method('byPath')->willReturn(array_map(fn (array $entry) => ['importer_status' => $status] + $entry, $entries));
+      $mock->method('urlPath')->willReturnCallback([$realInfo, 'urlPath']);
+      $mock->method('cacheTags')->willReturn([]);
+      return $mock;
+    };
+    $build = fn (DistributionInfoInterface $distributionInfo, DatastoreService $datastore) => (new OverviewBuilder(
+      $this->container->get('dkan_catalog_ui.dataset_metadata'),
+      $distributionInfo,
+      $datastore,
+      $this->container->get('date.formatter'),
+    ))->build($node, $metadata)['resources']['#props']['resources'][0];
+
+    foreach ([Result::ERROR, Result::WAITING, Result::IN_PROGRESS] as $status) {
+      $datastore = $this->createMock(DatastoreService::class);
+      $datastore->expects($this->never())->method('summary');
+      $this->assertSame('', $build($info($status), $datastore)['rows'], $status);
+    }
+
+    $datastore = $this->createMock(DatastoreService::class);
+    $datastore->expects($this->once())->method('summary')
+      ->willReturn((object) ['numOfRows' => 1234, 'numOfColumns' => 5]);
+    $row = $build($info(Result::DONE), $datastore);
+    $this->assertSame('1,234', $row['rows']);
+    $this->assertSame('5', $row['columns']);
   }
 
   /**

@@ -8,6 +8,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dkan_common\DataResource;
 use Drupal\dkan_datastore\DatastoreService;
 use Drupal\node\NodeInterface;
+use Procrastinator\Result;
 
 /**
  * Builds the Overview tab: resources and the metadata table.
@@ -150,6 +151,10 @@ class OverviewBuilder implements OverviewBuilderInterface {
       return NULL;
     }
     if (!in_array($distInfo['mime_type'] ?? '', DataResource::IMPORTABLE_FILE_TYPES)) {
+      return NULL;
+    }
+    // DKAN's getSummary() warns on a table whose import failed or never ran.
+    if (array_key_exists('importer_status', $distInfo) && $distInfo['importer_status'] !== Result::DONE) {
       return NULL;
     }
     try {

@@ -56,3 +56,8 @@ services:
       - '@dkan.datastore.import_info'
       - '@dkan.metastore.resource_mapper'
   Drupal\dkan_catalog_ui_preview\ImportStatusMessageInterface: '@dkan_catalog_ui.preview.import_status_message'
+
+  dkan_catalog_ui.preview.table_sort_query_subscriber:
+    class: Drupal\dkan_catalog_ui_preview\EventSubscriber\TableSortQuerySubscriber
+    tags:
+      - { name: event_subscriber }
