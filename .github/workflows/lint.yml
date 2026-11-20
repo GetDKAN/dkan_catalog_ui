@@ -1,5 +1,4 @@
-# Coding standards and static analysis. PHPUnit needs a DKAN site and is
-# not run here yet.
+# Coding standards and static analysis. PHPUnit runs in tests.yml.
 name: Lint
 
 on:

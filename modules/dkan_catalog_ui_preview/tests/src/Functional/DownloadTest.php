@@ -103,7 +103,7 @@ class DownloadTest extends BrowserTestBase {
     // Header cells are the original column names, in the state's order.
     $this->assertSame('city,name', $lines[0]);
     // Only names containing "_1", sorted by name descending.
-    $rows = array_map('str_getcsv', array_slice($lines, 1));
+    $rows = array_map(fn (string $line): array => str_getcsv($line, escape: ''), array_slice($lines, 1));
     $names = array_column($rows, 1);
     $this->assertSame(10, count(array_filter($names, fn ($n) => str_contains($n, '_1'))));
     $descending = $names;
