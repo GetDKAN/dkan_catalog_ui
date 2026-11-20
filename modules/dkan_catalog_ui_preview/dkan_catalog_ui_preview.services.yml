@@ -23,6 +23,7 @@ services:
       - '@dkan_catalog_ui.preview.like_escaper'
       - '@dkan_catalog_ui.preview.toolbar_builder'
       - '@dkan_catalog_ui.preview.dictionary_headers'
+      - '@dkan_catalog_ui.number_format'
   Drupal\dkan_catalog_ui_preview\DataPreviewBuilderInterface: '@dkan_catalog_ui.preview.builder'
 
   dkan_catalog_ui.preview.dictionary_headers:

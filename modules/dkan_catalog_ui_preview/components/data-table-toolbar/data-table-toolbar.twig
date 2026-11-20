@@ -144,7 +144,7 @@
     </details>
 
     <details class="dcu-table__panel dcu-table__panel--columns" id="dcu-table-columns"{{ open_panel == 'columns' ? ' open' }}>
-      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'columns'}, with_context = false) }}{{ labels.columns }}{% if columns.hidden_count %} <span class="dcu-table__panel-count">({{ columns.hidden_count }}<span class="visually-hidden"> {{ 'hidden'|t }}</span>)</span>{% endif %}{{ ui.chevron() }}</summary>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'columns'}, with_context = false) }}{{ labels.columns }}{% if columns.hidden_count %} <span class="dcu-table__panel-count">({{ columns.hidden_count }}<span class="visually-hidden"> {{ 'hidden'|t({}, {'context': 'Count of hidden columns'}) }}</span>)</span>{% endif %}{{ ui.chevron() }}</summary>
       <form method="get" action="{{ apply_url }}" class="dcu-table__panel-body dcu-table__columns">
         {{ ui.hidden_inputs(columns.hidden) }}
         <input type="hidden" name="panel" value="columns" />
@@ -179,9 +179,9 @@
         {{ ui.panel_head(labels.display) }}
         <fieldset class="dcu-table__density" data-dcu-density>
           <legend>{{ 'Row height'|t }}</legend>
-          <label><input type="radio" name="dcu_density" value="compact" /> {{ 'Compact'|t }}</label>
-          <label><input type="radio" name="dcu_density" value="normal" /> {{ 'Normal'|t }}</label>
-          <label><input type="radio" name="dcu_density" value="expanded" /> {{ 'Expanded'|t }}</label>
+          <label><input type="radio" name="dcu_density" value="compact" /> {{ 'Compact'|t({}, {'context': 'Data table row height'}) }}</label>
+          <label><input type="radio" name="dcu_density" value="normal" /> {{ 'Normal'|t({}, {'context': 'Data table row height'}) }}</label>
+          <label><input type="radio" name="dcu_density" value="expanded" /> {{ 'Expanded'|t({}, {'context': 'Data table row height'}) }}</label>
         </fieldset>
         <button type="button" class="dcu-table__fullscreen" data-dcu-fullscreen aria-pressed="false">{{ include('dkan_catalog_ui:icon', {name: 'expand'}, with_context = false) }}{{ include('dkan_catalog_ui:icon', {name: 'collapse'}, with_context = false) }}<span class="dcu-table__button-label">{{ 'Expand table'|t }}</span></button>
       </div>

@@ -323,7 +323,7 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
     return [
       'filters' => (string) $this->t('Filters'),
       'columns' => (string) $this->t('Columns'),
-      'display' => (string) $this->t('View'),
+      'display' => (string) $this->t('View', [], ['context' => 'Data table display options panel']),
       'share' => (string) $this->t('Share view'),
       'download' => (string) $this->t('Download'),
     ];

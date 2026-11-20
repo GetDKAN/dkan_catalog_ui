@@ -32,6 +32,7 @@ services:
       - '@dkan_catalog_ui.distribution_info'
       - '@dkan.datastore.service'
       - '@date.formatter'
+      - '@dkan_catalog_ui.number_format'
   Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilderInterface: '@dkan_catalog_ui.overview_builder'
 
   dkan_catalog_ui.data_dictionary_builder:
@@ -73,3 +74,9 @@ services:
       - '@dkan.metastore.data_dictionary_discovery'
       - '@dkan_catalog_ui.dataset_metadata'
   Drupal\dkan_catalog_ui\Search\SearchResultBuilderInterface: '@dkan_catalog_ui.search_result_builder'
+
+  dkan_catalog_ui.number_format:
+    class: Drupal\dkan_catalog_ui\NumberFormat
+    arguments:
+      - '@language_manager'
+  Drupal\dkan_catalog_ui\NumberFormat: '@dkan_catalog_ui.number_format'

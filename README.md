@@ -7,8 +7,9 @@ the site repo (`PLAN-native-frontend.md`).
 ## What it provides
 
 - `/dataset/{uuid}` aliases on dataset nodes (forced on presave, overriding
-  editor-entered aliases; `drush dkan-catalog-ui:aliases` backfills; uninstall
-  removes them) and a breadcrumb builder (Home > Datasets) for them.
+  editor-entered aliases; language-neutral unless the dataset is translatable,
+  so `/es/dataset/{uuid}` resolves; `drush dkan-catalog-ui:aliases` backfills;
+  uninstall removes them) and a breadcrumb builder (Home > Datasets) for them.
 - Dataset page (`node--data--full`) with tabs (the no-JS fallback relies on
   CSS `:has()`; without it every panel shows): Data Table (preview submodule),
   Overview (resources with row/column counts, metadata table), Data Dictionary

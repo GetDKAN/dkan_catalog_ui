@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\dkan_catalog_ui\NumberFormat;
 use Drupal\dkan_catalog_ui_preview\DataSource\DataSourceInterface;
 use Drupal\dkan_catalog_ui_preview\DataSource\DataSourceResult;
 use Drupal\dkan_catalog_ui_preview\Toolbar\ToolbarBuilder;
@@ -60,6 +61,7 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
     protected readonly LikeEscaper $likeEscaper,
     protected readonly ToolbarBuilderInterface $toolbarBuilder,
     protected readonly DictionaryHeadersInterface $dictionaryHeaders,
+    protected readonly NumberFormat $numberFormat,
   ) {}
 
   /**
@@ -96,7 +98,9 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
     $resourceId = $tables[$index]['resource_id'];
     $options = [
       'caption' => $tables[$index]['label'] ?: NULL,
-      'base_url' => $node->toUrl(),
+      // A route URL in the current language, not $node->toUrl() (the node's
+      // language), so state links keep the interface language prefix.
+      'base_url' => Url::fromRoute('entity.node.canonical', ['node' => $node->id()]),
       'apply_url' => Url::fromRoute('dkan_catalog_ui_preview.apply', ['dataset' => $node->uuid()]),
       'fragment_url' => Url::fromRoute('dkan_catalog_ui_preview.fragment', ['dataset' => $node->uuid()]),
       'max_page_size' => $this->rowsLimit(),
@@ -419,10 +423,10 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
     $filtered = (bool) $state->conditions;
     $total = $filtered ? $result->unfilteredTotalCount : $matching;
     $args = [
-      '@matching' => number_format($matching),
-      '@total' => number_format((int) $total),
-      '@start' => number_format($state->offset() + 1),
-      '@end' => number_format($state->offset() + count($result->rows)),
+      '@matching' => $this->numberFormat->format($matching),
+      '@total' => $this->numberFormat->format((int) $total),
+      '@start' => $this->numberFormat->format($state->offset() + 1),
+      '@end' => $this->numberFormat->format($state->offset() + count($result->rows)),
     ];
 
     if ($matching === 0) {

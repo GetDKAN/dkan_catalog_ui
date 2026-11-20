@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\dkan_catalog_ui_preview\Functional;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\dkan_catalog_ui_preview\Traits\DatastoreFixtureTrait;
@@ -316,6 +317,30 @@ class DataTableTest extends BrowserTestBase {
     $assert->statusCodeEquals(403);
     $this->drupalGet('/dataset/ft-apply');
     $assert->statusCodeEquals(403);
+  }
+
+  /**
+   * Under a second language the alias resolves and state links keep it.
+   */
+  public function testInterfaceLanguage(): void {
+    $this->container->get('module_installer')->install(['language']);
+    $this->rebuildContainer();
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    $this->createImportedDataset('ft-lang');
+    $assert = $this->assertSession();
+
+    $this->drupalGet('/es/dataset/ft-lang');
+    $assert->statusCodeEquals(200);
+    $sort = $this->getSession()->getPage()->find('css', 'th a[rel="nofollow"]')->getAttribute('href');
+    $this->assertStringContainsString('/es/dataset/ft-lang?', $sort);
+
+    $this->drupalGet('/es/dataset/ft-lang/table/apply', ['query' => ['sort' => 'age']]);
+    $this->assertSame('/es/dataset/ft-lang', parse_url($this->getSession()->getCurrentUrl(), PHP_URL_PATH));
+
+    // English keeps the unprefixed URL.
+    $this->drupalGet('/dataset/ft-lang');
+    $sort = $this->getSession()->getPage()->find('css', 'th a[rel="nofollow"]')->getAttribute('href');
+    $this->assertStringNotContainsString('/es/', $sort);
   }
 
   /**

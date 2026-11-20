@@ -5,6 +5,7 @@ namespace Drupal\dkan_catalog_ui\DatasetPage;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dkan_catalog_ui\NumberFormat;
 use Drupal\dkan_common\DataResource;
 use Drupal\dkan_datastore\DatastoreService;
 use Drupal\node\NodeInterface;
@@ -61,6 +62,7 @@ class OverviewBuilder implements OverviewBuilderInterface {
     protected readonly DistributionInfoInterface $distributionInfo,
     protected readonly DatastoreService $datastore,
     protected readonly DateFormatterInterface $dateFormatter,
+    protected readonly NumberFormat $numberFormat,
   ) {}
 
   /**
@@ -135,8 +137,8 @@ class OverviewBuilder implements OverviewBuilderInterface {
       ];
       $summary = $this->summary($infoByPath[$path] ?? NULL);
       if ($summary) {
-        $row['rows'] = number_format($summary->numOfRows);
-        $row['columns'] = number_format($summary->numOfColumns);
+        $row['rows'] = $this->numberFormat->format((int) $summary->numOfRows);
+        $row['columns'] = $this->numberFormat->format((int) $summary->numOfColumns);
       }
       $rows[] = $row;
     }

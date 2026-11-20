@@ -4,10 +4,13 @@ namespace Drupal\Tests\dkan_catalog_ui_preview\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\Language;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\UnroutedUrlAssemblerInterface;
+use Drupal\dkan_catalog_ui\NumberFormat;
 use Drupal\dkan_catalog_ui_preview\DataPreviewBuilder;
 use Drupal\dkan_catalog_ui_preview\DataSource\DataSourceInterface;
 use Drupal\dkan_catalog_ui_preview\DataSource\DataSourceResult;
@@ -145,10 +148,20 @@ class DataPreviewBuilderTest extends UnitTestCase {
       $this->likeEscaper(),
       $toolbar = new ToolbarBuilder($this->likeEscaper()),
       $this->dictionaryHeaders(),
+      $this->numberFormat(),
     );
     $builder->setStringTranslation($this->getStringTranslationStub());
     $toolbar->setStringTranslation($this->getStringTranslationStub());
     return $builder;
+  }
+
+  /**
+   * English number formatting.
+   */
+  protected function numberFormat(): NumberFormat {
+    $languageManager = $this->createMock(LanguageManagerInterface::class);
+    $languageManager->method('getCurrentLanguage')->willReturn(new Language(['id' => 'en']));
+    return new NumberFormat($languageManager);
   }
 
   /**

@@ -19,6 +19,7 @@ use Drupal\dkan_catalog_ui\DatasetPage\MetadataDate;
 use Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilderInterface;
 use Drupal\dkan_catalog_ui\Search\SearchResultBuilderInterface;
 use Drupal\node\NodeInterface;
+use Drupal\path_alias\PathAliasInterface;
 
 /**
  * Entity hook implementations: dataset aliases and dataset page sections.
@@ -82,6 +83,14 @@ class EntityHooks {
   #[Hook('node_presave')]
   public function nodePresave(NodeInterface $node): void {
     $this->aliasManager->apply($node);
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_presave() for path_alias entities.
+   */
+  #[Hook('path_alias_presave')]
+  public function pathAliasPresave(PathAliasInterface $pathAlias): void {
+    $this->aliasManager->normalizeLangcode($pathAlias);
   }
 
   /**
