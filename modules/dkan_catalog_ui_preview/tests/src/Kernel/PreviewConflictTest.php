@@ -24,7 +24,6 @@ class PreviewConflictTest extends CatalogUiKernelTestBase {
     'facets',
     'dkan_metastore_search',
     'dkan_catalog_ui_preview',
-    'dkan_datastore_preview',
   ];
 
   /**
@@ -32,6 +31,11 @@ class PreviewConflictTest extends CatalogUiKernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    // DKAN 4.x-dev ships dkan_datastore_preview; 4.1.x releases do not.
+    if (!$this->container->get('extension.list.module')->exists('dkan_datastore_preview')) {
+      $this->markTestSkipped('This DKAN version does not include dkan_datastore_preview.');
+    }
+    $this->enableModules(['dkan_datastore_preview']);
     // Ships the search_result view mode and its display.
     $this->installSearchConfig();
     // Both install hooks would enable their field on the default display.

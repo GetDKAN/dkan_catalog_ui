@@ -1,0 +1,38 @@
+# PHPUnit unit, kernel and functional suites on a ddev Drupal 11 + DKAN site.
+# PHP 8.4 here; lint.yml covers 8.3. DKAN 4.x-dev adds dkan_datastore_preview,
+# which PreviewConflictTest needs (skipped on releases without it).
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dkan: ['^4', '4.x-dev']
+    name: phpunit (DKAN ${{ matrix.dkan }})
+    steps:
+      - uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+      - name: Create a DKAN project
+        run: |
+          mkdir site && cd site
+          ddev config --project-type=drupal11 --docroot=web --project-name=ci --php-version=8.4 \
+            --web-environment-add=SIMPLETEST_BASE_URL=http://localhost,SIMPLETEST_DB=mysql://db:db@db/db,BROWSERTEST_OUTPUT_DIRECTORY=/tmp
+          ddev start
+          ddev composer create-project drupal/recommended-project:^11 --no-interaction
+          ddev composer config minimum-stability dev
+          ddev composer config prefer-stable true
+          ddev composer require "drupal/dkan:${{ matrix.dkan }}" drupal/facets:^3 drupal/search_api:^1 drush/drush:^13 \
+            --no-interaction --with-all-dependencies
+          ddev composer require --dev drupal/core-dev:^11 --no-interaction --with-all-dependencies
+      - uses: actions/checkout@v4
+        with:
+          path: site/web/modules/custom/dkan_catalog_ui
+      - name: PHPUnit
+        run: cd site && ddev exec vendor/bin/phpunit -c web/modules/custom/dkan_catalog_ui

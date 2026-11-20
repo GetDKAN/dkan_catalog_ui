@@ -49,3 +49,6 @@ ddev exec "DRUPAL_ROOT=/var/www/html/docroot SIMPLETEST_BASE_URL=\$DDEV_PRIMARY_
 ddev exec "cd docroot/modules/custom/dkan_catalog_ui && ../../../../vendor/bin/phpcs --standard=phpcs.xml.dist ."
 ddev exec "vendor/bin/phpstan analyse -c docroot/modules/custom/dkan_catalog_ui/phpstan.neon.dist --memory-limit=1G"
 ```
+
+CI: `.github/workflows/lint.yml` (phpcs, phpstan, eslint, stylelint) and
+`tests.yml` (all PHPUnit suites on a ddev Drupal 11 + DKAN site).
