@@ -35,6 +35,22 @@
   background: var(--dcu-color-surface);
 }
 
+/* Forced colors repaint transparent borders, so every tab would look
+   selected. Fill the selected tab with system colors instead (opted out of
+   forcing so the text backplate does not hide HighlightText). */
+@media (forced-colors: active) {
+  .dcu-tabs__link {
+    border-color: Canvas;
+  }
+
+  .dcu-tabs__link[aria-selected="true"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    border-color: Highlight;
+    background: Highlight;
+  }
+}
+
 .dcu-tabs__panel-heading {
   font-size: var(--dcu-font-size-lg);
   margin-block: var(--dcu-space-md) var(--dcu-space-sm);

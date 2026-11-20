@@ -25,6 +25,11 @@
   // dropped so overlapping changes cannot apply out of order.
   let latestRequest = 0;
 
+  // The query string the table on screen reflects. A popstate that leaves it
+  // unchanged is a fragment (#hash) navigation, such as the skip link, and
+  // must not reload the table or move focus.
+  let shownSearch = window.location.search;
+
   /**
    * Read the stored row height, or 'normal'.
    */
@@ -153,11 +158,18 @@
 
   /**
    * Make the siblings of a node inert, remembering which ones were changed.
+   *
+   * Live regions stay live: inert removes them from the accessibility tree,
+   * which would silence Drupal.announce() while the table is expanded.
    * @param node
    */
   function inertSiblings(node) {
     Array.from(node.parentElement.children).forEach((sibling) => {
-      if (sibling !== node && !sibling.hasAttribute("inert")) {
+      if (
+        sibling !== node &&
+        !sibling.hasAttribute("inert") &&
+        !sibling.matches("[aria-live]")
+      ) {
         sibling.setAttribute("inert", "");
         inertElements.push(sibling);
       }
@@ -312,6 +324,7 @@
     if (push) {
       window.history.pushState({ dcuTable: true }, "", pageUrl.toString());
     }
+    shownSearch = window.location.search;
     Drupal.attachBehaviors(next.parentNode);
     if (wasFullscreen) {
       enterFullscreen(next, true);
@@ -699,6 +712,9 @@
           }
         });
         window.addEventListener("popstate", () => {
+          if (window.location.search === shownSearch) {
+            return;
+          }
           const root = document.querySelector(ROOT);
           if (root && root.querySelector("[data-dcu-fragment]")) {
             const current = new URL(window.location.href);
