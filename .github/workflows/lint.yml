@@ -22,23 +22,26 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: module
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           tools: composer
-      # A minimal Drupal project with DKAN, so Drupal and DKAN classes resolve.
+      # A minimal Drupal project with DKAN, so Drupal and DKAN classes resolve;
+      # core-dev provides PHPUnit for the test classes.
       - run: composer create-project drupal/recommended-project:^11 site --no-interaction --no-install
       - run: |
           cd site
           composer config minimum-stability dev
+          composer config prefer-stable true
           composer config allow-plugins.phpstan/extension-installer true
           composer require drupal/dkan:^4 drupal/facets:^3 drupal/search_api:^1 drush/drush:^13 \
             phpstan/phpstan:^2 mglaman/phpstan-drupal:^2 phpstan/extension-installer:^1 \
             --no-interaction --with-all-dependencies
-          ln -s "$GITHUB_WORKSPACE/module" web/modules/custom/dkan_catalog_ui
+          composer require --dev drupal/core-dev:^11 --no-interaction --with-all-dependencies
+      # Inside the Drupal root, so phpstan-drupal discovers the module.
+      - uses: actions/checkout@v4
+        with:
+          path: site/web/modules/custom/dkan_catalog_ui
       - run: cd site && vendor/bin/phpstan analyse -c web/modules/custom/dkan_catalog_ui/phpstan.neon.dist --memory-limit=1G --no-progress
 
   frontend:
