@@ -25,7 +25,8 @@ the site repo (`PLAN-native-frontend.md`).
   `dkan_catalog_ui.links.menu.yml`; install and a post-update remove a legacy
   content link titled "Datasets" pointing at `/search` (exact match only).
 - `/search`: Views page on the `dkan` search index with fulltext, exposed sort,
-  result cards (`search_result` view mode), and facet blocks rendered inside the
+  result cards (`search_result` view mode: optional config, so core 11.3's
+  copy from `node` is reused), and facet blocks rendered inside the
   view (theme, keyword, publisher, format; ten values each, then "Show more"). Adds `distribution__item__format` to
   the index on install.
 - Single Directory Components under `components/`; neutral CSS tokens in `css/tokens.css`.
@@ -58,6 +59,7 @@ ddev exec "vendor/bin/phpstan analyse -c docroot/modules/custom/dkan_catalog_ui/
 
 CI: `.github/workflows/lint.yml` (phpcs, phpstan, eslint, stylelint) and
 `tests.yml` (all PHPUnit suites on a ddev Drupal 11 + DKAN site, then
-`scripts/config-drift.php`, which fails when `config/install` differs from a
-fresh install's config export). After changing shipped config, install on a
+`scripts/config-drift.php`, which fails when `config/install` or
+`config/optional` differs from a fresh install's config export, on latest core
+with DKAN ^4). After changing shipped config, install on a
 fresh site, `drush config:export`, and copy the computed keys back.
