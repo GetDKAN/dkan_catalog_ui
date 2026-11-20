@@ -26,6 +26,17 @@ class SearchResultViewModeTest extends CatalogUiKernelTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+    // Start without the view mode, as on 11.4: parent::setUp() installed core's
+    // (11.3) or the module's optional copy along with node's config.
+    EntityViewDisplay::load('node.data.search_result')?->delete();
+    EntityViewMode::load('node.search_result')?->delete();
+  }
+
+  /**
    * Without a view mode, the module's own is installed with the display.
    */
   public function testInstallsOwnViewMode(): void {
@@ -38,9 +49,6 @@ class SearchResultViewModeTest extends CatalogUiKernelTestBase {
    * An existing view mode (core 11.3) is kept and the display still installs.
    */
   public function testReusesExistingViewMode(): void {
-    // setUp() already installed the module's optional copies; start as 11.3.
-    EntityViewDisplay::load('node.data.search_result')?->delete();
-    EntityViewMode::load('node.search_result')->delete();
     EntityViewMode::create([
       'id' => 'node.search_result',
       'label' => 'Search result highlighting input',
