@@ -77,6 +77,7 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
       '#props' => [
         'apply_url' => $applyUrl->toString(),
         'fragment_url' => $options['fragment_url'] ? $options['fragment_url']->toString() : '',
+        'base_url' => $baseUrl ? $baseUrl->toString() : '',
         'show_panels' => (bool) $options['panels'],
         'has_summary' => !empty($options['summary']),
         'open_panel' => (string) $options['panel'],

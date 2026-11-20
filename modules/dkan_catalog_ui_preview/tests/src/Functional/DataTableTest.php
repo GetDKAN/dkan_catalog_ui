@@ -194,6 +194,8 @@ class DataTableTest extends BrowserTestBase {
     $assert = $this->assertSession();
     // No tableresponsive (and so no jQuery) for the preview table.
     $assert->responseNotContains('tableresponsive');
+    // In-place updates match state links by this URL, not the current path.
+    $assert->elementAttributeContains('css', '.dcu-table__toolbar', 'data-dcu-base', '/dataset/ft-display');
 
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('page_size', '10');
