@@ -32,4 +32,4 @@
   'user': 'M8 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6zM2.5 14.5a5.5 5.5 0 0 1 11 0',
   'search': 'M7 11.5a4.5 4.5 0 1 0 0-9a4.5 4.5 0 0 0 0 9zM10.5 10.5L14 14',
 } %}
-<svg class="dcu-icon dcu-icon--{{ name }}"{% if size %} width="{{ size }}" height="{{ size }}" style="--dcu-icon-size: {{ size }}px"{% endif %} viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" focusable="false"{% if label %} role="img" aria-label="{{ label }}"{% else %} aria-hidden="true"{% endif %}><path d="{{ paths[name] }}"/></svg>
+<svg class="dcu-icon dcu-icon--{{ name }}"{% if size %} width="{{ size }}" height="{{ size }}"{% endif %} viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" focusable="false"{% if label %} role="img" aria-label="{{ label }}"{% else %} aria-hidden="true"{% endif %}><path d="{{ paths[name] }}"/></svg>

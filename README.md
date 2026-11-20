@@ -15,6 +15,10 @@ the site repo (`PLAN-native-frontend.md`).
   Overview (resources with row/column counts, metadata table), Data Dictionary
   (sitewide or reference mode), API (server-rendered endpoint reference from
   the dataset's OpenAPI document, plus the raw JSON link; no client library).
+  Fragment IDs are a stable contract (search cards and shared links use
+  them): `#data-table`, `#overview`, `#data-dictionary` and `#api` select a
+  tab; `#dcu-table` (or any ID inside a panel) selects the panel containing
+  it. Other content on the page must not reuse these IDs.
 - `/api/docs`: the site API reference, the same endpoint list rendered from
   DKAN's `/api/1` document grouped by tag (cached until the set of enabled
   modules changes; an hour at most where max-age applies). Main-menu links Datasets and API ship in
@@ -28,7 +32,8 @@ the site repo (`PLAN-native-frontend.md`).
   `dkan_catalog_ui:icon` renders an inline SVG by `name` (enum in its
   `.component.yml`; unknown names fail prop validation where PHP assertions
   are on, as in tests), an optional fixed `size`
-  in px (default: `1em`, so `font-size` scales it) and an optional `label`
+  in px (as `width`/`height` attributes, no inline style; default: `1em`, so
+  `font-size` or `--dcu-icon-size` scales it) and an optional `label`
   (otherwise `aria-hidden`). Include it from Twig with
   `{{ include('dkan_catalog_ui:icon', {name: 'filter'}, with_context = false) }}`.
 

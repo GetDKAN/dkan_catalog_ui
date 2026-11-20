@@ -1,6 +1,10 @@
 .dcu-icon {
   flex: none;
+  vertical-align: -0.125em;
+}
+
+/* A fixed size uses the width/height attributes (no inline style, for CSP). */
+.dcu-icon:where(:not([width])) {
   width: var(--dcu-icon-size, 1em);
   height: var(--dcu-icon-size, 1em);
-  vertical-align: -0.125em;
 }

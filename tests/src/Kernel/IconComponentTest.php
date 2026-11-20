@@ -43,7 +43,9 @@ class IconComponentTest extends CatalogUiKernelTestBase {
     ];
     $html = (string) $renderer->renderInIsolation($build);
     $this->assertStringContainsString('role="img" aria-label="Close"', $html);
-    $this->assertStringContainsString('width="12" height="12" style="--dcu-icon-size: 12px"', $html);
+    $this->assertStringContainsString('width="12" height="12" viewBox', $html);
+    // No inline style, so a strict style-src CSP needs no exception.
+    $this->assertStringNotContainsString('style=', $html);
     $this->assertStringNotContainsString('aria-hidden', $html);
   }
 
