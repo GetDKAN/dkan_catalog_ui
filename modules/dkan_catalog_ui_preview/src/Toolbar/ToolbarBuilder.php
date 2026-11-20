@@ -6,6 +6,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\dkan_catalog_ui\DatasetPage\DistinctTitles;
 use Drupal\dkan_catalog_ui\DatasetPage\DownloadUrl;
 use Drupal\dkan_catalog_ui_preview\Condition;
 use Drupal\dkan_catalog_ui_preview\DataPreviewBuilder;
@@ -184,11 +185,16 @@ class ToolbarBuilder implements ToolbarBuilderInterface {
     if (count($tables) < 2) {
       return NULL;
     }
+    $labels = [];
+    foreach ($tables as $index => $table) {
+      $labels[$index] = $table['title'] ?: ($table['label'] ?: $this->plain($this->t('Distribution @n', ['@n' => $index + 1])));
+    }
+    $labels = DistinctTitles::apply($labels, array_map(fn (array $table) => (string) $table['label'], $tables));
     $items = [];
     foreach ($tables as $index => $table) {
       $items[] = [
         'value' => (string) $index,
-        'label' => $table['title'] ?: ($table['label'] ?: $this->plain($this->t('Distribution @n', ['@n' => $index + 1]))),
+        'label' => $labels[$index],
         'selected' => $index === $state->table,
       ];
     }

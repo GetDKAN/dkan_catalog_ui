@@ -187,7 +187,7 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
    */
   public function testDatesAreUtc(): void {
     date_default_timezone_set('Pacific/Auckland');
-    $node = $this->createDataset('utc-test', ['modified' => '2020-01-15T23:30:00Z', 'issued' => '2019-06-01']);
+    $node = $this->createDataset('utc-test', ['modified' => '2020-01-15T23:30:00-08:00', 'issued' => '2019-06-01']);
     $build = $this->buildNodeView($node);
     $this->assertSame('January 15, 2020', $build[EntityHooks::FIELD_HEADER]['#props']['updated']);
     $this->assertSame('2020-01-15', $build[EntityHooks::FIELD_HEADER]['#props']['updated_iso']);
@@ -291,6 +291,20 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $this->assertContains('config:dkan_metastore.settings', $section['#cache']['tags']);
     $this->assertArrayHasKey('empty', $section);
     $this->assertArrayNotHasKey(0, $section);
+  }
+
+  /**
+   * A dictionary without fields renders a message, not an empty table.
+   */
+  public function testDataDictionaryWithoutFields(): void {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'dkan_catalog_ui:data-dictionary',
+      '#props' => ['title' => 'Empty', 'fields' => []],
+    ];
+    $html = (string) $this->container->get('renderer')->renderInIsolation($build);
+    $this->assertStringContainsString('This data dictionary defines no fields.', $html);
+    $this->assertStringNotContainsString('<table', $html);
   }
 
   /**

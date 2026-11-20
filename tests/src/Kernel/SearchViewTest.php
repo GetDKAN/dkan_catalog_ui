@@ -181,6 +181,28 @@ class SearchViewTest extends CatalogUiKernelTestBase {
   }
 
   /**
+   * Shipped facets show ten values; the post-update skips site-set limits.
+   */
+  public function testFacetSoftLimit(): void {
+    foreach (['dcu_theme', 'dcu_keyword', 'dcu_publisher', 'dcu_format'] as $id) {
+      $this->assertSame(10, Facet::load($id)->getWidget()['config']['soft_limit'], $id);
+    }
+    $setLimit = function (string $id, int $limit): void {
+      $facet = Facet::load($id);
+      $widget = $facet->getWidget();
+      $widget['config']['soft_limit'] = $limit;
+      $facet->setWidget($widget['type'], $widget['config']);
+      $facet->save();
+    };
+    $setLimit('dcu_theme', 0);
+    $setLimit('dcu_keyword', 5);
+    \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui', 'php', 'dkan_catalog_ui.post_update');
+    $this->assertSame('Soft limit 10 set on: dcu_theme.', dkan_catalog_ui_post_update_facet_soft_limit());
+    $this->assertSame(10, Facet::load('dcu_theme')->getWidget()['config']['soft_limit']);
+    $this->assertSame(5, Facet::load('dcu_keyword')->getWidget()['config']['soft_limit']);
+  }
+
+  /**
    * Facets survive a views results-cache hit on a later request.
    *
    * Core's `tag` cache plugin stores only the rows; facets read the Search

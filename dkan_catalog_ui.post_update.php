@@ -6,6 +6,7 @@
  */
 
 use Drupal\dkan_catalog_ui\Hook\EntityHooks;
+use Drupal\facets\Entity\Facet;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -31,6 +32,26 @@ function dkan_catalog_ui_post_update_flag_format_field(): string {
     return 'The format index field is now recorded as added by dkan_catalog_ui.';
   }
   return 'No module-added format index field found; nothing recorded.';
+}
+
+/**
+ * Show ten values per shipped facet, with "Show more", where still unlimited.
+ *
+ * Facets a site has given its own soft limit are left alone.
+ */
+function dkan_catalog_ui_post_update_facet_soft_limit(): string {
+  $updated = [];
+  foreach (Facet::loadMultiple(['dcu_theme', 'dcu_keyword', 'dcu_publisher', 'dcu_format']) as $facet) {
+    $widget = $facet->getWidget();
+    if (($widget['config']['soft_limit'] ?? NULL) !== 0) {
+      continue;
+    }
+    $widget['config']['soft_limit'] = 10;
+    $facet->setWidget($widget['type'], $widget['config']);
+    $facet->save();
+    $updated[] = $facet->id();
+  }
+  return $updated ? 'Soft limit 10 set on: ' . implode(', ', $updated) . '.' : 'No unlimited shipped facets; nothing changed.';
 }
 
 /**

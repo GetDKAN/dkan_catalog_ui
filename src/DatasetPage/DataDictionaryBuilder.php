@@ -135,7 +135,11 @@ class DataDictionaryBuilder implements DataDictionaryBuilderInterface {
         $titles[$this->distributionInfo->urlPath($url)] = (string) $dist->title;
       }
     }
-    return $titles;
+    $files = [];
+    foreach (array_keys($titles) as $path) {
+      $files[$path] = basename((string) $path);
+    }
+    return DistinctTitles::apply($titles, $files);
   }
 
   /**

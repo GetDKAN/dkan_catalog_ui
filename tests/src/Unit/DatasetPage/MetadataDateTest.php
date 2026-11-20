@@ -30,19 +30,25 @@ class MetadataDateTest extends UnitTestCase {
     $this->assertNull(MetadataDate::parse(''));
     $this->assertNull(MetadataDate::parse('not a date'));
     $this->assertSame('2020-01-15', MetadataDate::iso('2020-01-15T23:30:00Z'));
+    $this->assertSame('2020-01-15', MetadataDate::iso('2020-01-15T23:30:00-08:00'));
+    $this->assertSame('2020-01-01', MetadataDate::iso('2020-01-01T00:30:00+14:00'));
     $this->assertSame('', MetadataDate::iso('not a date'));
   }
 
   /**
-   * Display goes through the formatter in UTC; unparseable values pass through.
+   * Display formats the calendar date as written; unparseable values pass.
+   *
+   * The formatter receives midnight UTC of the written date.
    */
   public function testDisplay(): void {
+    date_default_timezone_set('Pacific/Auckland');
     $formatter = $this->createMock(DateFormatterInterface::class);
-    $formatter->expects($this->once())
+    $formatter->expects($this->exactly(2))
       ->method('format')
-      ->with(1579131000, 'custom', 'F j, Y', 'UTC')
+      ->with(1579046400, 'custom', 'F j, Y', 'UTC')
       ->willReturn('January 15, 2020');
     $this->assertSame('January 15, 2020', MetadataDate::display($formatter, '2020-01-15T23:30:00Z'));
+    $this->assertSame('January 15, 2020', MetadataDate::display($formatter, '2020-01-15T23:30:00-08:00'));
     $this->assertSame('circa 2020', MetadataDate::display($formatter, 'circa 2020'));
   }
 

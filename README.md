@@ -21,7 +21,7 @@ the site repo (`PLAN-native-frontend.md`).
   content link titled "Datasets" pointing at `/search` (exact match only).
 - `/search`: Views page on the `dkan` search index with fulltext, exposed sort,
   result cards (`search_result` view mode), and facet blocks rendered inside the
-  view (theme, keyword, publisher, format). Adds `distribution__item__format` to
+  view (theme, keyword, publisher, format; ten values each, then "Show more"). Adds `distribution__item__format` to
   the index on install.
 - Single Directory Components under `components/`; neutral CSS tokens in `css/tokens.css`.
   `dkan_catalog_ui:icon` renders an inline SVG by `name` (enum in its
