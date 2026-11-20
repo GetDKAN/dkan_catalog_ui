@@ -210,6 +210,8 @@ class DataPreviewBuilder implements DataPreviewBuilderInterface {
           '#header' => $this->buildHeader($labels, $dictionary, $columns, $state, $baseUrl, $numeric),
           '#rows' => $this->buildRows($result->rows, $columns, $numeric),
           '#sticky' => FALSE,
+          // No priority-* columns: tableresponsive (and jQuery) is inert.
+          '#responsive' => FALSE,
           '#empty' => $this->t('No data available.'),
           '#attributes' => ['class' => ['dcu-table__table']]
           + ((string) ($options['caption'] ?? '') !== '' ? ['aria-labelledby' => self::CAPTION_ID] : []),

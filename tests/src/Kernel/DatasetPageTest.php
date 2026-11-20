@@ -306,6 +306,16 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $html = (string) $this->container->get('renderer')->renderInIsolation($build);
     $this->assertStringContainsString('This data dictionary defines no fields.', $html);
     $this->assertStringNotContainsString('<table', $html);
+    $this->assertStringNotContainsString('role="region"', $html);
+
+    // With fields, the scroller is a labelled, focusable region.
+    $build = [
+      '#type' => 'component',
+      '#component' => 'dkan_catalog_ui:data-dictionary',
+      '#props' => ['title' => 'Empty', 'fields' => [['name' => 'a', 'title' => 'A', 'type' => 'string']]],
+    ];
+    $html = (string) $this->container->get('renderer')->renderInIsolation($build);
+    $this->assertStringContainsString('<div class="dcu-data-dictionary" tabindex="0" role="region" aria-label="Empty">', $html);
   }
 
   /**

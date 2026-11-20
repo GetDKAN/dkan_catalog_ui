@@ -95,7 +95,6 @@
   }
 }
 
-.dcu-search__main .view-header,
 .dcu-search__main .dcu-search__summary {
   margin-bottom: var(--dcu-space-md);
   color: var(--dcu-color-text-muted);

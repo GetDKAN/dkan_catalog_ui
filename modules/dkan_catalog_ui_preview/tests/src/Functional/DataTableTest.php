@@ -192,6 +192,8 @@ class DataTableTest extends BrowserTestBase {
     $this->createImportedDataset('ft-display');
     $this->drupalGet('/dataset/ft-display');
     $assert = $this->assertSession();
+    // No tableresponsive (and so no jQuery) for the preview table.
+    $assert->responseNotContains('tableresponsive');
 
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('page_size', '10');

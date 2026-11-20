@@ -34,7 +34,7 @@
         </li>
       {% endif %}
       {% if ellipses.previous %}
-        <li class="pager__item pager__item--ellipsis" role="presentation">&hellip;</li>
+        <li class="pager__item pager__item--ellipsis"><span aria-hidden="true">&hellip;</span></li>
       {% endif %}
       {% for key, item in items.pages %}
         <li class="pager__item{{ current == key ? ' is-active' : '' }}">
@@ -45,7 +45,7 @@
         </li>
       {% endfor %}
       {% if ellipses.next %}
-        <li class="pager__item pager__item--ellipsis" role="presentation">&hellip;</li>
+        <li class="pager__item pager__item--ellipsis"><span aria-hidden="true">&hellip;</span></li>
       {% endif %}
       {% if items.next %}
         <li class="pager__item pager__item--next">

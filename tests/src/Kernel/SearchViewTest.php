@@ -178,6 +178,15 @@ class SearchViewTest extends CatalogUiKernelTestBase {
     $view->execute();
     $this->assertCount(1, $view->result);
     $this->assertSame('dkan_dataset/search-parks', $view->result[0]->_item->getId());
+
+    // No match: the empty text is wrapped for theme styling.
+    $view = Views::getView('dkan_catalog_ui_search');
+    $view->setDisplay('page_1');
+    $view->setExposedInput(['fulltext' => 'zebra']);
+    $view->execute();
+    $build = $view->render('page_1');
+    $html = (string) $this->container->get('renderer')->renderRoot($build);
+    $this->assertMatchesRegularExpression('@<div class="view-empty">\s*No datasets match your search.@', $html);
   }
 
   /**

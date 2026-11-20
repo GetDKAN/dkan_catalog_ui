@@ -1,5 +1,6 @@
 {% set has_format = fields|filter(field => field.format is not empty)|length > 0 %}
-<div class="dcu-data-dictionary">
+{# Focusable region so keyboard users can scroll a wide table (WCAG 2.1.1). #}
+<div class="dcu-data-dictionary"{% if fields is not empty %} tabindex="0" role="region" aria-label="{{ title ?: 'Data dictionary'|t }}"{% endif %}>
   {% if title and (show_title is not defined or show_title) %}<h3 class="dcu-data-dictionary__heading">{{ title }}</h3>{% endif %}
   {% if fields is empty %}
   <p class="dcu-data-dictionary__empty">{{ 'This data dictionary defines no fields.'|t }}</p>

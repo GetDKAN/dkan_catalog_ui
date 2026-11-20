@@ -2,6 +2,12 @@
   margin-bottom: var(--dcu-space-lg);
 }
 
+/* Zero specificity so a theme's focus ring wins. */
+:where(.dcu-data-dictionary:focus-visible) {
+  outline: 2px solid var(--dcu-color-primary);
+  outline-offset: 2px;
+}
+
 .dcu-data-dictionary__table {
   width: 100%;
   border-collapse: collapse;
@@ -11,7 +17,7 @@
 .dcu-data-dictionary__table th,
 .dcu-data-dictionary__table td {
   padding: var(--dcu-space-sm) var(--dcu-space-md);
-  text-align: left;
+  text-align: start;
   vertical-align: top;
   border-bottom: 1px solid var(--dcu-color-border);
 }
