@@ -226,7 +226,9 @@ class SearchViewTest extends CatalogUiKernelTestBase {
     $this->createDataset('search-two', ['title' => 'Bike Parks', 'theme' => ['Recreation']]);
     $this->index();
 
-    $cache = Views::getView('dkan_catalog_ui_search')->getDisplay('page_1')->getOption('cache');
+    $view = Views::getView('dkan_catalog_ui_search');
+    $view->setDisplay('page_1');
+    $cache = $view->getDisplay()->getOption('cache');
     $this->assertStringStartsWith('search_api_', $cache['type']);
     // Every shipped facet is permanently cacheable (the dcu_case processor
     // declares it), so the query can be cached at all.

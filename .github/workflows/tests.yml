@@ -1,5 +1,6 @@
 # PHPUnit unit, kernel and functional suites on a ddev Drupal 11 + DKAN site:
-# the latest 11.x on PHP 8.4, and the 11.3 floor on PHP 8.3. DKAN 4.x-dev adds
+# the latest 11.x on PHP 8.4, and the 11.3 floor on PHP 8.3. Then a fresh
+# install whose config export must match config/install. DKAN 4.x-dev adds
 # dkan_datastore_preview, which PreviewConflictTest needs (skipped on releases
 # without it).
 name: Tests
@@ -40,3 +41,11 @@ jobs:
           path: site/web/modules/custom/dkan_catalog_ui
       - name: PHPUnit
         run: cd site && ddev exec vendor/bin/phpunit -c web/modules/custom/dkan_catalog_ui
+      - name: Shipped config matches a fresh install
+        if: success() || failure()
+        run: |
+          cd site
+          ddev drush site:install minimal --db-url=mysql://db:db@db/db -y
+          ddev drush en -y dkan dkan_catalog_ui dkan_catalog_ui_preview
+          ddev drush config:export --destination=/tmp/active -y
+          ddev exec php web/modules/custom/dkan_catalog_ui/scripts/config-drift.php /tmp/active web/modules/custom/dkan_catalog_ui/config/install

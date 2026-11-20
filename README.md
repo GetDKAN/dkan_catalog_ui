@@ -52,4 +52,7 @@ ddev exec "vendor/bin/phpstan analyse -c docroot/modules/custom/dkan_catalog_ui/
 ```
 
 CI: `.github/workflows/lint.yml` (phpcs, phpstan, eslint, stylelint) and
-`tests.yml` (all PHPUnit suites on a ddev Drupal 11 + DKAN site).
+`tests.yml` (all PHPUnit suites on a ddev Drupal 11 + DKAN site, then
+`scripts/config-drift.php`, which fails when `config/install` differs from a
+fresh install's config export). After changing shipped config, install on a
+fresh site, `drush config:export`, and copy the computed keys back.

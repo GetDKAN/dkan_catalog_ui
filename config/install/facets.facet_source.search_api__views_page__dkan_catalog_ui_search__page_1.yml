@@ -1,10 +1,6 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - views.view.dkan_catalog_ui_search
-  module:
-    - search_api
   enforced:
     module:
       - dkan_catalog_ui

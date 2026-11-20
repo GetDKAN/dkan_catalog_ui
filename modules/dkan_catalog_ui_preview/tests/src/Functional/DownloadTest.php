@@ -96,7 +96,7 @@ class DownloadTest extends BrowserTestBase {
 
     // An absolute URL keeps the query string; a path would be encoded.
     $this->drupalGet($this->getAbsoluteUrl($href));
-    $assert->statusCodeEquals(200, $href);
+    $assert->statusCodeEquals(200);
     $this->assertStringStartsWith('text/csv', (string) $this->getSession()->getResponseHeader('Content-Type'));
     $lines = array_values(array_filter(array_map('trim', explode("\n", $this->getSession()->getPage()->getContent()))));
     $this->assertCount(11, $lines);
@@ -105,7 +105,7 @@ class DownloadTest extends BrowserTestBase {
     // Only names containing "_1", sorted by name descending.
     $rows = array_map(fn (string $line): array => str_getcsv($line, escape: ''), array_slice($lines, 1));
     $names = array_column($rows, 1);
-    $this->assertSame(10, count(array_filter($names, fn ($n) => str_contains($n, '_1'))));
+    $this->assertCount(10, array_filter($names, fn ($n) => str_contains($n, '_1')));
     $descending = $names;
     rsort($descending);
     $this->assertSame($descending, $names);
