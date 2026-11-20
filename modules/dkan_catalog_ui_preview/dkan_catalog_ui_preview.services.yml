@@ -56,9 +56,3 @@ services:
       - '@dkan.datastore.import_info'
       - '@dkan.metastore.resource_mapper'
   Drupal\dkan_catalog_ui_preview\ImportStatusMessageInterface: '@dkan_catalog_ui.preview.import_status_message'
-
-  Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks:
-    class: \Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks
-    arguments:
-      - '@entity_type.manager'
-      - '@dkan_catalog_ui.preview.tabular_distributions'

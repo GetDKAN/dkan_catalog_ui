@@ -143,19 +143,3 @@ function dkan_catalog_ui_ensure_format_index_field(): void {
   $index->save();
   $index->reindex();
 }
-
-/**
- * Implements hook_requirements().
- */
-function dkan_catalog_ui_requirements(string $phase): array {
-  $requirements = [];
-  if ($phase === 'runtime' && \Drupal::moduleHandler()->moduleExists('dkan_js_frontend')) {
-    $requirements['dkan_catalog_ui_js_frontend'] = [
-      'title' => t('DKAN Catalog UI'),
-      'value' => t('The dkan_js_frontend module is also enabled.'),
-      'description' => t('Both modules claim /dataset/{id} and /search. Aliased dataset pages resolve to the catalog UI; other paths go to the JavaScript frontend. Uninstall one of them.'),
-      'severity' => REQUIREMENT_WARNING,
-    ];
-  }
-  return $requirements;
-}
