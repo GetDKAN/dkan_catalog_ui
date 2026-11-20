@@ -14,3 +14,15 @@
   color: var(--dcu-color-primary-contrast, #fff);
   background: var(--dcu-color-primary, #005ea2);
 }
+
+/* Forced colors drop the background fill; mark the current page with
+   system colors. Opt out of forcing so the text backplate does not cover
+   the HighlightText number. */
+@media (forced-colors: active) {
+  .dcu-table__footer .pager__item.is-active a {
+    forced-color-adjust: none;
+    color: HighlightText;
+    border-color: Highlight;
+    background: Highlight;
+  }
+}

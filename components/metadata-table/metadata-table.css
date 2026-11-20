@@ -11,6 +11,12 @@
   border-bottom: 1px solid var(--dcu-color-border);
 }
 
+/* Long URLs and identifiers must not widen the table past the viewport:
+   unlike break-word, anywhere lowers the cell's min-content width. */
+.dcu-metadata-table__table td {
+  overflow-wrap: anywhere;
+}
+
 .dcu-metadata-table__table th {
   width: 30%;
   font-weight: 600;
