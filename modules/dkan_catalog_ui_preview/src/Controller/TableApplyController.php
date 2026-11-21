@@ -5,6 +5,7 @@ namespace Drupal\dkan_catalog_ui_preview\Controller;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Url;
 use Drupal\dkan_catalog_ui_preview\DataSource\DataSourceInterface;
 use Drupal\dkan_catalog_ui_preview\TableState;
 use Drupal\dkan_catalog_ui_preview\TabularDistributionsInterface;
@@ -81,7 +82,11 @@ class TableApplyController implements ContainerInjectionInterface {
       $redirectQuery['panel'] = $panel;
     }
 
-    $url = $node->toUrl('canonical', ['query' => $redirectQuery, 'fragment' => self::TABLE_ID]);
+    // Current language, like the base URL in DataPreviewBuilder::lazyBuild().
+    $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()], [
+      'query' => $redirectQuery,
+      'fragment' => self::TABLE_ID,
+    ]);
     if (in_array('application/json', $request->getAcceptableContentTypes(), TRUE)) {
       $response = new JsonResponse(['url' => $url->toString()]);
       $response->setPrivate()->setMaxAge(0);

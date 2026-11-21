@@ -359,17 +359,25 @@
   }
 
   /**
-   * Whether a link inside the table is a table-state link (same path).
+   * Whether a link inside the table is a table-state link.
+   *
+   * State links point at the toolbar's base URL (the dataset alias), which
+   * differs from the current path on /node/N or other aliases.
    * @param link
+   * @param toolbar
    */
-  function isStateLink(link) {
+  function isStateLink(link, toolbar) {
     if (!link.href || link.target || link.hasAttribute("download")) {
       return false;
     }
     const url = new URL(link.href, window.location.href);
+    const base =
+      toolbar && toolbar.dataset.dcuBase
+        ? new URL(toolbar.dataset.dcuBase, window.location.href).pathname
+        : window.location.pathname;
     return (
       url.origin === window.location.origin &&
-      url.pathname === window.location.pathname
+      (url.pathname === base || url.pathname === window.location.pathname)
     );
   }
 
@@ -637,7 +645,7 @@
             plainClick &&
             link &&
             root.contains(link) &&
-            isStateLink(link)
+            isStateLink(link, toolbar)
           ) {
             event.preventDefault();
             // A link inside a panel (Cancel) closes it: return to its toggle.

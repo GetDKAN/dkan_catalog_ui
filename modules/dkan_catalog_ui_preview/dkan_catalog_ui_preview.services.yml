@@ -23,6 +23,7 @@ services:
       - '@dkan_catalog_ui.preview.like_escaper'
       - '@dkan_catalog_ui.preview.toolbar_builder'
       - '@dkan_catalog_ui.preview.dictionary_headers'
+      - '@dkan_catalog_ui.number_format'
   Drupal\dkan_catalog_ui_preview\DataPreviewBuilderInterface: '@dkan_catalog_ui.preview.builder'
 
   dkan_catalog_ui.preview.dictionary_headers:
@@ -57,8 +58,14 @@ services:
       - '@dkan.metastore.resource_mapper'
   Drupal\dkan_catalog_ui_preview\ImportStatusMessageInterface: '@dkan_catalog_ui.preview.import_status_message'
 
-  Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks:
-    class: \Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks
+  dkan_catalog_ui.preview.table_sort_query_subscriber:
+    class: Drupal\dkan_catalog_ui_preview\EventSubscriber\TableSortQuerySubscriber
+    tags:
+      - { name: event_subscriber }
+
+  dkan_catalog_ui.preview.state_url_expires_subscriber:
+    class: Drupal\dkan_catalog_ui_preview\EventSubscriber\StateUrlExpiresSubscriber
     arguments:
-      - '@entity_type.manager'
-      - '@dkan_catalog_ui.preview.tabular_distributions'
+      - '@datetime.time'
+    tags:
+      - { name: event_subscriber }

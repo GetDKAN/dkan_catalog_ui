@@ -1,90 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Function dkan_catalog_ui_requirements\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.install
-
-		-
-			message: '#^Function dkan_catalog_ui_entity_extra_field_info\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_node_view\(\) has parameter \$build with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_node_view\(\) has parameter \$view_mode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preprocess_node\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preprocess_views_view\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_theme\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_views_data\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: dkan_catalog_ui.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preview_requirements\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/dkan_catalog_ui_preview/dkan_catalog_ui_preview.install
-
-		-
-			message: '#^Function dkan_catalog_ui_preview_entity_extra_field_info\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/dkan_catalog_ui_preview/dkan_catalog_ui_preview.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preview_node_view\(\) has parameter \$build with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/dkan_catalog_ui_preview/dkan_catalog_ui_preview.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preview_node_view\(\) has parameter \$view_mode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/dkan_catalog_ui_preview/dkan_catalog_ui_preview.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preview_node_view_alter\(\) has parameter \$build with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/dkan_catalog_ui_preview/dkan_catalog_ui_preview.module
-
-		-
-			message: '#^Function dkan_catalog_ui_preview_theme\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/dkan_catalog_ui_preview/dkan_catalog_ui_preview.module
-
-		-
 			message: '#^Method Drupal\\dkan_catalog_ui_preview\\Condition\:\:create\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -673,18 +589,6 @@ parameters:
 			path: modules/dkan_catalog_ui_preview/tests/src/Functional/DataTableTest.php
 
 		-
-			message: '#^Method Behat\\Mink\\WebAssert\:\:statusCodeEquals\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: modules/dkan_catalog_ui_preview/tests/src/Functional/DownloadTest.php
-
-		-
-			message: '#^You should use assertCount\(\$expectedCount, \$variable\) instead of assertSame\(\$expectedCount, count\(\$variable\)\)\.$#'
-			identifier: phpunit.assertCount
-			count: 1
-			path: modules/dkan_catalog_ui_preview/tests/src/Functional/DownloadTest.php
-
-		-
 			message: '#^Property Drupal\\KernelTests\\KernelTestBase\:\:\$container \(Drupal\\Core\\DependencyInjection\\ContainerBuilder\) does not accept Symfony\\Component\\DependencyInjection\\ContainerInterface\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -817,31 +721,31 @@ parameters:
 			path: modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest.php
 
 		-
-			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:62\:\:__construct\(\) has parameter \$rows with no value type specified in iterable type array\.$#'
+			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:65\:\:__construct\(\) has parameter \$rows with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest.php
 
 		-
-			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:62\:\:__construct\(\) has parameter \$test with no type specified\.$#'
+			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:65\:\:__construct\(\) has parameter \$test with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest.php
 
 		-
-			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:62\:\:fetchData\(\) has parameter \$conditions with no value type specified in iterable type array\.$#'
+			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:65\:\:fetchData\(\) has parameter \$conditions with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest.php
 
 		-
-			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:62\:\:fetchData\(\) has parameter \$properties with no value type specified in iterable type array\.$#'
+			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:65\:\:fetchData\(\) has parameter \$properties with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest.php
 
 		-
-			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:62\:\:getSchema\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method Drupal\\dkan_catalog_ui_preview\\DataSource\\DataSourceInterface@anonymous/modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest\.php\:65\:\:getSchema\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/dkan_catalog_ui_preview/tests/src/Unit/DataPreviewBuilderTest.php
@@ -923,12 +827,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Controller/ApiDocsController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/DatasetPage/ApiBuilder.php
 
 		-
 			message: '#^Method Drupal\\dkan_catalog_ui\\DatasetPage\\ApiBuilder\:\:build\(\) return type has no value type specified in iterable type array\.$#'
@@ -1249,12 +1147,6 @@ parameters:
 			path: src/Plugin/views/area/FacetBlocks.php
 
 		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: src/Plugin/views/area/FacetBlocks.php
-
-		-
 			message: '#^Method Drupal\\dkan_catalog_ui\\Plugin\\views\\row\\DatasetCard\:\:buildOptionsForm\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1359,12 +1251,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Drupal\\views\\ViewExecutable\:\:\$execute_time\.$#'
 			identifier: property.notFound
-			count: 1
-			path: tests/src/Kernel/SearchViewTest.php
-
-		-
-			message: '#^Method Drupal\\views\\ViewExecutable\:\:getDisplay\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
 			count: 1
 			path: tests/src/Kernel/SearchViewTest.php
 

@@ -5,9 +5,11 @@ namespace Drupal\dkan_catalog_ui\DatasetPage;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dkan_catalog_ui\NumberFormat;
 use Drupal\dkan_common\DataResource;
 use Drupal\dkan_datastore\DatastoreService;
 use Drupal\node\NodeInterface;
+use Procrastinator\Result;
 
 /**
  * Builds the Overview tab: resources and the metadata table.
@@ -60,6 +62,7 @@ class OverviewBuilder implements OverviewBuilderInterface {
     protected readonly DistributionInfoInterface $distributionInfo,
     protected readonly DatastoreService $datastore,
     protected readonly DateFormatterInterface $dateFormatter,
+    protected readonly NumberFormat $numberFormat,
   ) {}
 
   /**
@@ -134,8 +137,8 @@ class OverviewBuilder implements OverviewBuilderInterface {
       ];
       $summary = $this->summary($infoByPath[$path] ?? NULL);
       if ($summary) {
-        $row['rows'] = number_format($summary->numOfRows);
-        $row['columns'] = number_format($summary->numOfColumns);
+        $row['rows'] = $this->numberFormat->format((int) $summary->numOfRows);
+        $row['columns'] = $this->numberFormat->format((int) $summary->numOfColumns);
       }
       $rows[] = $row;
     }
@@ -150,6 +153,10 @@ class OverviewBuilder implements OverviewBuilderInterface {
       return NULL;
     }
     if (!in_array($distInfo['mime_type'] ?? '', DataResource::IMPORTABLE_FILE_TYPES)) {
+      return NULL;
+    }
+    // DKAN's getSummary() warns on a table whose import failed or never ran.
+    if (array_key_exists('importer_status', $distInfo) && $distInfo['importer_status'] !== Result::DONE) {
       return NULL;
     }
     try {

@@ -44,8 +44,7 @@ class ApiBuilder implements ApiBuilderInterface {
 
     $endpoints = [];
     try {
-      $spec = $this->docs->getDatasetSpecific($uuid);
-      $endpoints = $this->reference->endpoints(is_array($spec) ? $spec : []);
+      $endpoints = $this->reference->endpoints($this->docs->getDatasetSpecific($uuid));
     }
     catch (\Throwable $e) {
       $this->logger->notice('API docs unavailable for @uuid: @message', [

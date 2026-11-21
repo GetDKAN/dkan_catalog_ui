@@ -12,9 +12,6 @@ use Drupal\node\NodeInterface;
 
 /**
  * Hook implementations for dkan_catalog_ui_preview.
- *
- * On Drupal 10 the procedural stubs in dkan_catalog_ui_preview.module
- * delegate here; on Drupal 11.1+ the #[Hook] attributes register directly.
  */
 class DataPreviewHooks {
 

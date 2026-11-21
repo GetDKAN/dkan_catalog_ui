@@ -37,25 +37,3 @@ function dkan_catalog_ui_preview_uninstall(): void {
     $display->save();
   }
 }
-
-/**
- * Implements hook_requirements().
- *
- * DKAN core's dkan_datastore_preview renders its own preview through the
- * data_preview extra field; on dataset pages this module drops it
- * (DataPreviewHooks::nodeViewAlter()). Installing alongside it is refused;
- * enabling it afterwards cannot be prevented, so runtime warns.
- */
-function dkan_catalog_ui_preview_requirements(string $phase): array {
-  if (!in_array($phase, ['install', 'runtime'], TRUE) || !\Drupal::moduleHandler()->moduleExists('dkan_datastore_preview')) {
-    return [];
-  }
-  return [
-    'dkan_catalog_ui_preview_conflict' => [
-      'title' => t('DKAN Catalog UI Preview'),
-      'value' => t('The dkan_datastore_preview module is also enabled.'),
-      'description' => t('Both modules render a datastore preview for dataset nodes. The catalog UI table replaces the core preview on dataset pages; uninstall dkan_datastore_preview.'),
-      'severity' => $phase === 'install' ? REQUIREMENT_ERROR : REQUIREMENT_WARNING,
-    ],
-  ];
-}

@@ -3,16 +3,20 @@
 namespace Drupal\dkan_catalog_ui\Alias;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\node\NodeInterface;
+use Drupal\path_alias\PathAliasInterface;
 
 /**
  * Maintains /dataset/{uuid} path aliases for dataset nodes.
  *
- * Aliases are written through the core path field so langcode, updates and
- * deletion follow the node; an alias entered by an editor is overwritten on
- * save. When pathauto is installed the item is flagged PathautoState::SKIP
- * so a site pattern never overwrites the alias. Aliases created by
- * backfill() go straight to path_alias storage and carry no such flag.
+ * Aliases are written through the core path field so updates and deletion
+ * follow the node; an alias entered by an editor is overwritten on save. The
+ * alias is language-neutral unless the node is translatable
+ * (normalizeLangcode() enforces it on every path_alias save). When pathauto
+ * is installed the item is flagged PathautoState::SKIP so a site pattern
+ * never overwrites the alias. Aliases created by backfill() go straight to
+ * path_alias storage and carry no such flag.
  * hook_uninstall() removes every managed alias.
  */
 class DatasetAliasManager implements DatasetAliasManagerInterface {
@@ -55,10 +59,36 @@ class DatasetAliasManager implements DatasetAliasManagerInterface {
     if ($item->get('alias')->getValue() !== $alias) {
       $item->set('alias', $alias);
     }
+    $item->set('langcode', $this->langcodeFor($node));
     // Value 0 is \Drupal\pathauto\PathautoState::SKIP; the property only
     // exists when pathauto is installed.
     if ($item->getDataDefinition()->getPropertyDefinition('pathauto')) {
       $item->set('pathauto', 0);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function langcodeFor(NodeInterface $node): string {
+    return $node->isTranslatable() ? $node->language()->getId() : LanguageInterface::LANGCODE_NOT_SPECIFIED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function normalizeLangcode(PathAliasInterface $pathAlias): void {
+    if (!str_starts_with($pathAlias->getAlias(), self::ALIAS_PREFIX)
+      || !preg_match('#^/node/(\d+)$#', $pathAlias->getPath(), $matches)) {
+      return;
+    }
+    $node = $this->entityTypeManager->getStorage('node')->load($matches[1]);
+    if (!$node instanceof NodeInterface || !$this->applies($node) || $pathAlias->getAlias() !== $this->aliasFor($node)) {
+      return;
+    }
+    $langcode = $this->langcodeFor($node);
+    if ($pathAlias->get('langcode')->value !== $langcode) {
+      $pathAlias->set('langcode', $langcode);
     }
   }
 
@@ -97,7 +127,7 @@ class DatasetAliasManager implements DatasetAliasManagerInterface {
         $aliasStorage->create([
           'path' => $path,
           'alias' => $alias,
-          'langcode' => $node->language()->getId(),
+          'langcode' => $this->langcodeFor($node),
         ])->save();
         $created++;
       }

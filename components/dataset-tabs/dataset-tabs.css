@@ -62,16 +62,8 @@
   display: none;
 }
 
-/* JS: the active panel is the only visible one; headings become redundant. */
+/* JS: the active panel is the only visible one; dataset-tabs.js hides the
+   headings with core's visually-hidden class. */
 .dcu-tabs--enhanced .dcu-tabs__panel[hidden] {
   display: none;
-}
-
-.dcu-tabs--enhanced .dcu-tabs__panel-heading {
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  white-space: nowrap;
-  clip-path: inset(50%);
 }

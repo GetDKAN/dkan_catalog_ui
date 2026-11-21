@@ -173,8 +173,8 @@ class FacetBlocks extends AreaPluginBase {
     foreach ($ids as $id) {
       /** @var \Drupal\facets\FacetInterface|null $facet */
       $facet = $this->facetStorage->load($id);
-      if ($facet && ($source = $facet->getFacetSourceConfig())) {
-        return (string) ($source->getFilterKey() ?: 'f');
+      if ($facet) {
+        return (string) ($facet->getFacetSourceConfig()->getFilterKey() ?: 'f');
       }
     }
     return 'f';

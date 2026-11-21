@@ -49,6 +49,11 @@
             return;
           }
           container.classList.add("dcu-tabs--enhanced");
+          // The tab names the visible panel; keep its heading for screen
+          // readers only.
+          container
+            .querySelectorAll(".dcu-tabs__panel-heading")
+            .forEach((heading) => heading.classList.add("visually-hidden"));
           list.setAttribute("role", "tablist");
           links.forEach((link, i) => {
             link.parentNode.setAttribute("role", "presentation");

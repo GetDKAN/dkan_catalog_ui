@@ -18,6 +18,9 @@ props:
     fragment_url:
       type: string
       title: Fragment route URL (empty disables in-place updates)
+    base_url:
+      type: string
+      title: URL that state links carry state on (links to it update in place)
     show_panels:
       type: boolean
       title: Render the panels and chips

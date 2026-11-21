@@ -178,6 +178,37 @@ class SearchViewTest extends CatalogUiKernelTestBase {
     $view->execute();
     $this->assertCount(1, $view->result);
     $this->assertSame('dkan_dataset/search-parks', $view->result[0]->_item->getId());
+
+    // No match: the empty text is wrapped for theme styling.
+    $view = Views::getView('dkan_catalog_ui_search');
+    $view->setDisplay('page_1');
+    $view->setExposedInput(['fulltext' => 'zebra']);
+    $view->execute();
+    $build = $view->render('page_1');
+    $html = (string) $this->container->get('renderer')->renderRoot($build);
+    $this->assertMatchesRegularExpression('@<div class="view-empty">\s*No datasets match your search.@', $html);
+  }
+
+  /**
+   * Shipped facets show ten values; the post-update skips site-set limits.
+   */
+  public function testFacetSoftLimit(): void {
+    foreach (['dcu_theme', 'dcu_keyword', 'dcu_publisher', 'dcu_format'] as $id) {
+      $this->assertSame(10, Facet::load($id)->getWidget()['config']['soft_limit'], $id);
+    }
+    $setLimit = function (string $id, int $limit): void {
+      $facet = Facet::load($id);
+      $widget = $facet->getWidget();
+      $widget['config']['soft_limit'] = $limit;
+      $facet->setWidget($widget['type'], $widget['config']);
+      $facet->save();
+    };
+    $setLimit('dcu_theme', 0);
+    $setLimit('dcu_keyword', 5);
+    \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui', 'php', 'dkan_catalog_ui.post_update');
+    $this->assertSame('Soft limit 10 set on: dcu_theme.', dkan_catalog_ui_post_update_facet_soft_limit());
+    $this->assertSame(10, Facet::load('dcu_theme')->getWidget()['config']['soft_limit']);
+    $this->assertSame(5, Facet::load('dcu_keyword')->getWidget()['config']['soft_limit']);
   }
 
   /**
@@ -195,7 +226,9 @@ class SearchViewTest extends CatalogUiKernelTestBase {
     $this->createDataset('search-two', ['title' => 'Bike Parks', 'theme' => ['Recreation']]);
     $this->index();
 
-    $cache = Views::getView('dkan_catalog_ui_search')->getDisplay('page_1')->getOption('cache');
+    $view = Views::getView('dkan_catalog_ui_search');
+    $view->setDisplay('page_1');
+    $cache = $view->getDisplay()->getOption('cache');
     $this->assertStringStartsWith('search_api_', $cache['type']);
     // Every shipped facet is permanently cacheable (the dcu_case processor
     // declares it), so the query can be cached at all.

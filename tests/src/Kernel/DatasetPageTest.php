@@ -4,9 +4,13 @@ namespace Drupal\Tests\dkan_catalog_ui\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\DistributionInfoInterface;
+use Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilder;
 use Drupal\dkan_catalog_ui\Hook\EntityHooks;
+use Drupal\dkan_datastore\DatastoreService;
 use Drupal\node\NodeInterface;
 use PHPUnit\Framework\Attributes\Group;
+use Procrastinator\Result;
 
 /**
  * Tests the dataset page sections and template.
@@ -33,6 +37,43 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $viewBuilder = $this->container->get('entity_type.manager')->getViewBuilder('node');
     $build = $viewBuilder->view($node, 'full');
     return $viewBuilder->build($build);
+  }
+
+  /**
+   * Row counts are read only for finished imports (DKAN warns otherwise).
+   */
+  public function testRowCountsOnlyForFinishedImports(): void {
+    $node = $this->createDataset('counts-test');
+    $metadata = $this->container->get('dkan_catalog_ui.dataset_metadata')->load($node);
+    $realInfo = $this->container->get('dkan_catalog_ui.distribution_info');
+    $entries = $realInfo->byPath($node);
+    $info = function (string $status) use ($entries, $realInfo): DistributionInfoInterface {
+      $mock = $this->createMock(DistributionInfoInterface::class);
+      $mock->method('byPath')->willReturn(array_map(fn (array $entry) => ['importer_status' => $status] + $entry, $entries));
+      $mock->method('urlPath')->willReturnCallback([$realInfo, 'urlPath']);
+      $mock->method('cacheTags')->willReturn([]);
+      return $mock;
+    };
+    $build = fn (DistributionInfoInterface $distributionInfo, DatastoreService $datastore) => (new OverviewBuilder(
+      $this->container->get('dkan_catalog_ui.dataset_metadata'),
+      $distributionInfo,
+      $datastore,
+      $this->container->get('date.formatter'),
+      $this->container->get('dkan_catalog_ui.number_format'),
+    ))->build($node, $metadata)['resources']['#props']['resources'][0];
+
+    foreach ([Result::ERROR, Result::WAITING, Result::IN_PROGRESS] as $status) {
+      $datastore = $this->createMock(DatastoreService::class);
+      $datastore->expects($this->never())->method('summary');
+      $this->assertSame('', $build($info($status), $datastore)['rows'], $status);
+    }
+
+    $datastore = $this->createMock(DatastoreService::class);
+    $datastore->expects($this->once())->method('summary')
+      ->willReturn((object) ['numOfRows' => 1234, 'numOfColumns' => 5]);
+    $row = $build($info(Result::DONE), $datastore);
+    $this->assertSame('1,234', $row['rows']);
+    $this->assertSame('5', $row['columns']);
   }
 
   /**
@@ -147,7 +188,7 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
    */
   public function testDatesAreUtc(): void {
     date_default_timezone_set('Pacific/Auckland');
-    $node = $this->createDataset('utc-test', ['modified' => '2020-01-15T23:30:00Z', 'issued' => '2019-06-01']);
+    $node = $this->createDataset('utc-test', ['modified' => '2020-01-15T23:30:00-08:00', 'issued' => '2019-06-01']);
     $build = $this->buildNodeView($node);
     $this->assertSame('January 15, 2020', $build[EntityHooks::FIELD_HEADER]['#props']['updated']);
     $this->assertSame('2020-01-15', $build[EntityHooks::FIELD_HEADER]['#props']['updated_iso']);
@@ -251,6 +292,30 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
     $this->assertContains('config:dkan_metastore.settings', $section['#cache']['tags']);
     $this->assertArrayHasKey('empty', $section);
     $this->assertArrayNotHasKey(0, $section);
+  }
+
+  /**
+   * A dictionary without fields renders a message, not an empty table.
+   */
+  public function testDataDictionaryWithoutFields(): void {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'dkan_catalog_ui:data-dictionary',
+      '#props' => ['title' => 'Empty', 'fields' => []],
+    ];
+    $html = (string) $this->container->get('renderer')->renderInIsolation($build);
+    $this->assertStringContainsString('This data dictionary defines no fields.', $html);
+    $this->assertStringNotContainsString('<table', $html);
+    $this->assertStringNotContainsString('role="region"', $html);
+
+    // With fields, the scroller is a labelled, focusable region.
+    $build = [
+      '#type' => 'component',
+      '#component' => 'dkan_catalog_ui:data-dictionary',
+      '#props' => ['title' => 'Empty', 'fields' => [['name' => 'a', 'title' => 'A', 'type' => 'string']]],
+    ];
+    $html = (string) $this->container->get('renderer')->renderInIsolation($build);
+    $this->assertStringContainsString('<div class="dcu-data-dictionary" tabindex="0" role="region" aria-label="Empty">', $html);
   }
 
   /**

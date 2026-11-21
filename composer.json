@@ -5,6 +5,7 @@
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/GetDKAN/dkan_catalog_ui",
   "require": {
+    "drupal/core": "^11.3",
     "drupal/dkan": "^4",
     "drupal/facets": "^3.0",
     "drupal/search_api": "^1.35"

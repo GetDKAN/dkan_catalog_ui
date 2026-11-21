@@ -1,6 +1,9 @@
-# PHPUnit unit, kernel and functional suites on a ddev Drupal 11 + DKAN site.
-# PHP 8.4 here; lint.yml covers 8.3. DKAN 4.x-dev adds dkan_datastore_preview,
-# which PreviewConflictTest needs (skipped on releases without it).
+# PHPUnit unit, kernel and functional suites on a ddev Drupal 11 + DKAN site:
+# the latest 11.x on PHP 8.4, and the 11.3 floor on PHP 8.3. On latest core
+# with DKAN ^4, a fresh install's config export must match config/install and
+# config/optional. DKAN 4.x-dev adds
+# dkan_datastore_preview, which PreviewConflictTest needs (skipped on releases
+# without it).
 name: Tests
 
 on:
@@ -13,8 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dkan: ['^4', '4.x-dev']
-    name: phpunit (DKAN ${{ matrix.dkan }})
+        include:
+          - { drupal: '^11', php: '8.4', dkan: '^4' }
+          - { drupal: '^11', php: '8.4', dkan: '4.x-dev' }
+          - { drupal: '~11.3.0', php: '8.3', dkan: '^4' }
+    name: phpunit (Drupal ${{ matrix.drupal }}, PHP ${{ matrix.php }}, DKAN ${{ matrix.dkan }})
     steps:
       - uses: ddev/github-action-setup-ddev@v1
         with:
@@ -22,17 +28,28 @@ jobs:
       - name: Create a DKAN project
         run: |
           mkdir site && cd site
-          ddev config --project-type=drupal11 --docroot=web --project-name=ci --php-version=8.4 \
+          ddev config --project-type=drupal11 --docroot=web --project-name=ci --php-version=${{ matrix.php }} \
             --web-environment-add=SIMPLETEST_BASE_URL=http://localhost,SIMPLETEST_DB=mysql://db:db@db/db,BROWSERTEST_OUTPUT_DIRECTORY=/tmp
           ddev start
-          ddev composer create-project drupal/recommended-project:^11 --no-interaction
+          ddev composer create-project "drupal/recommended-project:${{ matrix.drupal }}" --no-interaction
           ddev composer config minimum-stability dev
           ddev composer config prefer-stable true
           ddev composer require "drupal/dkan:${{ matrix.dkan }}" drupal/facets:^3 drupal/search_api:^1 drush/drush:^13 \
             --no-interaction --with-all-dependencies
-          ddev composer require --dev drupal/core-dev:^11 --no-interaction --with-all-dependencies
+          ddev composer require --dev "drupal/core-dev:${{ matrix.drupal }}" --no-interaction --with-all-dependencies
       - uses: actions/checkout@v4
         with:
           path: site/web/modules/custom/dkan_catalog_ui
       - name: PHPUnit
         run: cd site && ddev exec vendor/bin/phpunit -c web/modules/custom/dkan_catalog_ui
+      # Against the current target only: on 11.3, core's node module ships its
+      # own search_result view mode, which the optional copy here defers to.
+      - name: Shipped config matches a fresh install
+        if: (success() || failure()) && matrix.drupal == '^11' && matrix.dkan == '^4'
+        run: |
+          cd site
+          ddev drush site:install minimal --db-url=mysql://db:db@db/db -y
+          ddev drush en -y dkan dkan_catalog_ui dkan_catalog_ui_preview
+          ddev drush config:export --destination=/tmp/active -y
+          ddev exec php web/modules/custom/dkan_catalog_ui/scripts/config-drift.php /tmp/active \
+            web/modules/custom/dkan_catalog_ui/config/install web/modules/custom/dkan_catalog_ui/config/optional

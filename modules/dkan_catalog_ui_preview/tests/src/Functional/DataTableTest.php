@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\dkan_catalog_ui_preview\Functional;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\dkan_catalog_ui_preview\Traits\DatastoreFixtureTrait;
@@ -191,6 +192,10 @@ class DataTableTest extends BrowserTestBase {
     $this->createImportedDataset('ft-display');
     $this->drupalGet('/dataset/ft-display');
     $assert = $this->assertSession();
+    // No tableresponsive (and so no jQuery) for the preview table.
+    $assert->responseNotContains('tableresponsive');
+    // In-place updates match state links by this URL, not the current path.
+    $assert->elementAttributeContains('css', '.dcu-table__toolbar', 'data-dcu-base', '/dataset/ft-display');
 
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('page_size', '10');
@@ -302,11 +307,44 @@ class DataTableTest extends BrowserTestBase {
     $this->drupalGet('/dataset/nope/table/apply');
     $assert->statusCodeEquals(404);
 
+    // Array sort/order would make core's TableSort throw on the table.
+    foreach (['/dataset/ft-apply', '/dataset/ft-apply/table'] as $path) {
+      foreach (['sort', 'order'] as $key) {
+        $this->drupalGet($path, ['query' => [$key => ['age']]]);
+        $assert->statusCodeEquals(200);
+        $assert->elementExists('css', '#dcu-table');
+      }
+    }
+
     user_role_revoke_permissions(RoleInterface::ANONYMOUS_ID, ['access content']);
     $this->drupalGet('/dataset/ft-apply/table/apply');
     $assert->statusCodeEquals(403);
     $this->drupalGet('/dataset/ft-apply');
     $assert->statusCodeEquals(403);
+  }
+
+  /**
+   * Under a second language the alias resolves and state links keep it.
+   */
+  public function testInterfaceLanguage(): void {
+    $this->container->get('module_installer')->install(['language']);
+    $this->rebuildContainer();
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    $this->createImportedDataset('ft-lang');
+    $assert = $this->assertSession();
+
+    $this->drupalGet('/es/dataset/ft-lang');
+    $assert->statusCodeEquals(200);
+    $sort = $this->getSession()->getPage()->find('css', 'th a[rel="nofollow"]')->getAttribute('href');
+    $this->assertStringContainsString('/es/dataset/ft-lang?', $sort);
+
+    $this->drupalGet('/es/dataset/ft-lang/table/apply', ['query' => ['sort' => 'age']]);
+    $this->assertSame('/es/dataset/ft-lang', parse_url($this->getSession()->getCurrentUrl(), PHP_URL_PATH));
+
+    // English keeps the unprefixed URL.
+    $this->drupalGet('/dataset/ft-lang');
+    $sort = $this->getSession()->getPage()->find('css', 'th a[rel="nofollow"]')->getAttribute('href');
+    $this->assertStringNotContainsString('/es/', $sort);
   }
 
   /**
@@ -340,6 +378,34 @@ class DataTableTest extends BrowserTestBase {
     $assert->responseHeaderEquals('X-Drupal-Cache', 'MISS');
     $assert->responseHeaderEquals('X-Drupal-Dynamic-Cache', 'HIT');
     $assert->elementExists('css', 'th[aria-sort="ascending"]');
+    $assert->elementAttributeContains('css', 'th[aria-sort="ascending"] a', 'rel', 'nofollow');
+
+    // State, junk and sanitized-array variants of the page and the fragment
+    // expire from the page cache; the canonical URL stays permanent.
+    $this->drupalGet('/dataset/ft-cache', ['query' => ['junk' => '1']]);
+    $this->drupalGet('/dataset/ft-cache', ['query' => ['sort' => ['age']]]);
+    $this->drupalGet('/dataset/ft-cache/table', ['query' => ['page' => '2']]);
+    $expires = $this->container->get('database')->select('cache_page', 'c')
+      ->fields('c', ['cid', 'expire'])
+      ->execute()
+      ->fetchAllKeyed();
+    $now = $this->container->get('datetime.time')->getCurrentTime();
+    $variants = 0;
+    foreach ($expires as $cid => $expire) {
+      $uri = parse_url((string) $cid);
+      if (!str_starts_with($uri['path'] ?? '', '/dataset/ft-cache')) {
+        continue;
+      }
+      if (isset($uri['query'])) {
+        $variants++;
+        $this->assertGreaterThan($now, (int) $expire, $cid);
+        $this->assertLessThanOrEqual($now + 3600, (int) $expire, $cid);
+      }
+      else {
+        $this->assertSame(-1, (int) $expire, $cid);
+      }
+    }
+    $this->assertSame(4, $variants);
   }
 
 }

@@ -7,27 +7,34 @@ the site repo (`PLAN-native-frontend.md`).
 ## What it provides
 
 - `/dataset/{uuid}` aliases on dataset nodes (forced on presave, overriding
-  editor-entered aliases; `drush dkan-catalog-ui:aliases` backfills; uninstall
-  removes them) and a breadcrumb builder (Home > Datasets) for them.
+  editor-entered aliases; language-neutral unless the dataset is translatable,
+  so `/es/dataset/{uuid}` resolves; `drush dkan-catalog-ui:aliases` backfills;
+  uninstall removes them) and a breadcrumb builder (Home > Datasets) for them.
 - Dataset page (`node--data--full`) with tabs (the no-JS fallback relies on
   CSS `:has()`; without it every panel shows): Data Table (preview submodule),
   Overview (resources with row/column counts, metadata table), Data Dictionary
   (sitewide or reference mode), API (server-rendered endpoint reference from
   the dataset's OpenAPI document, plus the raw JSON link; no client library).
+  Fragment IDs are a stable contract (search cards and shared links use
+  them): `#data-table`, `#overview`, `#data-dictionary` and `#api` select a
+  tab; `#dcu-table` (or any ID inside a panel) selects the panel containing
+  it. Other content on the page must not reuse these IDs.
 - `/api/docs`: the site API reference, the same endpoint list rendered from
   DKAN's `/api/1` document grouped by tag (cached until the set of enabled
   modules changes; an hour at most where max-age applies). Main-menu links Datasets and API ship in
   `dkan_catalog_ui.links.menu.yml`; install and a post-update remove a legacy
   content link titled "Datasets" pointing at `/search` (exact match only).
 - `/search`: Views page on the `dkan` search index with fulltext, exposed sort,
-  result cards (`search_result` view mode), and facet blocks rendered inside the
-  view (theme, keyword, publisher, format). Adds `distribution__item__format` to
+  result cards (`search_result` view mode: optional config, so core 11.3's
+  copy from `node` is reused), and facet blocks rendered inside the
+  view (theme, keyword, publisher, format; ten values each, then "Show more"). Adds `distribution__item__format` to
   the index on install.
 - Single Directory Components under `components/`; neutral CSS tokens in `css/tokens.css`.
   `dkan_catalog_ui:icon` renders an inline SVG by `name` (enum in its
   `.component.yml`; unknown names fail prop validation where PHP assertions
   are on, as in tests), an optional fixed `size`
-  in px (default: `1em`, so `font-size` scales it) and an optional `label`
+  in px (as `width`/`height` attributes, no inline style; default: `1em`, so
+  `font-size` or `--dcu-icon-size` scales it) and an optional `label`
   (otherwise `aria-hidden`). Include it from Twig with
   `{{ include('dkan_catalog_ui:icon', {name: 'filter'}, with_context = false) }}`.
 
@@ -51,4 +58,8 @@ ddev exec "vendor/bin/phpstan analyse -c docroot/modules/custom/dkan_catalog_ui/
 ```
 
 CI: `.github/workflows/lint.yml` (phpcs, phpstan, eslint, stylelint) and
-`tests.yml` (all PHPUnit suites on a ddev Drupal 11 + DKAN site).
+`tests.yml` (all PHPUnit suites on a ddev Drupal 11 + DKAN site, then
+`scripts/config-drift.php`, which fails when `config/install` or
+`config/optional` differs from a fresh install's config export, on latest core
+with DKAN ^4). After changing shipped config, install on a
+fresh site, `drush config:export`, and copy the computed keys back.

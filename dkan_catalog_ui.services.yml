@@ -32,6 +32,7 @@ services:
       - '@dkan_catalog_ui.distribution_info'
       - '@dkan.datastore.service'
       - '@date.formatter'
+      - '@dkan_catalog_ui.number_format'
   Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilderInterface: '@dkan_catalog_ui.overview_builder'
 
   dkan_catalog_ui.data_dictionary_builder:
@@ -74,22 +75,8 @@ services:
       - '@dkan_catalog_ui.dataset_metadata'
   Drupal\dkan_catalog_ui\Search\SearchResultBuilderInterface: '@dkan_catalog_ui.search_result_builder'
 
-  Drupal\dkan_catalog_ui\Hook\EntityHooks:
-    class: Drupal\dkan_catalog_ui\Hook\EntityHooks
+  dkan_catalog_ui.number_format:
+    class: Drupal\dkan_catalog_ui\NumberFormat
     arguments:
-      - '@entity_type.manager'
-      - '@dkan_catalog_ui.dataset_alias'
-      - '@dkan_catalog_ui.dataset_metadata'
-      - '@dkan_catalog_ui.overview_builder'
-      - '@dkan_catalog_ui.data_dictionary_builder'
-      - '@dkan_catalog_ui.api_builder'
-      - '@dkan_catalog_ui.search_result_builder'
-      - '@date.formatter'
-
-  Drupal\dkan_catalog_ui\Hook\ThemeHooks:
-    class: Drupal\dkan_catalog_ui\Hook\ThemeHooks
-    arguments:
-      - '@extension.list.module'
-
-  Drupal\dkan_catalog_ui\Hook\ViewsHooks:
-    class: Drupal\dkan_catalog_ui\Hook\ViewsHooks
+      - '@language_manager'
+  Drupal\dkan_catalog_ui\NumberFormat: '@dkan_catalog_ui.number_format'

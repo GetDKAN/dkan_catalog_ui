@@ -65,7 +65,7 @@
 .dcu-endpoint__params th,
 .dcu-endpoint__params td {
   padding: var(--dcu-space-xs) var(--dcu-space-sm);
-  text-align: left;
+  text-align: start;
   vertical-align: top;
   border-bottom: 1px solid var(--dcu-color-border);
 }

@@ -11,7 +11,7 @@
 {# Schema defaults are documentation only; apply them here. #}
 {% set show_panels = show_panels is defined ? show_panels : true %}
 {% set has_summary = has_summary is defined ? has_summary : false %}
-<div class="dcu-table__toolbar" data-dcu-apply="{{ apply_url }}"{% if fragment_url %} data-dcu-fragment="{{ fragment_url }}"{% endif %}>
+<div class="dcu-table__toolbar" data-dcu-apply="{{ apply_url }}"{% if fragment_url %} data-dcu-fragment="{{ fragment_url }}"{% endif %}{% if base_url %} data-dcu-base="{{ base_url }}"{% endif %}>
   {% if chooser or caption or download %}
   <div class="dcu-table__file">
     <div class="dcu-table__identity">
@@ -144,7 +144,7 @@
     </details>
 
     <details class="dcu-table__panel dcu-table__panel--columns" id="dcu-table-columns"{{ open_panel == 'columns' ? ' open' }}>
-      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'columns'}, with_context = false) }}{{ labels.columns }}{% if columns.hidden_count %} <span class="dcu-table__panel-count">({{ columns.hidden_count }}<span class="visually-hidden"> {{ 'hidden'|t }}</span>)</span>{% endif %}{{ ui.chevron() }}</summary>
+      <summary class="dcu-table__panel-summary">{{ include('dkan_catalog_ui:icon', {name: 'columns'}, with_context = false) }}{{ labels.columns }}{% if columns.hidden_count %} <span class="dcu-table__panel-count">({{ columns.hidden_count }}<span class="visually-hidden"> {{ 'hidden'|t({}, {'context': 'Count of hidden columns'}) }}</span>)</span>{% endif %}{{ ui.chevron() }}</summary>
       <form method="get" action="{{ apply_url }}" class="dcu-table__panel-body dcu-table__columns">
         {{ ui.hidden_inputs(columns.hidden) }}
         <input type="hidden" name="panel" value="columns" />
@@ -166,7 +166,7 @@
         <div class="dcu-table__panel-actions">
           <button type="submit" class="dcu-button" name="close" value="1">{{ 'Save'|t }}</button>
           <button type="submit" class="dcu-table__link-button" name="reset_columns" value="1">{{ 'Reset columns'|t }}</button>
-          {% if columns.cancel_url %}<a class="dcu-table__cancel" href="{{ columns.cancel_url }}">{{ 'Cancel'|t }}</a>{% endif %}
+          {% if columns.cancel_url %}<a class="dcu-table__cancel" href="{{ columns.cancel_url }}" rel="nofollow">{{ 'Cancel'|t }}</a>{% endif %}
         </div>
       </form>
     </details>
@@ -179,9 +179,9 @@
         {{ ui.panel_head(labels.display) }}
         <fieldset class="dcu-table__density" data-dcu-density>
           <legend>{{ 'Row height'|t }}</legend>
-          <label><input type="radio" name="dcu_density" value="compact" /> {{ 'Compact'|t }}</label>
-          <label><input type="radio" name="dcu_density" value="normal" /> {{ 'Normal'|t }}</label>
-          <label><input type="radio" name="dcu_density" value="expanded" /> {{ 'Expanded'|t }}</label>
+          <label><input type="radio" name="dcu_density" value="compact" /> {{ 'Compact'|t({}, {'context': 'Data table row height'}) }}</label>
+          <label><input type="radio" name="dcu_density" value="normal" /> {{ 'Normal'|t({}, {'context': 'Data table row height'}) }}</label>
+          <label><input type="radio" name="dcu_density" value="expanded" /> {{ 'Expanded'|t({}, {'context': 'Data table row height'}) }}</label>
         </fieldset>
         <button type="button" class="dcu-table__fullscreen" data-dcu-fullscreen aria-pressed="false">{{ include('dkan_catalog_ui:icon', {name: 'expand'}, with_context = false) }}{{ include('dkan_catalog_ui:icon', {name: 'collapse'}, with_context = false) }}<span class="dcu-table__button-label">{{ 'Expand table'|t }}</span></button>
       </div>
@@ -210,10 +210,10 @@
       <ul class="dcu-table__chips" aria-label="{{ chips.label }}">
         {% for chip in chips.items %}
           <li class="dcu-table__chip">
-            <a href="{{ chip.url }}" aria-label="{{ chip.remove_label }}">{{ chip.label }} {{ include('dkan_catalog_ui:icon', {name: 'close', size: 12}, with_context = false) }}</a>
+            <a href="{{ chip.url }}" rel="nofollow" aria-label="{{ chip.remove_label }}">{{ chip.label }} {{ include('dkan_catalog_ui:icon', {name: 'close', size: 12}, with_context = false) }}</a>
           </li>
         {% endfor %}
-        <li class="dcu-table__chip dcu-table__chip--clear"><a href="{{ chips.clear_all_url }}" aria-label="{{ chips.clear_all_label }}">{{ 'Clear all'|t }}</a></li>
+        <li class="dcu-table__chip dcu-table__chip--clear"><a href="{{ chips.clear_all_url }}" rel="nofollow" aria-label="{{ chips.clear_all_label }}">{{ 'Clear all'|t }}</a></li>
       </ul>
     {% endif %}
   </div>

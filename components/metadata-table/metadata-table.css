@@ -6,7 +6,7 @@
 .dcu-metadata-table__table th,
 .dcu-metadata-table__table td {
   padding: var(--dcu-space-sm) var(--dcu-space-md);
-  text-align: left;
+  text-align: start;
   vertical-align: top;
   border-bottom: 1px solid var(--dcu-color-border);
 }

@@ -3,7 +3,9 @@
 namespace Drupal\Tests\dkan_catalog_ui_preview\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\dkan_catalog_ui_preview\Hook\DataPreviewHooks;
+use Drupal\dkan_catalog_ui_preview\Install\Requirements\DkanCatalogUiPreviewRequirements;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\dkan_catalog_ui\Kernel\CatalogUiKernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
@@ -97,13 +99,10 @@ class PreviewConflictTest extends CatalogUiKernelTestBase {
    * Install is refused and runtime warns while core's module is enabled.
    */
   public function testRequirements(): void {
-    include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    \Drupal::moduleHandler()->loadInclude('dkan_catalog_ui_preview', 'install');
-    $install = dkan_catalog_ui_preview_requirements('install');
-    $this->assertSame(REQUIREMENT_ERROR, $install['dkan_catalog_ui_preview_conflict']['severity']);
-    $runtime = dkan_catalog_ui_preview_requirements('runtime');
-    $this->assertSame(REQUIREMENT_WARNING, $runtime['dkan_catalog_ui_preview_conflict']['severity']);
-    $this->assertSame([], dkan_catalog_ui_preview_requirements('update'));
+    $install = DkanCatalogUiPreviewRequirements::getRequirements();
+    $this->assertSame(RequirementSeverity::Error, $install['dkan_catalog_ui_preview_conflict']['severity']);
+    $runtime = $this->container->get('module_handler')->invokeAll('runtime_requirements');
+    $this->assertSame(RequirementSeverity::Warning, $runtime['dkan_catalog_ui_preview_conflict']['severity']);
   }
 
 }
