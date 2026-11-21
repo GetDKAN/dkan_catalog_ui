@@ -3,6 +3,7 @@
 namespace Drupal\dkan_catalog_ui\DatasetPage;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dkan_catalog_ui\NumberFormat;
@@ -19,7 +20,9 @@ class OverviewBuilder implements OverviewBuilderInterface {
   use StringTranslationTrait;
 
   /**
-   * Metadata properties shown in the table, in order.
+   * Metadata table properties, in order, when the settings config is missing.
+   *
+   * The shipped dkan_catalog_ui.settings overview_properties matches this.
    */
   const DEFAULT_PROPERTIES = [
     'modified',
@@ -38,6 +41,14 @@ class OverviewBuilder implements OverviewBuilderInterface {
     'accrualPeriodicity',
     'describedBy',
   ];
+
+  /**
+   * Schema properties never appended as "other" properties.
+   *
+   * The page shows title, description and distributions elsewhere; @type is
+   * a constant.
+   */
+  const SHOWN_ELSEWHERE = ['@type', 'title', 'description', 'distribution'];
 
   /**
    * Mime type to display format.
@@ -63,18 +74,24 @@ class OverviewBuilder implements OverviewBuilderInterface {
     protected readonly DatastoreService $datastore,
     protected readonly DateFormatterInterface $dateFormatter,
     protected readonly NumberFormat $numberFormat,
+    protected readonly ConfigFactoryInterface $configFactory,
   ) {}
 
   /**
    * {@inheritdoc}
    */
   public function build(NodeInterface $node, object $metadata): array {
+    $settings = $this->configFactory->get('dkan_catalog_ui.settings');
     $build = [
       '#type' => 'container',
       '#attributes' => ['class' => ['dcu-dataset-overview']],
       '#cache' => [
         // Publisher, theme and keyword values come from referenced items.
-        'tags' => Cache::mergeTags($node->getCacheTags(), $this->datasetMetadata->referenceCacheTags($node)),
+        'tags' => Cache::mergeTags(
+          $node->getCacheTags(),
+          $this->datasetMetadata->referenceCacheTags($node),
+          $settings->getCacheTags(),
+        ),
       ],
     ];
 
@@ -91,7 +108,7 @@ class OverviewBuilder implements OverviewBuilderInterface {
       ];
     }
 
-    $rows = $this->buildRows($metadata);
+    $rows = $this->buildRows($metadata, $this->properties($settings->get('overview_properties'), (bool) $settings->get('overview_other_properties')));
     if ($rows) {
       $build['metadata'] = [
         '#type' => 'component',
@@ -184,12 +201,37 @@ class OverviewBuilder implements OverviewBuilderInterface {
   }
 
   /**
-   * Build metadata table rows: label, value and optional href.
+   * Metadata table properties, in order.
+   *
+   * @param string[]|null $listed
+   *   The configured list; NULL (no config yet) uses DEFAULT_PROPERTIES.
+   * @param bool $others
+   *   Whether to append the remaining dataset schema properties.
+   *
+   * @return string[]
+   *   Property names.
    */
-  protected function buildRows(object $metadata): array {
+  protected function properties(?array $listed, bool $others): array {
+    $properties = $listed ?? self::DEFAULT_PROPERTIES;
+    if ($others) {
+      $schema = array_keys($this->datasetMetadata->propertyLabels());
+      $properties = array_merge($properties, array_values(array_diff($schema, $properties, self::SHOWN_ELSEWHERE)));
+    }
+    return $properties;
+  }
+
+  /**
+   * Build metadata table rows: label, value and optional href.
+   *
+   * @param object $metadata
+   *   Dataset metadata.
+   * @param string[] $properties
+   *   Properties to show, in order.
+   */
+  protected function buildRows(object $metadata, array $properties): array {
     $labels = $this->datasetMetadata->propertyLabels();
     $rows = [];
-    foreach (self::DEFAULT_PROPERTIES as $property) {
+    foreach ($properties as $property) {
       if (!isset($metadata->{$property})) {
         continue;
       }

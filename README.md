@@ -12,7 +12,8 @@ the site repo (`PLAN-native-frontend.md`).
   uninstall removes them) and a breadcrumb builder (Home > Datasets) for them.
 - Dataset page (`node--data--full`) with tabs (the no-JS fallback relies on
   CSS `:has()`; without it every panel shows): Data Table (preview submodule),
-  Overview (resources with row/column counts, metadata table), Data Dictionary
+  Overview (resources with row/column counts, metadata table; see
+  Configuration), Data Dictionary
   (sitewide or reference mode), API (server-rendered endpoint reference from
   the dataset's OpenAPI document, plus the raw JSON link; no client library).
   Fragment IDs are a stable contract (search cards and shared links use
@@ -47,6 +48,23 @@ drush search-api:index
 
 `dkan_catalog_ui_preview` is a fork of DKAN core's `dkan_datastore_preview`
 (GetDKAN/dkan#4784 at `0aa181ff7`), maintained here. Its table replaces DKAN core's `dkan_datastore_preview` on dataset pages: installing it while that module is enabled is refused, and the status report warns when both are enabled.
+
+## Configuration
+
+`/admin/dkan/catalog-ui` (`dkan_catalog_ui.settings`, permission
+`administer site configuration`) sets the Overview metadata table:
+
+- `overview_properties`: top-level metadata properties, in display order
+  (15 shipped). A property with no value, or
+  with a value that is not a string, number, list of strings, `publisher` or
+  `contactPoint`, is skipped.
+- `overview_other_properties` (default off): append the remaining dataset
+  schema properties, in schema order, except `@type`, `title`, `description`
+  and `distribution`, so new schema fields show without editing the list.
+
+Labels are the dataset schema's property titles (`contactPoint`, `bureauCode`
+and `programCode` have fixed labels). A post-update creates the config on
+existing sites.
 
 ## Tests and standards
 

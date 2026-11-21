@@ -24,3 +24,17 @@ plugin.plugin_configuration.facets_processor.dcu_case:
     mode:
       type: string
       label: 'Mode (ucwords or upper)'
+
+dkan_catalog_ui.settings:
+  type: config_object
+  label: 'DKAN catalog UI settings'
+  mapping:
+    overview_properties:
+      type: sequence
+      label: 'Metadata properties in the Overview table, in order'
+      sequence:
+        type: string
+        label: 'Property name'
+    overview_other_properties:
+      type: boolean
+      label: 'Also show other dataset schema properties, in schema order'

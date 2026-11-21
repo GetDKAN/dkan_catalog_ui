@@ -3,6 +3,7 @@ description: Drupal-native dataset search and dataset pages for DKAN.
 type: module
 core_version_requirement: ^11.3
 package: DKAN
+configure: dkan_catalog_ui.settings
 dependencies:
   - dkan:dkan_common
   - dkan:dkan_metastore

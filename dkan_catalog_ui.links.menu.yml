@@ -10,3 +10,8 @@ dkan_catalog_ui.api:
   route_name: dkan_catalog_ui.api_docs
   menu_name: main
   weight: 10
+dkan_catalog_ui.settings:
+  title: Catalog UI settings
+  description: Metadata shown on dataset pages.
+  parent: system.admin_dkan
+  route_name: dkan_catalog_ui.settings

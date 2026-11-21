@@ -17,6 +17,8 @@ interface DatasetMetadataInterface {
   /**
    * Human-readable titles from the dataset schema, keyed by property name.
    *
+   * In schema order; properties without a title are left out.
+   *
    * @return string[]
    *   Property titles.
    */
