@@ -1,0 +1,17 @@
+overview_properties:
+  - modified
+  - issued
+  - publisher
+  - identifier
+  - contactPoint
+  - bureauCode
+  - programCode
+  - keyword
+  - theme
+  - license
+  - accessLevel
+  - temporal
+  - spatial
+  - accrualPeriodicity
+  - describedBy
+overview_other_properties: false

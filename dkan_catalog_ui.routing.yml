@@ -5,3 +5,11 @@ dkan_catalog_ui.api_docs:
     _title: 'API'
   requirements:
     _permission: 'access content'
+
+dkan_catalog_ui.settings:
+  path: '/admin/dkan/catalog-ui'
+  defaults:
+    _form: '\Drupal\dkan_catalog_ui\Form\SettingsForm'
+    _title: 'Catalog UI settings'
+  requirements:
+    _permission: 'administer site configuration'

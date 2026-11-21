@@ -5,6 +5,7 @@
  * Post update functions for the DKAN Catalog UI module.
  */
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\dkan_catalog_ui\Alias\DatasetAliasManagerInterface;
 use Drupal\dkan_catalog_ui\Hook\EntityHooks;
@@ -92,6 +93,19 @@ function dkan_catalog_ui_post_update_language_neutral_aliases(array &$sandbox): 
   }
   $sandbox['#finished'] = ($ids && $sandbox['total']) ? min(1, $sandbox['done'] / $sandbox['total']) : 1;
   return "Dataset aliases made language-neutral: {$sandbox['changed']}.";
+}
+
+/**
+ * Create dkan_catalog_ui.settings with the shipped Overview property list.
+ */
+function dkan_catalog_ui_post_update_overview_settings(): string {
+  $config = \Drupal::configFactory()->getEditable('dkan_catalog_ui.settings');
+  if (!$config->isNew()) {
+    return 'dkan_catalog_ui.settings already exists; nothing changed.';
+  }
+  $path = \Drupal::service('extension.list.module')->getPath('dkan_catalog_ui') . '/config/install';
+  $config->setData((new FileStorage($path))->read('dkan_catalog_ui.settings'))->save(TRUE);
+  return 'Created dkan_catalog_ui.settings with the default Overview properties.';
 }
 
 /**

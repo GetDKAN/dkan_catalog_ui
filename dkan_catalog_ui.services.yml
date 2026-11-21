@@ -33,6 +33,7 @@ services:
       - '@dkan.datastore.service'
       - '@date.formatter'
       - '@dkan_catalog_ui.number_format'
+      - '@config.factory'
   Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilderInterface: '@dkan_catalog_ui.overview_builder'
 
   dkan_catalog_ui.data_dictionary_builder:

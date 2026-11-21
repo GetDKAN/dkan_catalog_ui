@@ -60,6 +60,7 @@ class DatasetPageTest extends CatalogUiKernelTestBase {
       $datastore,
       $this->container->get('date.formatter'),
       $this->container->get('dkan_catalog_ui.number_format'),
+      $this->container->get('config.factory'),
     ))->build($node, $metadata)['resources']['#props']['resources'][0];
 
     foreach ([Result::ERROR, Result::WAITING, Result::IN_PROGRESS] as $status) {
