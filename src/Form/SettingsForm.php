@@ -9,6 +9,7 @@ use Drupal\Core\Form\ConfigTarget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\dkan_catalog_ui\DatasetPage\DatasetMetadataInterface;
 use Drupal\dkan_catalog_ui\DatasetPage\OverviewBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Catalog UI settings: the dataset Overview metadata table.
@@ -25,6 +26,20 @@ class SettingsForm extends ConfigFormBase {
     protected DatasetMetadataInterface $datasetMetadata,
   ) {
     parent::__construct($config_factory, $typedConfigManager);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Explicit: Drupal 11.3's ConfigFormBase::create() passes only its own two
+   * arguments (11.4 autowires).
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get(DatasetMetadataInterface::class),
+    );
   }
 
   /**
